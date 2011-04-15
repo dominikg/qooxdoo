@@ -14,6 +14,7 @@
 
    Authors:
      * Fabian Jakobs (fjakobs)
+     * Martin Wittemann (martinwittemann)
 
 ************************************************************************ */
 
@@ -23,6 +24,26 @@
 qx.Class.define("qx.event.type.MouseWheel",
 {
   extend : qx.event.type.Mouse,
+
+  statics : {
+    /**
+     * The maximal mesured scroll wheel delta.
+     * @internal
+     */
+    MAXSCROLL : null,
+
+    /**
+     * The minimal mesured scroll wheel delta.
+     * @internal
+     */
+    MINSCROLL : null,
+
+    /**
+     * The normalization factor for the speed calculation.
+     * @internal
+     */
+    FACTOR : 1
+  },
 
   members :
   {
@@ -35,54 +56,125 @@ qx.Class.define("qx.event.type.MouseWheel",
 
 
     /**
+     * Normalizer for the mouse wheel data.
+     *
+     * @param delta {Number} The mouse delta.
+     */
+    __normalize : function(delta) {
+      var absDelta = Math.abs(delta);
+
+      // store the min value
+      if (
+        qx.event.type.MouseWheel.MINSCROLL == null ||
+        qx.event.type.MouseWheel.MINSCROLL > absDelta
+      ) {
+        qx.event.type.MouseWheel.MINSCROLL = absDelta;
+        this.__recalculateMultiplicator();
+      }
+
+      // store the max value
+      if (
+        qx.event.type.MouseWheel.MAXSCROLL == null ||
+        qx.event.type.MouseWheel.MAXSCROLL < absDelta
+      ) {
+        qx.event.type.MouseWheel.MAXSCROLL = absDelta;
+        this.__recalculateMultiplicator();
+      }
+
+      // special case for systems not speeding up
+      if (
+        qx.event.type.MouseWheel.MAXSCROLL === absDelta &&
+        qx.event.type.MouseWheel.MINSCROLL === absDelta
+      ) {
+        return 2 * (delta / absDelta);
+      }
+
+      var range =
+        qx.event.type.MouseWheel.MAXSCROLL - qx.event.type.MouseWheel.MINSCROLL;
+      var ret = (delta / range) * Math.log(range) * qx.event.type.MouseWheel.FACTOR;
+
+      // return at least 1 or -1
+      return ret < 0 ? Math.min(ret, -1) : Math.max(ret, 1);
+    },
+
+
+    /**
+     * Recalculates the factor with which the calculated delta is normalized.
+     */
+    __recalculateMultiplicator : function() {
+      var max = qx.event.type.MouseWheel.MAXSCROLL || 0;
+      var min = qx.event.type.MouseWheel.MINSCROLL || max;
+      if (max <= min) {
+        return;
+      }
+      var range = max - min;
+      var maxRet = (max / range) * Math.log(range);
+      if (maxRet == 0) {
+        maxRet = 1;
+      }
+      qx.event.type.MouseWheel.FACTOR = 6 / maxRet;
+    },
+
+
+    /**
      * Get the amount the wheel has been scrolled
      *
-     * @signature function()
      * @return {Integer} Scroll wheel movement
      */
-    getWheelDelta : qx.core.Variant.select("qx.client",
-    {
-      "default" : function() {
-        return -(this._native.wheelDelta / 40);
-      },
-
-      "gecko" : function() {
-        return this._native.detail;
-      },
-
-      "webkit" : function()
-      {
-        if (qx.bom.client.Browser.NAME == "chrome") {
-          // mac has a much higher sppedup during scrolling
-          if (qx.bom.client.Platform.MAC) {
-            return -(this._native.wheelDelta / 60);
-          } else {
-            return -(this._native.wheelDelta / 120);
-          }
-
-
-        } else {
-          // windows safaris behave different than on OSX
-          if (qx.bom.client.Platform.WIN) {
-            var factor = 120;
-            // safari 5.0 and not 5.0.1
-            if (qx.bom.client.Engine.VERSION == 533.16) {
-              factor = 1200;
-            }
-          } else {
-            factor = 40;
-            // Safari 5.0 or 5.0.1
-            if (
-              qx.bom.client.Engine.VERSION == 533.16 ||
-              qx.bom.client.Engine.VERSION == 533.17 ||
-              qx.bom.client.Engine.VERSION == 533.18
-            ) {
-              factor = 1200;
-            }
-          }
-          return -(this._native.wheelDelta / factor);
+    getWheelDelta : function() {
+      // new feature detectiong behavior
+      if (qx.core.Environment.get("qx.dynamicmousewheel")) {
+        if (this._native.detail) {
+          return this.__normalize(this._native.detail);
         }
+        return this.__normalize(-this._native.wheelDelta);
+
+      // old, browser detecting behavior
+      } else {
+        var handler = qx.core.Environment.select("engine.name", {
+          "default" : function() {
+            return -(this._native.wheelDelta / 40);
+          },
+
+          "gecko" : function() {
+            return this._native.detail;
+          },
+
+          "webkit" : function()
+          {
+            if (qx.core.Environment.get("browser.name") == "chrome") {
+              // mac has a much higher sppedup during scrolling
+              if (qx.core.Environment.get("os.name") == "osx") {
+                return -(this._native.wheelDelta / 60);
+              } else {
+                return -(this._native.wheelDelta / 120);
+              }
+
+            } else {
+              // windows safaris behave different than on OSX
+              if (qx.core.Environment.get("os.name") == "win") {
+                var factor = 120;
+                // safari 5.0 and not 5.0.1
+                if (parseFloat(qx.core.Environment.get("engine.version")) == 533.16) {
+                  factor = 1200;
+                }
+              } else {
+                factor = 40;
+                // Safari 5.0 or 5.0.1
+                if (
+                  parseFloat(qx.core.Environment.get("engine.version")) == 533.16 ||
+                  parseFloat(qx.core.Environment.get("engine.version")) == 533.17 ||
+                  parseFloat(qx.core.Environment.get("engine.version")) == 533.18
+                ) {
+                  factor = 1200;
+                }
+              }
+              return -(this._native.wheelDelta / factor);
+            }
+          }
+        });
+        return handler.call(this);
       }
-    })
+    }
   }
 });

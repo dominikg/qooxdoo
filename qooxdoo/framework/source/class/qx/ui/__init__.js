@@ -17,7 +17,7 @@
  * To *build a GUI* it is usually a good idea to start with one of the
  * *qx.ui.container* widgets, add a layout manager and then some functional
  * widgets to it. This helps you to organize your application.  A
- * minimal example for creating a user interface might look like this:
+ * minimal example for creating an user interface might look like this:
  *
  * <pre class='javascript'>
  * var c = new qx.ui.container.Composite(new qx.ui.layout.Grow); // this adds the layout manager in one go
@@ -30,7 +30,7 @@
  * }, this);
  * </pre>
  *
- * Make sure you also check the <a href="http://manual.qooxdoo.org/1.3/pages/getting_started/helloworld.html">"hello world" tutorial</a> for a minimal working application with GUI elements.
+ * Make sure you also check the <a href="http://manual.qooxdoo.org/1.4/pages/getting_started/helloworld.html">"hello world" tutorial</a> for a minimal working application with GUI elements.
  *
  * Here is a *topical grouping* of useful widgets and packages for GUI creation:
  *

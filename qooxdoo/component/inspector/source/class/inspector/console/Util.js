@@ -40,19 +40,23 @@ qx.Class.define("inspector.console.Util",
       var result = null;
 
       try {
-        if (qx.core.Variant.isSet("qx.client", "opera") && qx.bom.client.Engine.VERSION < 9.8) {
+        if (qx.core.Environment.get("engine.name") == "opera" && qx.core.Environment.get("engine.version") < 9.8) {
           result = (function(code) {
             return iFrameWindow.eval(code);
           }).call(qx.core.Init.getApplication().getSelectedObject(), code);
         } else {
-          if (qx.core.Variant.isSet("qx.client", "mshtml") ||
-              qx.core.Variant.isSet("qx.client", "webkit")) {
+          if (qx.core.Environment.get("engine.name") == "mshtml" ||
+              qx.core.Environment.get("engine.name") == "webkit") {
             code = code.replace(/^(\s*var\s+)(.*)$/, "$2");
           }
 
           var returnCode = "";
-          if (qx.core.Variant.isSet("qx.client", "webkit") ||
-              qx.core.Variant.isSet("qx.client", "opera")) {
+          if (
+            qx.core.Environment.get("engine.name") == "webkit" ||
+            qx.core.Environment.get("engine.name") == "opera" ||
+            (qx.core.Environment.get("engine.name") == "mshtml" && parseFloat(qx.core.Environment.get("browser.version")) >= 9) ||
+            (qx.core.Environment.get("engine.name") == "gecko" && parseFloat(qx.core.Environment.get("browser.version")) >= 4)
+          ) {
             returnCode = "return eval('" + code + "');"
           } else {
             returnCode = "return eval.call(window, '" + code + "');"

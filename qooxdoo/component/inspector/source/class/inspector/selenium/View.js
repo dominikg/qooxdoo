@@ -67,9 +67,12 @@ qx.Class.define("inspector.selenium.View", {
       "/core/xpath/xpath.js",
       "/core/xpath/javascript-xpath-0.1.11.js"
     ];
-    
-    this.__userExt = qx.core.Setting.get("inspector.selenium.extensions") || 
-      /(.*?)framework/.exec(qx.$$libraries.qx.sourceUri)[1] + "component/simulator/tool/user-extensions/user-extensions.js";
+
+    this.__userExt = qx.core.Environment.get("inspector.selenium.extensions");
+    if (!this.__userExt) {
+      this.__userExt = /(.*?)framework/.exec(qx.$$libraries.qx.sourceUri)[1] + "component/simulator/tool/user-extensions/user-extensions.js";
+    }
+
     this.__availableCommands = [];
 
     // Toolbar
@@ -527,7 +530,7 @@ qx.Class.define("inspector.selenium.View", {
     __getSelenese : function()
     {
       var url = qx.core.Init.getApplication().getIframeWindowObject().location.href;
-      var title = qx.core.Init.getApplication().getIframeWindowObject().qx.core.Setting.get("qx.application");
+      var title = qx.core.Init.getApplication().getIframeWindowObject().qx.core.Environment.get("qx.application");
 
       this.__seleneseTestCase = new inspector.selenium.SeleneseTestCase(url, title);
       this.__seleneseTestCase.addListenerOnce("appear", function(event) {
@@ -701,13 +704,13 @@ qx.Class.define("inspector.selenium.View", {
      */
     __scriptsLoaded : function(ev)
     {
-      if (ev.getData().fail > 0 ) {
-        alert("Couldn't load qooxdoo Selenium user extensions, make sure the path is correct!");
+      if (!window.Selenium) {
+        alert("Selenium instance could not be created!");
         return;
       }
 
-      if (!window.Selenium) {
-        alert("Unexpected error: Selenium instance not created!");
+      if ((ev.getData().fail > 0) || !window.Selenium.prototype.qx) {
+        alert("Couldn't load qooxdoo Selenium user extensions!");
         return;
       }
 

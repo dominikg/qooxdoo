@@ -18,7 +18,7 @@
 ************************************************************************ */
 
 /**
- * The json data store is responsible for fetching data from a url. The type
+ * The json data store is responsible for fetching data from an url. The type
  * of the data has to be json.
  *
  * The loaded data will be parsed and saved in qooxdoo objects. Every value
@@ -65,8 +65,8 @@ qx.Class.define("qx.data.store.Json",
      * created model.
      */
     "loaded" : "qx.event.type.Data",
-    
-    /** 
+
+    /**
      * Fired when an error (aborted, timeout or failed) occurred
      * during the load. If you want more details, use the {@link #changeState}
      * event.
@@ -174,29 +174,29 @@ qx.Class.define("qx.data.store.Json",
      */
     __requestCompleteHandler : function(ev)
     {
-        var data = ev.getContent();
+       var data = ev.getContent();
 
-        // check for the data manipulation hook
-        var del = this._delegate;
-        if (del && qx.lang.Type.isFunction(del.manipulateData)) {
-          data = this._delegate.manipulateData(data);
-        }
+       // check for the data manipulation hook
+       var del = this._delegate;
+       if (del && qx.lang.Type.isFunction(del.manipulateData)) {
+         data = this._delegate.manipulateData(data);
+       }
 
-        // create the class
-        this._marshaler.toClass(data, true);
+       // create the class
+       this._marshaler.toClass(data, true);
 
-        var oldModel = this.getModel();
+       var oldModel = this.getModel();
 
-        // set the initial data
-        this.setModel(this._marshaler.toModel(data));
+       // set the initial data
+       this.setModel(this._marshaler.toModel(data));
 
-        // get rid of the old model
-        if (oldModel && oldModel.dispose) {
-          oldModel.dispose();
-        }
+       // get rid of the old model
+       if (oldModel && oldModel.dispose) {
+         oldModel.dispose();
+       }
 
-        // fire complete event
-        this.fireDataEvent("loaded", this.getModel());
+       // fire complete event
+       this.fireDataEvent("loaded", this.getModel());
     },
 
 

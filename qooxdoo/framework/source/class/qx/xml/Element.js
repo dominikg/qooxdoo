@@ -43,7 +43,7 @@ qx.Class.define("qx.xml.Element",
      * <code>false</code> otherwise.
      */
     XML_SERIALIZER : false,
-    
+
     /**
      * The subtree rooted by the specified element or document is serialized to a string.
      *
@@ -68,8 +68,8 @@ qx.Class.define("qx.xml.Element",
      * Selects the first XmlNode that matches the XPath expression.
      *
      * <p>Note: XPath queries containing namespace prefixes won't work in
-     * Chromium-based browsers until Chromium bug #671 
-     * [<a href="http://code.google.com/p/chromium/issues/detail?id=671">1</a>] 
+     * Chromium-based browsers until Chromium bug #671
+     * [<a href="http://code.google.com/p/chromium/issues/detail?id=671">1</a>]
      * is fixed. Opera versions < 9.52 do not seem to support namespaces in
      * XPath queries at all.</p>
      *
@@ -79,7 +79,7 @@ qx.Class.define("qx.xml.Element",
      * @return {Element} first matching element
      * @signature function(element, query, namespaces)
      */
-    selectSingleNode : qx.core.Variant.select("qx.client",
+    selectSingleNode : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(element, query, namespaces) {
         if (namespaces) {
@@ -135,7 +135,7 @@ qx.Class.define("qx.xml.Element",
      *
      * <p>Note: XPath queries containing namespace prefixes won't work in
      * Chromium-based browsers until Chromium bug #671
-     * [<a href="http://code.google.com/p/chromium/issues/detail?id=671">1</a>] 
+     * [<a href="http://code.google.com/p/chromium/issues/detail?id=671">1</a>]
      * is fixed. Opera versions < 9.52 do not seem to support namespaces in
      * XPath queries at all.</p>
      *
@@ -145,7 +145,7 @@ qx.Class.define("qx.xml.Element",
      * @return {Element[]} List of matching elements
      * @signature function(element, query, namespaces)
      */
-    selectNodes : qx.core.Variant.select("qx.client",
+    selectNodes : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(element, query, namespaces) {
         if (namespaces) {
@@ -206,7 +206,7 @@ qx.Class.define("qx.xml.Element",
     /**
      * Returns a list of elements with the given tag name belonging to the given namespace
      *
-     * (See 
+     * (See
      * <a href="http://developer.mozilla.org/en/DOM/element.getElementsByTagNameNS">MDN
      * Reference</a>).
      *
@@ -218,7 +218,7 @@ qx.Class.define("qx.xml.Element",
      * @return {Element[]} a list of found elements in the order they appear in the tree.
      * @signature function(element, namespaceURI, tagname)
      */
-    getElementsByTagNameNS : qx.core.Variant.select("qx.client",
+    getElementsByTagNameNS : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(element, namespaceURI, tagname)
       {
@@ -262,7 +262,7 @@ qx.Class.define("qx.xml.Element",
      * @param value {String} Attribute value
      * @signature function(document, element, namespaceUri, name, value)
      */
-    setAttributeNS : qx.core.Variant.select("qx.client",
+    setAttributeNS : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(document, element, namespaceUri, name, value) {
         var attr = document.createNode(2, name, namespaceUri);
@@ -284,7 +284,7 @@ qx.Class.define("qx.xml.Element",
      * @return {String} the value of the attribute, empty string if not found
      * @signature function(element, namespaceUri, name)
      */
-    getAttributeNS : qx.core.Variant.select("qx.client",
+    getAttributeNS : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(element, namespaceUri, name) {
         var attributes = element.attributes;
@@ -320,7 +320,7 @@ qx.Class.define("qx.xml.Element",
      *
      * @return {Element} The newly created sub-element
      */
-    createSubElementNS: qx.core.Variant.select("qx.client",
+    createSubElementNS: qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(document, parent, name, namespaceUri) {
         var node = document.createNode(1, name, namespaceUri);
@@ -349,7 +349,8 @@ qx.Class.define("qx.xml.Element",
 
   defer : function(statics)
   {
-    statics.XML_SERIALIZER = (window.XMLSerializer && 
-     !( qx.bom.client.Engine.MSHTML && qx.bom.client.Engine.VERSION >= 9)); 
+    statics.XML_SERIALIZER = (window.XMLSerializer &&
+     !( qx.core.Environment.get("engine.name") == "mshtml" &&
+     qx.core.Environment.get("engine.version") >= 9));
   }
 });

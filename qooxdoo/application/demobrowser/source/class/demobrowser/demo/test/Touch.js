@@ -17,6 +17,9 @@
 
 ************************************************************************ */
 
+/**
+ * @tag test
+ */
 qx.Class.define("demobrowser.demo.test.Touch",
 {
   extend : qx.application.Native,
@@ -31,14 +34,14 @@ qx.Class.define("demobrowser.demo.test.Touch",
 
   members :
   {
-  
+
     __infoAreaOne : null,
     __infoAreaTwo : null,
 
     /**
-     * This method contains the initial application code and gets called 
+     * This method contains the initial application code and gets called
      * during startup of the application
-     * 
+     *
      * @lint ignoreDeprecated(alert)
      */
     main : function()
@@ -47,7 +50,7 @@ qx.Class.define("demobrowser.demo.test.Touch",
       this.base(arguments);
 
       // Enable logging in debug variant
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if ((qx.core.Environment.get("qx.debug")))
       {
         // support native logging capabilities, e.g. Firebug for Firefox
         qx.log.appender.Native;
@@ -60,7 +63,9 @@ qx.Class.define("demobrowser.demo.test.Touch",
       container.setRoot(true);
 
 
-      if (!qx.bom.client.Engine.WEBKIT || (!qx.bom.client.Feature.TOUCH && qx.core.Variant.isSet("qx.mobile.emulatetouch", "off")))
+      if (qx.core.Environment.get("engine.name") != "webkit" || (
+        !qx.core.Environment.get("event.touch") &&
+        qx.core.Environment.get("qx.mobile.emulatetouch") == false))
       {
         var warningLabelStyle = {
           "color" : "green",
@@ -84,7 +89,7 @@ qx.Class.define("demobrowser.demo.test.Touch",
 
       this.__infoAreaTwo = this.__createInfoArea(110, 110);
       container.add(this.__infoAreaTwo);
-      
+
       container.add(this.__createCancelArea(210,10));
     },
 

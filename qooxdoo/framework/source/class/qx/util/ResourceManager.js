@@ -130,22 +130,44 @@ qx.Class.define("qx.util.ResourceManager",
 
 
     /**
-     * Whether the given resource identifier is a image
+     * Whether the given resource identifier is an image
      * with clipping information available.
+     *
+     * @deprecated since 1.4: superseded by getCombinedFormat()
      *
      * @param id {String} Resource identifier
      * @return {Boolean} Whether the resource ID is known as a clipped image
      */
     isClippedImage : function(id)
     {
+      qx.log.Logger.deprecatedMethodWarning(arguments.callee,
+        "isClippedImage has been superseded by getCombinedFormat");
       var entry = this.self(arguments).__registry[id];
-      var isClipped = entry && entry.length > 4;
-      if (isClipped){
+      return entry && entry.length > 4 && typeof(entry[4]) == "string" &&
+        this.constructor.__registry[entry[4]];
+    },
+
+
+    /**
+     * Returns the format of the combined image (png, gif, ...), if the given
+     * resource identifier is an image contained in one, or the empty string
+     * otherwise.
+     *
+     * @param id {String} Resource identifier
+     * @return {String} The type of the combined image containing id
+     */
+    getCombinedFormat : function(id)
+    {
+      var clippedtype = "";
+      var entry = this.self(arguments).__registry[id];
+      var isclipped = entry && entry.length > 4 && typeof(entry[4]) == "string"
+        && this.constructor.__registry[entry[4]];
+      if (isclipped){
         var combId  = entry[4];
-        var combImg = this.self(arguments).__registry[combId];
-        isClipped = combImg[2];  // return combined image type
+        var combImg = this.constructor.__registry[combId];
+        clippedtype = combImg[2];
       }
-      return isClipped;
+      return clippedtype;
     },
 
 
@@ -181,8 +203,8 @@ qx.Class.define("qx.util.ResourceManager",
       }
 
       var urlPrefix = "";
-      if (qx.core.Variant.isSet("qx.client", "mshtml") &&
-          qx.bom.client.Feature.SSL) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml") &&
+          qx.core.Environment.get("io.ssl")) {
         urlPrefix = this.self(arguments).__urlPrefix[lib];
       }
 
@@ -200,7 +222,7 @@ qx.Class.define("qx.util.ResourceManager",
      * @param resid {String} resource id of the image
      * @return {String} "data:" or "http:" URI
      */
-    toDataUri : function (resid) 
+    toDataUri : function (resid)
     {
       var resentry = this.constructor.__registry[resid];
       var combined = this.constructor.__registry[resentry[4]];
@@ -211,7 +233,8 @@ qx.Class.define("qx.util.ResourceManager",
               "," + resstruct["data"];
       }
       else {
-        console.log("Falling back for", resid);
+        //TODO: remove this for release
+        this.debug("ResourceManager.toDataUri: falling back for", resid);
         uri = this.toUri(resid);
       }
       return uri;
@@ -221,7 +244,7 @@ qx.Class.define("qx.util.ResourceManager",
 
   defer : function(statics)
   {
-    if (qx.core.Variant.isSet("qx.client", "mshtml"))
+    if ((qx.core.Environment.get("engine.name") == "mshtml"))
     {
       // To avoid a "mixed content" warning in IE when the application is
       // delivered via HTTPS a prefix has to be added. This will transform the
@@ -229,7 +252,7 @@ qx.Class.define("qx.util.ResourceManager",
       // Though this warning is only displayed in conjunction with images which
       // are referenced as a CSS "background-image", every resource path is
       // changed when the application is served with HTTPS.
-      if (qx.bom.client.Feature.SSL)
+      if (qx.core.Environment.get("io.ssl"))
       {
         for (var lib in qx.$$libraries)
         {

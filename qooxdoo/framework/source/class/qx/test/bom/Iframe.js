@@ -49,7 +49,7 @@ qx.Class.define("qx.test.bom.Iframe",
     {
       // do not test 'onload' on IE, this returns always 'undefined'
       // http://tobielangel.com/2007/1/11/attribute-nightmare-in-ie/
-      if(qx.bom.client.Engine.MSHTML) {
+      if(qx.core.Environment.get("engine.name") == "mshtml") {
         delete attributes["onload"];
       }
 
@@ -64,7 +64,7 @@ qx.Class.define("qx.test.bom.Iframe",
     {
       this.__iframe = qx.bom.Iframe.create();
       qx.dom.Element.insertBegin(this.__iframe, document.body);
-      
+
       this.assertNotNull(qx.bom.Iframe.getWindow(this.__iframe));
     }
   }

@@ -41,6 +41,42 @@ qx.Class.define("qx.bom.element.Decoration",
     /** {Map} Collect warnings for potential clipped images */
     __warnings : {},
 
+    /**
+     * {Boolean} Whether the alpha image loader is needed.
+     * We enable this for all IE browser because of issues reported by Maria
+     * Siebert and others in combination with the opacity filter applied
+     * to e.g. disabled icons. Thanks Maria.
+     *
+     * To prevent these issues use the "disabled" images. This is done by adding
+     * a special second image which is already in a disabled state. In order to
+     * make use of this feature the image has to follow the convention "-disabled".
+     * (e.g. "button.png" -> "button-disabled.png")
+     *
+     * The situation for IE8 is that running in "IE8 Standards Mode" IE8 has a
+     * runtime performance issue. The updates are compared to IE7 really slow.
+     * The cause for this is the dynamic adding/removing of the IMG elements
+     * which are part of the decorator. Using the alpha image loader does change
+     * this DOM structure to only use DIV elements which do not have a negative
+     * performance impact. See Bug #2185 for details.
+     */
+    __enableAlphaFix : (qx.core.Environment.get("engine.name") == "mshtml") && qx.core.Environment.get("engine.version") < 9,
+
+
+    /** {Map} List of repeat modes which supports the IE AlphaImageLoader */
+    __alphaFixRepeats : qx.core.Environment.select("engine.name",
+    {
+      "mshtml" :
+      {
+        "scale-x" : true,
+        "scale-y" : true,
+        "scale" : true,
+        "no-repeat" : true
+      },
+
+      "default" : null
+    }),
+
+
     /** {Map} Mapping between background repeat and the tag to create */
     __repeatToTagname :
     {
@@ -128,7 +164,15 @@ qx.Class.define("qx.bom.element.Decoration",
      * @param source {String?null} Source used to identify the image format
      * @return {String} The tag name: <code>div</code> or <code>img</code>
      */
-    getTagName : function(repeat, source) {
+    getTagName : function(repeat, source)
+    {
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
+      {
+        if (source && this.__enableAlphaFix && this.__alphaFixRepeats[repeat] && qx.lang.String.endsWith(source, ".png")) {
+          return "div";
+        }
+      }
+
       return this.__repeatToTagname[repeat];
     },
 
@@ -152,14 +196,14 @@ qx.Class.define("qx.bom.element.Decoration",
         style.position = "absolute";
       }
 
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         // Add a fix for small blocks where IE has a minHeight
         // of the fontSize in quirks mode
         style.fontSize = 0;
         style.lineHeight = 0;
       }
-      else if (qx.core.Variant.isSet("qx.client", "webkit"))
+      else if ((qx.core.Environment.get("engine.name") == "webkit"))
       {
         // This stops images from being dragable in webkit
         style.WebkitUserDrag = "none";
@@ -167,7 +211,7 @@ qx.Class.define("qx.bom.element.Decoration",
 
       var format = qx.util.ResourceManager.getInstance().getImageFormat(source) ||
                    qx.io.ImageLoader.getFormat(source);
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (source != null && format == null) {
           qx.log.Logger.warn("ImageLoader: Not recognized format of external image '" + source + "'!");
@@ -268,11 +312,11 @@ qx.Class.define("qx.bom.element.Decoration",
     __processScaleXScaleY : function(style, repeat, sourceid)
     {
       var ResourceManager = qx.util.ResourceManager.getInstance();
-      var clipped = ResourceManager.isClippedImage(sourceid);
+      var clipped = ResourceManager.getCombinedFormat(sourceid);
       var dimension = this.__getDimension(sourceid);
       var uri;
 
-      if (clipped) 
+      if (clipped)
       {
         var data = ResourceManager.getData(sourceid);
         var combinedid = data[4];
@@ -298,7 +342,7 @@ qx.Class.define("qx.bom.element.Decoration",
       // No clipped image available
       else
       {
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           this.__checkForPotentialClippedImage(sourceid);
         }
 
@@ -396,7 +440,7 @@ qx.Class.define("qx.bom.element.Decoration",
     __processRepeats : function(style, repeat, sourceid)
     {
       var ResourceManager = qx.util.ResourceManager.getInstance();
-      var clipped = ResourceManager.isClippedImage(sourceid);
+      var clipped = ResourceManager.getCombinedFormat(sourceid);
       var dimension = this.__getDimension(sourceid);
 
       // Double axis repeats cannot be clipped
@@ -436,7 +480,7 @@ qx.Class.define("qx.bom.element.Decoration",
       }
       else
       {
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           if (repeat !== "repeat") {
             this.__checkForPotentialClippedImage(sourceid);
@@ -507,6 +551,26 @@ qx.Class.define("qx.bom.element.Decoration",
           this.__warnings[source] = true;
         }
       }
-    }
+    },
+
+
+    /**
+     * For IE browsers the alpha image loader might be necessary. This accessor
+     * method provides an API for high-level classes to check if the alpha image
+     * loader is enabled.
+     *
+     * @signature function()
+     * @return {Boolean} <code>true</code> when the AlphaImageLoader is used, <code>false</code> otherwise.
+     */
+    isAlphaImageLoaderEnabled : qx.core.Environment.select("engine.name",
+    {
+      "mshtml" : function() {
+        return qx.bom.element.Decoration.__enableAlphaFix;
+      },
+
+      "default" : function() {
+        return false;
+      }
+    })
   }
 });

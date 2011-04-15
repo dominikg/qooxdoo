@@ -19,6 +19,11 @@
 ************************************************************************ */
 
 /**
+ * EXPERIMENTAL - NOT READY FOR PRODUCTION
+ *
+ * Note: This class is going to be replaced by {@link qx.io.request.Xhr}
+ * in a future release.
+ *
  * A more comfortable HTTP request object than the native one under
  * {@link qx.bom.Request}.
  *
@@ -26,9 +31,13 @@
  * real properties. The class also fires events to allow easy access
  * to status changes.
  *
+ * Automatically adds a few HTTP headers to requests depending on
+ * the configuration.
+ * 
  * Caution: This class automatically disposes itself after
  * the load/error/abort/timeout events have been fired. Access to request specific
  * properties is only possible during event listeners and not afterwards
+ * 
  */
 qx.Class.define("qx.io.HttpRequest",
 {

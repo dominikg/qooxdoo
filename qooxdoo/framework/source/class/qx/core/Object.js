@@ -122,7 +122,7 @@ qx.Class.define("qx.core.Object",
      */
     base : function(args, varags)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!qx.Bootstrap.isFunction(args.callee.base)) {
           throw new Error(
@@ -631,10 +631,10 @@ qx.Class.define("qx.core.Object",
       this.$$allowconstruct = null;
 
       // Debug output
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.disposerDebugging")) {
-          qx.Bootstrap.debug(this, "Disposing " + this);
+        if (qx.core.Environment.get("qx.disposerDebugLevel") > 2) {
+          qx.Bootstrap.debug(this, "Disposing " + this.classname + "[" + this.toHashCode() + "]");
         }
       }
 
@@ -672,9 +672,9 @@ qx.Class.define("qx.core.Object",
       }
 
       // Additional checks
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.disposerDebugging"))
+        if (qx.core.Environment.get("qx.disposerDebugLevel") > 0)
         {
           var key, value;
           for (key in this)
@@ -751,12 +751,12 @@ qx.Class.define("qx.core.Object",
 
   /*
   *****************************************************************************
-     SETTINGS
+     ENVIRONMENT SETTINGS
   *****************************************************************************
   */
 
-  settings : {
-    "qx.disposerDebugging" : false
+  environment : {
+    "qx.disposerDebugLevel" : 0
   },
 
 
@@ -771,7 +771,7 @@ qx.Class.define("qx.core.Object",
   defer : function(statics, members)
   {
     // add asserts into each debug build
-    if (qx.core.Variant.isSet("qx.debug", "on")) {
+    if (qx.core.Environment.get("qx.debug")) {
       qx.Class.include(statics, qx.core.MAssert);
     }
   },

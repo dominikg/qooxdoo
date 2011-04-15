@@ -94,7 +94,7 @@ qx.Class.define("apiviewer.Controller",
       {
         var loadEnd = new Date();
 
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           this.debug("Time to load data from server: " + (loadEnd.getTime() - loadStart.getTime()) + "ms");
         }
 
@@ -114,7 +114,7 @@ qx.Class.define("apiviewer.Controller",
         }
         var end = new Date();
 
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           this.debug("Time to eval tree data: " + (end.getTime() - start.getTime()) + "ms");
         }
 
@@ -261,7 +261,7 @@ qx.Class.define("apiviewer.Controller",
       var rootPackage = new apiviewer.dao.Package(docTree);
       var end = new Date();
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.debug("Time to build data tree: " + (end.getTime() - start.getTime()) + "ms");
       }
 
@@ -269,7 +269,7 @@ qx.Class.define("apiviewer.Controller",
       this._tree.setTreeData(rootPackage);
       var end = new Date();
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.debug("Time to update tree: " + (end.getTime() - start.getTime()) + "ms");
       }
 

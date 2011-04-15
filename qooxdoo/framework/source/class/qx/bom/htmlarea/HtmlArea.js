@@ -90,7 +90,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * "Fix" Keycode to identifier mapping in opera to suit the needs
      * of the editor component
      */
-    if (qx.core.Variant.isSet("qx.client", "opera"))
+    if ((qx.core.Environment.get("engine.name") == "opera"))
     {
       /*
        * To correct the broken key handling in Opera "fix" the meanings of
@@ -362,7 +362,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
             // This special case is only relevant for IE browsers
             // --------------------------------------------------------------
 
-            if (qx.core.Variant.isSet("qx.client", "mshtml"))
+            if ((qx.core.Environment.get("engine.name") == "mshtml"))
             {
               if (tag == "div" && root.className && root.className == "placeholder")
               {
@@ -384,7 +384,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
             // Current attribute
             var a;
 
-            if (qx.core.Variant.isSet("qx.client", "gecko"))
+            if ((qx.core.Environment.get("engine.name") == "gecko"))
             {
               // we can leave out all auto-generated empty span elements which are marked dirty
               if (tag == "span" && len == 1 && attrs[0].name == "_moz_dirty" && root.childNodes.length == 0) {
@@ -413,7 +413,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
 
               if (name != "style")
               {
-                if (qx.bom.client.Engine.MSHTML)
+                if (qx.core.Environment.get("engine.name") == "mshtml")
                 {
                   if (name == "id" && root.getAttribute("old_id"))
                   {
@@ -832,7 +832,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       qx.bom.Iframe.setSource(this.__iframe, uri);
 
       // Omit native dotted outline border
-      if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml")) {
         qx.bom.element.Attribute.set(this.__iframe, "hideFocus", "true");
       } else {
         qx.bom.element.Style.set(this.__iframe, "outline", "none");
@@ -887,7 +887,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
           doctype : '<!' + 'DOCTYPE html PUBLIC "-/' + '/W3C/' + '/DTD XHTML 1.0 Transitional/' + '/EN" "http:/' + '/www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
           html : '<html xmlns="http:/' + '/www.w3.org/1999/xhtml" xml:lang="en" lang="en">',
           meta: '<title></title><meta http-equiv="Content-type" content="text/html; charset=UTF-8" />',
-          style : qx.core.Variant.select("qx.client",
+          style : qx.core.Environment.select("engine.name",
           {
             "mshtml" : 'html { margin:0px; padding:0px; } ' +
                        'body { font-size: 100.01%; font-family:Verdana, Geneva, Arial, Helvetica, sans-serif; width:100%; height:100%; background-color:transparent; overflow:auto; background-image:none; margin:0px; padding:5px; } ',
@@ -955,15 +955,18 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
     {
       // bogus node for Firefox 2.x
       var bogusNode = "";
-      if (qx.core.Variant.isSet("qx.client","gecko"))
+      if ((qx.core.Environment.get("engine.name") == "gecko"))
       {
-        if (qx.bom.client.Browser.VERSION <= 2) {
+        if (qx.core.Environment.get("browser.version") <= 2) {
           bogusNode += '<br _moz_editor_bogus_node="TRUE" _moz_dirty=""/>';
         }
       }
 
       var zeroWidthNoBreakSpace = value.length == 0 ? "\ufeff" : "";
-      var idForFontElement = qx.core.Variant.isSet("qx.client", "gecko|webkit") ? 'id="__elementToFocus__"' : '';
+      var idForFontElement =
+        qx.core.Environment.get("engine.name") == "gecko" ||
+        qx.core.Environment.get("engine.name") == "webkit" ?
+        'id="__elementToFocus__"' : '';
 
       var defaultContent = '<p>' +
                            '<span style="font-family:' +
@@ -1051,7 +1054,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       var body = this.getContentBody();
       var bodyStyle = {};
       var styleAttribute, styleValue;
-      var modeToUse = qx.bom.client.Engine.MSHTML ? 2 : 1;
+      var modeToUse = qx.core.Environment.get("engine.name") == "mshtml" ? 2 : 1;
       for (var i=0, j=stylesToExport.length; i<j; i++)
       {
         styleAttribute = stylesToExport[i];
@@ -1123,16 +1126,19 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       // Clone the node
       var nodeClone = node.cloneNode(true);
       var innerHTML = nodeClone.innerHTML;
-      
+
       // Replace all ">" with space "> " to create new word borders
       innerHTML = innerHTML.replace(/>/gi, "> ");
       // Remove all line breaks
       innerHTML = innerHTML.replace(/\n/gi, " ");
       // Remove all comments
       innerHTML = innerHTML.replace(/<!--.*-->/gi, "");
-      
+
       nodeClone.innerHTML = innerHTML;
-      var text  = qx.core.Variant.isSet("qx.client", "mshtml|opera") ? nodeClone.innerText : nodeClone.textContent;
+      var text  =
+        qx.core.Environment.get("engine.name") == "mshtml" ||
+        qx.core.Environment.get("engine.name") == "opera" ?
+        nodeClone.innerText : nodeClone.textContent;
       var words = text.match(qx.bom.htmlarea.HtmlArea.GetWordsRegExp);
 
       return !words ? [] : words;
@@ -1271,7 +1277,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
         }
         else
         {
-          if (qx.core.Variant.isSet("qx.debug", "on")) {
+          if (qx.core.Environment.get("qx.debug")) {
             this.error('document not available, try again...');
           }
 
@@ -1309,7 +1315,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
 
       // sometimes IE does some strange things and the document is not available
       // so we wait for it
-      if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml")) {
         this.__waitForDocumentReady();
       } else {
         this._onDocumentIsReady();
@@ -1347,20 +1353,20 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
 
       // For IE the document needs to be set in "designMode"
       // BEFORE the content is rendered.
-      if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml")) {
         this.setEditable(true);
       }
 
       // Open a new document and insert needed elements plus the initial content
       this.__renderContent();
 
-      if (!qx.core.Variant.isSet("qx.client", "opera")) {
+      if (!(qx.core.Environment.get("engine.name") == "opera")) {
         this.__addListeners();
       }
 
       // Setting the document editable for all other browser engines
       // AFTER the content is set
-      if (!qx.core.Variant.isSet("qx.client", "mshtml")) {
+      if (!(qx.core.Environment.get("engine.name") == "mshtml")) {
         this.setEditable(true);
       }
 
@@ -1375,7 +1381,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
 
       // Add listeners to opera after the edit mode is activated,
       // otherwise the listeners will be removed
-      if (qx.core.Variant.isSet("qx.client", "opera")) {
+      if ((qx.core.Environment.get("engine.name") == "opera")) {
         this.__addListeners();
       }
 
@@ -1389,7 +1395,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * be useful (especially for Gecko) whenever the HtmlArea was hidden and
      * gets visible again.
      */
-    forceEditable : qx.core.Variant.select("qx.client",
+    forceEditable : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -1402,7 +1408,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
            * was hidden and visible again.
            * Yes, and there are differences in Firefox 3.x and Firefox 2.x
            */
-          if (qx.bom.client.Engine.VERSION >= "1.9")
+          if (parseFloat(qx.core.Environment.get("engine.version")) >= "1.9")
           {
             doc.designMode = "Off";
 
@@ -1432,7 +1438,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @signature function()
      */
-    invalidateEditor : qx.core.Variant.select("qx.client",
+    invalidateEditor : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -1455,7 +1461,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @signature function()
      */
-    __resetEditorToValidState : qx.core.Variant.select("qx.client",
+    __resetEditorToValidState : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -1501,7 +1507,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
         }
 
         // IE returns an array when calling getAttribute
-        if (qx.core.Variant.isSet("qx.client", "mshtml"))
+        if ((qx.core.Environment.get("engine.name") == "mshtml"))
         {
           style = styleAttrib.cssText;
         }
@@ -1531,7 +1537,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       // "overflow-x" explicit to "hidden"
       // In mshtml browsers this does NOT work. The property "overflow-x"
       // overwrites the value of "overflow-y".
-      var overflow = qx.bom.client.Engine.GECKO ? " html, body {overflow-x: visible; } " : "";
+      var overflow = qx.core.Environment.get("engine.name") == "gecko" ?
+        " html, body {overflow-x: visible; } " : "";
 
       var skeletonParts = this.__documentSkeletonParts[this.getContentType()];
       var head = '<head>' + skeletonParts.meta +
@@ -1610,7 +1617,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       var Registration = qx.event.Registration;
       var doc = this._getIframeDocument();
 
-      var focusBlurTarget = qx.bom.client.Engine.WEBKIT ? this._getIframeWindow() : doc.body;
+      var focusBlurTarget = qx.core.Environment.get("engine.name") == "webkit" ? this._getIframeWindow() : doc.body;
       Registration.addListener(focusBlurTarget, "focus", this._handleFocusEvent, this);
       Registration.addListener(focusBlurTarget, "blur", this._handleBlurEvent, this);
 
@@ -1632,7 +1639,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       var Registration = qx.event.Registration;
       var doc = this._getIframeDocument();
 
-      var mouseEventName = qx.bom.client.Engine.MSHTML ? "click" : "mouseup";
+      var mouseEventName = qx.core.Environment.get("engine.name") == "mshtml" ? "click" : "mouseup";
       Registration.addListener(doc.body, mouseEventName, this._handleMouseUpOnBody, this);
       Registration.addListener(doc.documentElement, mouseEventName, this._handleMouseUpOnDocument, this);
 
@@ -1704,7 +1711,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       {
         try
         {
-          if (qx.core.Variant.isSet("qx.client", "gecko"))
+          if ((qx.core.Environment.get("engine.name") == "gecko"))
           {
             // FF Bug (Backspace etc. doesn't work if we dont set it twice)
             doc.designMode = (onOrOff !== false) ? 'Off' : 'On';
@@ -1743,7 +1750,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
         // For Gecko set additionally "styleWithCSS" to turn on CSS.
         // Fallback for older Gecko engines is "useCSS".
         // see http://www.mozilla.org/editor/midas-spec.html
-        if (qx.core.Variant.isSet("qx.client", "gecko"))
+        if ((qx.core.Environment.get("engine.name") == "gecko"))
         {
           try
           {
@@ -1824,8 +1831,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       var keyIdentifier = e.getKeyIdentifier().toLowerCase();
       this.__currentEvent = e;
 
-      if (qx.core.Variant.isSet("qx.debug", "on") &&
-          qx.core.Setting.get("qx.bom.htmlarea.HtmlArea.debug") == "on") {
+      if ((qx.core.Environment.get("qx.debug")) &&
+          qx.core.Environment.get("qx.bom.htmlarea.HtmlArea.debug")) {
         this.debug(e.getType() + " | " + keyIdentifier);
       }
 
@@ -1834,8 +1841,10 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       // keyup event. The keypress delivers the "Ctrl" key and the keyup the
       // "Enter" key. If the latter occurs right after the first one the
       // linebreak gets inserted.
-      if (qx.core.Variant.isSet("qx.client", "mshtml|webkit"))
-      {
+      if (
+        qx.core.Environment.get("engine.name") == "mshtml" ||
+        qx.core.Environment.get("engine.name") == "webkit"
+      ) {
         if (this.__controlPressed)
         {
           switch(keyIdentifier)
@@ -1843,7 +1852,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
             case "enter":
               if (this.getInsertLinebreakOnCtrlEnter())
               {
-                if (qx.core.Variant.isSet("qx.client", "webkit"))
+                if ((qx.core.Environment.get("engine.name") == "webkit"))
                 {
                   this.__insertWebkitLineBreak();
 
@@ -1875,7 +1884,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
           }
         }
       }
-      else if (qx.core.Variant.isSet("qx.client", "gecko"))
+      else if ((qx.core.Environment.get("engine.name") == "gecko"))
       {
         // These keys can change the selection
         switch(keyIdentifier)
@@ -1920,14 +1929,14 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @param e {Object} Event object
      * @return {void}
      */
-    _handleKeyDown : qx.core.Variant.select("qx.client",
+    _handleKeyDown : qx.core.Environment.select("engine.name",
     {
       "mshtml|webkit" : function(e)
       {
         var keyIdentifier   = e.getKeyIdentifier().toLowerCase();
 
-        if (qx.core.Variant.isSet("qx.debug", "on") &&
-            qx.core.Setting.get("qx.bom.htmlarea.HtmlArea.debug") == "on") {
+        if ((qx.core.Environment.get("qx.debug")) &&
+            qx.core.Environment.get("qx.bom.htmlarea.HtmlArea.debug")) {
           //this.debug(e.getType() + " | " + e.getKeyIdentifier().toLowerCase());
         }
 
@@ -1970,8 +1979,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       var isShiftPressed  = e.isShiftPressed();
       this.__currentEvent = e;
 
-      if (qx.core.Variant.isSet("qx.debug", "on") &&
-          qx.core.Setting.get("qx.bom.htmlarea.HtmlArea.debug") == "on") {
+      if ((qx.core.Environment.get("qx.debug")) &&
+          qx.core.Environment.get("qx.bom.htmlarea.HtmlArea.debug")) {
         this.debug(e.getType() + " | " + keyIdentifier);
       }
 
@@ -1982,8 +1991,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
         // for IE it's necessary to NOT look at the cursorcontext right after
         // the "Enter" because the corresponding styles / elements are not yet
         // created.
-        var fireEvent = !(qx.core.Variant.isSet("qx.client", "mshtml") && keyIdentifier == "enter") ||
-                        !(qx.core.Variant.isSet("qx.client", "gecko") &&  keyIdentifier == "enter");
+        var fireEvent = !((qx.core.Environment.get("engine.name") == "mshtml") && keyIdentifier == "enter") ||
+                        !((qx.core.Environment.get("engine.name") == "gecko") &&  keyIdentifier == "enter");
 
         if (fireEvent)
         {
@@ -2019,7 +2028,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
             e.preventDefault();
             e.stopPropagation();
 
-            if (qx.core.Variant.isSet("qx.client", "gecko"))
+            if ((qx.core.Environment.get("engine.name") == "gecko"))
             {
               if (this.__isSelectionWithinWordBoundary())
               {
@@ -2036,7 +2045,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
               // get it work.
               this.insertHtml("<br /><div id='placeholder'></div>");
             }
-            else if (qx.core.Variant.isSet("qx.client", "opera"))
+            else if ((qx.core.Environment.get("engine.name") == "opera"))
             {
               // To insert a linebreak for Opera it is necessary to work with
               // ranges and add the <br> element on node-level. The selection
@@ -2064,7 +2073,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
           // Special handling for IE when hitting the "Enter" key instead of
           // letting the IE insert a <p> insert manually a <br> if the
           // corresponding property is set.
-          if (qx.core.Variant.isSet("qx.client", "mshtml"))
+          if ((qx.core.Environment.get("engine.name") == "mshtml"))
           {
             if (!this.getInsertParagraphOnLinebreak())
             {
@@ -2081,7 +2090,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
             }
           }
           // Special handling for Firefox when hitting the "Enter" key
-          else if(qx.core.Variant.isSet("qx.client", "gecko"))
+          else if((qx.core.Environment.get("engine.name") == "gecko"))
           {
             if (this.getInsertParagraphOnLinebreak() &&
                 !isShiftPressed && !isCtrlPressed)
@@ -2126,7 +2135,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
               this.__fireCursorContextOnNextInput = true;
             }
           }
-          else if(qx.core.Variant.isSet("qx.client", "webkit"))
+          else if((qx.core.Environment.get("engine.name") == "webkit"))
           {
             if (this.getInsertParagraphOnLinebreak() && isShiftPressed)
             {
@@ -2145,7 +2154,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
           // Firefox 2 needs some additional work to select the first line
           // completely in case the selection is already on the first line and
           // "key up" is pressed.
-          if (qx.bom.client.Engine.GECKO && qx.bom.client.Engine.FULLVERSION < 1.9 && isShiftPressed)
+          if (qx.core.Environment.get("engine.name") == "gecko" &&
+            qx.core.Environment.get("engine.version") < 1.9 && isShiftPressed)
           {
             var sel = this.getSelection();
 
@@ -2172,7 +2182,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
         // Firefox 2 needs some extra work to move the cursor (and optionally
         // select text while moving) to first position in the first line.
         case "home":
-          if (qx.bom.client.Engine.GECKO && qx.bom.client.Engine.FULLVERSION < 1.9)
+          if (qx.core.Environment.get("engine.name") == "gecko" &&
+            qx.core.Environment.get("engine.version") < 1.9)
           {
             if(isCtrlPressed)
             {
@@ -2342,8 +2353,10 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
     {
       this.__storedSelectedHtml = null;
 
-      if (qx.core.Variant.isSet("qx.client","gecko|webkit"))
-      {
+      if (
+        qx.core.Environment.get("engine.name") == "gecko" ||
+        qx.core.Environment.get("engine.name") == "webkit"
+      ) {
         // Remove element to focus, as the editor is focused for the first time
         // and the element is not needed anymore.
         var elementToFocus = this.getContentDocument().getElementById("__elementToFocus__");
@@ -2395,8 +2408,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      */
     _handleMouseUpOnBody : function(e)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on") &&
-          qx.core.Setting.get("qx.bom.htmlarea.HtmlArea.debug") == "on") {
+      if ((qx.core.Environment.get("qx.debug")) &&
+          qx.core.Environment.get("qx.bom.htmlarea.HtmlArea.debug")) {
         this.debug("handleMouse " + e.getType());
       }
       this.__mouseUpOnBody = true;
@@ -2415,7 +2428,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function(e)
      * @return {void}
      */
-    _handleMouseUpOnDocument : qx.core.Variant.select("qx.client", {
+    _handleMouseUpOnDocument : qx.core.Environment.select("engine.name", {
       "mshtml" : qx.lang.Function.empty,
 
       "default" : function(e)
@@ -2503,12 +2516,21 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
 
 
     /**
-     * Removes all formatting styles on the current selection content
+     * Removes all formatting styles on the current selection content and resets
+     * the font family and size to the default ones. See {@link #defaultFontSize} 
+     * and {@link #defaultFontFamily}.
      *
      * @return {Boolean} Success of operation
      */
-    removeFormat : function() {
-      return this.__commandManager.execute("removeformat");
+    removeFormat : function()
+    {
+      var value = this.__commandManager.execute("removeformat");
+
+      // reset the default font size and family
+      this.__commandManager.execute("fontsize", this.getDefaultFontSize());
+      this.__commandManager.execute("fontfamily", this.getDefaultFontFamily());
+
+      return value;
     },
 
 
@@ -2821,13 +2843,13 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       // show the caret after clearing out the content. Otherwise
       // the user is able to type ahead but right after the clearing the
       // caret is not visible (-> cursor does not blink)
-      if (qx.bom.client.Engine.GECKO) {
+      if (qx.core.Environment.get("engine.name") == "gecko") {
         doc.body.innerHTML = "<p>&nbsp;</p>";
       }
 
       // To ensure Webkit is showing a cursor after resetting the
       // content it is necessary to create a new selection and add a range
-      else if (qx.bom.client.Engine.WEBKIT)
+      else if (qx.core.Environment.get("engine.name") == "webkit")
       {
         var sel = this.getSelection();
         var rng = doc.createRange();
@@ -2862,7 +2884,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @return {Boolean} True, if area is empty - otherwise false.
      */
-    containsOnlyPlaceholder : qx.core.Variant.select("qx.client",
+    containsOnlyPlaceholder : qx.core.Environment.select("engine.name",
     {
 
       "mshtml" : function()
@@ -2904,7 +2926,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @signature function()
      */
-    focusContent : qx.core.Variant.select("qx.client",
+    focusContent : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -2967,7 +2989,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @signature function()
      */
-    __isContentAvailable : qx.core.Variant.select("qx.client",
+    __isContentAvailable : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -3025,7 +3047,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @signature function()
      */
-    __resetToDefaultContentAndSelect : qx.core.Variant.select("qx.client",
+    __resetToDefaultContentAndSelect : qx.core.Environment.select("engine.name",
     {
       "gecko|webkit" : function()
       {
@@ -3118,7 +3140,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       }
 
       var doc = this._getIframeDocument();
-      var focusNodeStyle = qx.core.Variant.isSet("qx.client", "mshtml") ?
+      var focusNodeStyle = (qx.core.Environment.get("engine.name") == "mshtml") ?
                            focusNode.currentStyle :
                            doc.defaultView.getComputedStyle(focusNode, null);
 
@@ -3141,7 +3163,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
 
       if (focusNodeStyle != null)
       {
-        if (qx.core.Variant.isSet("qx.client", "mshtml"))
+        if ((qx.core.Environment.get("engine.name") == "mshtml"))
         {
           isItalic = focusNodeStyle.fontStyle == "italic";
           isUnderline = focusNodeStyle.textDecoration.indexOf("underline") !== -1;
@@ -3170,7 +3192,10 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
           justifyFull = focusNodeStyle.getPropertyValue("text-align") == "justify";
         }
 
-        if (qx.core.Variant.isSet("qx.client", "mshtml|opera")) {
+        if (
+          qx.core.Environment.get("engine.name") == "mshtml" ||
+          qx.core.Environment.get("engine.name") == "opera"
+        ) {
           isBold = focusNodeStyle.fontWeight == 700;
         } else {
           isBold = focusNodeStyle.getPropertyValue("font-weight") == "bold" ||
@@ -3247,7 +3272,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @return {Selection} Selection object
     */
-    getSelection : qx.core.Variant.select("qx.client",
+    getSelection : qx.core.Environment.select("engine.name",
     {
        "mshtml" : function() {
          return this._getIframeDocument() ? this._getIframeDocument().selection : null;
@@ -3264,7 +3289,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @return {Boolean} collapsed status of selection
      */
-    isSelectionCollapsed : qx.core.Variant.select("qx.client",
+    isSelectionCollapsed : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function() {
         return this.getSelection() && this.getSelection().type == "None";
@@ -3281,7 +3306,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @return {String} Selected plain text.
      */
-    getSelectedText : qx.core.Variant.select("qx.client",
+    getSelectedText : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function() {
         return this.getRange() ? this.getRange().text : "";
@@ -3324,7 +3349,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function(range)
      * @return {String} range contents
      */
-    __getRangeContents : qx.core.Variant.select("qx.client",
+    __getRangeContents : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(range)
       {
@@ -3368,7 +3393,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      *
      * @return {void}
      */
-    clearSelection : qx.core.Variant.select("qx.client",
+    clearSelection : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function()
       {
@@ -3397,7 +3422,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function()
      * @return {Boolean} within word boundary
      */
-    __isSelectionWithinWordBoundary : qx.core.Variant.select("qx.client", {
+    __isSelectionWithinWordBoundary : qx.core.Environment.select("engine.name", {
       "gecko" : function()
       {
         var sel = this.getSelection();
@@ -3424,7 +3449,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function()
      * @return {Boolean} selection focus node
      */
-    __isFocusNodeAnElement : qx.core.Variant.select("qx.client", {
+    __isFocusNodeAnElement : qx.core.Environment.select("engine.name", {
       "gecko" : function() {
         return qx.dom.Node.isElement(this.getFocusNode());
       },
@@ -3459,7 +3484,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function(sel)
      * @return {Range?null} Range object or null if the document is not available
      */
-    __createRange : qx.core.Variant.select("qx.client",
+    __createRange : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(sel)
       {
@@ -3506,7 +3531,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function()
      * @return {void}
      */
-    saveRange : qx.core.Variant.select("qx.client", {
+    saveRange : qx.core.Environment.select("engine.name", {
       "mshtml" : function() {
         this.__savedRange = this.getRange();
       },
@@ -3521,7 +3546,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function()
      * @return {Range|null} range object or null
      */
-    getSavedRange : qx.core.Variant.select("qx.client", {
+    getSavedRange : qx.core.Environment.select("engine.name", {
       "mshtml" : function() {
         return this.__savedRange;
       },
@@ -3536,7 +3561,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function()
      * @return {void}
      */
-    resetSavedRange : qx.core.Variant.select("qx.client", {
+    resetSavedRange : qx.core.Environment.select("engine.name", {
       "mshtml" : function() {
         this.__savedRange = null;
       },
@@ -3556,7 +3581,7 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
      * @signature function()
      * @return {Element?null} Focus node or null if no range is available
      */
-    getFocusNode : qx.core.Variant.select("qx.client",
+    getFocusNode : qx.core.Environment.select("engine.name",
     {
        "mshtml" : function()
        {
@@ -3614,8 +3639,8 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
   },
 
 
-  settings : {
-    "qx.bom.htmlarea.HtmlArea.debug" : "off"
+  environment : {
+    "qx.bom.htmlarea.HtmlArea.debug" : false
   },
 
 
@@ -3641,17 +3666,19 @@ qx.Class.define("qx.bom.htmlarea.HtmlArea",
       Registration.removeListener(doc.body, "keyup", this._handleKeyUp, this);
       Registration.removeListener(doc.body, "keydown", this._handleKeyDown, this);
 
-      var focusBlurTarget = qx.bom.client.Engine.WEBKIT ? this._getIframeWindow() : doc.body;
+      var focusBlurTarget = qx.core.Environment.get("engine.name") == "webkit"
+        ? this._getIframeWindow() : doc.body;
       Registration.removeListener(focusBlurTarget, "focus", this._handleFocusEvent);
       Registration.removeListener(focusBlurTarget, "blur",  this._handleBlurEvent);
       Registration.removeListener(doc, "focusout", this._handleFocusOutEvent);
 
-      var mouseEventName = qx.bom.client.Engine.MSHTML ? "click" : "mouseup";
+      var mouseEventName = qx.core.Environment.get("engine.name") == "mshtml" ?
+         "click" : "mouseup";
       Registration.removeListener(doc.body, mouseEventName, this._handleMouseUpOnBody, this);
       Registration.removeListener(doc.documentElement, mouseEventName, this._handleMouseUpOnDocument, this);
       Registration.removeListener(doc.documentElement, "contextmenu", this._handleContextMenuEvent, this);
 
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         // Force unload of the iframe. Unload event is not fired when htmlarea is disposed.
         // Needed to dispose event manager (which is reg. on the unload event of the iframe) + to fix "no typing in text fields possible, when editor

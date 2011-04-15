@@ -21,7 +21,7 @@
 ################################################################################
 
 import re, os, sys, zlib, optparse, types, string, glob
-import functools, codecs, operator
+import functools, codecs, operator, time
 import graph
 
 from misc                            import filetool, textutil, util, Path, json, copytool
@@ -345,10 +345,9 @@ class Generator(object):
 
         ##
         # Get the variants from the config
-        def getVariants():
-            # TODO: Runtime variants support is currently missing
+        def getVariants(confkey):
             variants = {}
-            variantsConfig = self._job.get("variants", {})
+            variantsConfig = self._job.get(confkey, {})
             variantsRuntime = self._variants
 
             for key in variantsConfig:
@@ -360,7 +359,9 @@ class Generator(object):
             # sanity check variants
             for key,val in variants.items():
                 if not isinstance(val, types.ListType):
-                    raise ValueError("Config error: Variant values must be lists: \"%s\":\"%r\"" % (key,val))
+                    #raise ValueError("Config error: Variant values must be lists: \"%s\":\"%r\"" % (key,val))
+                    # allow scalar values
+                    variants[key] = [ val ]
 
             return variants
 
@@ -518,6 +519,7 @@ class Generator(object):
 
         # -- Main --------------------------------------------------------------
 
+        starttime = time.time()
         config = self._job
         job    = self._job
         require = config.get("require", {})
@@ -579,8 +581,11 @@ class Generator(object):
         if takeout(jobTriggers, "provider"):
             script = Script()
             script.classesObj = self._classesObj.values()
-            variantData = getVariants()
-            variantSets = util.computeCombinations(variantData)
+            variantData = getVariants("variants")
+            environData = getVariants("environment") 
+            # for the time being, lets merge variant and environment data, putting
+            combiData   = self._mergeVariantsEnvironment(variantData, environData)
+            variantSets = util.computeCombinations(combiData)
             script.variants = variantSets[0] 
             script.libraries = self._libraries
             script.namespace = self.getAppName()
@@ -594,16 +599,21 @@ class Generator(object):
         self._treeCompiler   = TreeCompiler(self._classes, self._classesObj, self._context)
 
         # Processing all combinations of variants
-        variantData = getVariants()  # e.g. {'qx.debug':['on','off'], 'qx.aspects':['on','off']}
-        variantSets = util.computeCombinations(variantData) # e.g. [{'qx.debug':'on','qx.aspects':'on'},...]
-        for variantSetNum, variants in enumerate(variantSets):
+        variantData = getVariants("variants")  # e.g. {'qx.debug':['on','off'], 'qx.aspects':['on','off']}
+        environData = getVariants("environment") 
+        # @deprecated
+        # for the time being, lets merge variant and environment data, putting
+        combiData   = self._mergeVariantsEnvironment(variantData, environData)
+        variantSets  = util.computeCombinations(combiData) # e.g. [{'qx.debug':'on','qx.aspects':'on'},...]
+        for variantSetNum, variantset in enumerate(variantSets):
 
             # some console output
-            printVariantInfo(variantSetNum, variants, variantSets, variantData)
+            printVariantInfo(variantSetNum, variantset, variantSets, combiData)
 
             script           = Script()  # a new Script object represents the target code
             script.namespace = self.getAppName()
-            script.variants  = variants
+            script.variants  = variantset
+            script.envsettings = variantset
             script.libraries = self._libraries
             script.jobconfig = self._job
             # set source/build version
@@ -614,11 +624,11 @@ class Generator(object):
 
             # get current class list
             script.classes = computeClassList(includeWithDeps, excludeWithDeps, 
-                               includeNoDeps, excludeNoDeps, variants, script=script, verifyDeps=True)
+                               includeNoDeps, excludeNoDeps, variantset, script=script, verifyDeps=True)
               # keep the list of class objects in sync
             script.classesObj = [self._classesObj[id] for id in script.classes]
 
-            featureMap = self._depLoader.registerDependeeFeatures(script.classesObj, variants, script.buildType)
+            featureMap = self._depLoader.registerDependeeFeatures(script.classesObj, variantset, script.buildType)
             self._treeCompiler._featureMap = featureMap
 
             # prepare 'script' object
@@ -636,9 +646,34 @@ class Generator(object):
                 self.runLogUnusedClasses(script)
                 self.runLogResources(script)
                 
-        self._console.info("Done")
+        elapsedsecs = time.time() - starttime
+        self._console.info("Done (%dm%05.2f)" % (int(elapsedsecs/60), elapsedsecs % 60))
 
         return
+
+
+    def _mergeVariantsEnvironment(self, variantData, environData):
+        combiData = {}
+        # variantData last so it overrules
+        #combiData   = dict(j for i in (environData, variantData) for j in i.iteritems())
+
+        # using a special string type, mstr, for the result keys, so i can
+        # annotate it (used in CodeGenerator to separate envrionment keys)
+        for k,val in variantData.iteritems():
+            key = mstr(k)
+            combiData[key] = val
+        for k,val in environData.iteritems():
+            if k in variantData:
+                #self._console.warn('Key "%s" of deprecated "variants" config clashing with "environment" config; using variants.' % k)
+                #continue
+                pass
+            key = mstr('<env>:'+k)
+            if key in combiData: # this should never happen
+                raise RuntimeError('Rename variants key "%s" in your config.' % key)
+            key.type = "env"
+            combiData[key] = val
+
+        return combiData
 
 
     def runPrivateDebug(self):
@@ -1567,7 +1602,7 @@ class Generator(object):
                 layout = "horizontal" == "horizontal" # default horizontal=True
 
             # get type of combined image (png, base64, ...)
-            combtype = imgspec['type'] if 'type' in imgspec else "extension"
+            combtype = "base64" if image.endswith(".b64.json") else "extension"
             
             # create the combined image
             subconfigs = self._imageClipper.combine(image, input, layout, combtype)
@@ -1808,7 +1843,12 @@ class Generator(object):
         if util.getPlatformInfo()[0] == "Windows":
             classPathSeparator = ";"
         
-        argv.append(classPathSeparator.join(configClassPath))
+        configClassPath = classPathSeparator.join(configClassPath)
+        
+        if "CYGWIN" in util.getPlatformInfo()[0]:
+            configClassPath = "`cygpath -wp " + configClassPath + "`"
+        
+        argv.append(configClassPath)
         
         rhinoClass = self._job.get("simulate/rhino-class", "org.mozilla.javascript.tools.shell.Main")
         runnerScript = self._job.get("simulate/simulator-script")
@@ -1816,12 +1856,14 @@ class Generator(object):
         
         cmd = " ".join(textutil.quoteCommandArgs(argv))
         
-        settings = self._job.get("settings", None)
+        settings = self._job.get("environment", None)
+        for key in settings:
+            if type(settings[key]) == unicode:
+                settings[key] = settings[key].replace(" ", "$")
         if settings:
-            settings = json.dumps(settings)
-            if sys.platform[0:3] == "win":
-                settings = settings.replace(" ", "").replace('"','\\"')
-            settings = "'settings=" + settings + "'"
+            settings = json.dumps(settings, separators=(",", ":"))
+            settings = settings.replace('"','\\"').replace("{", "\{").replace("}", "\}")
+            settings = "settings=" + settings
             cmd += " " + settings
         
         self._console.debug("Selenium start command: " + cmd)
@@ -1915,4 +1957,13 @@ class Generator(object):
                 memo['appname'] = appname
         return memo['appname']
 
+
+##
+# String class, extensibel
+#
+class mstr(str):
+    def __init__(self,*args,**kwargs):
+        #super(mstr, self).__init__(*args,**kwargs) -- throws deprecWarning under 2.6+!
+        str.__init__(*args,**kwargs)
+        self.type = None
 

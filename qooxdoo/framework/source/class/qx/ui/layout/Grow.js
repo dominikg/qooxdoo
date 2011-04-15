@@ -51,8 +51,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/layout/grow.html'>
- * Extended documentation</a> and links to demos of this layout in the qooxdoo wiki.
+ * <a href='http://manual.qooxdoo.org/1.4/pages/layout/grow.html'>
+ * Extended documentation</a> and links to demos of this layout in the qooxdoo manual.
  */
 qx.Class.define("qx.ui.layout.Grow",
 {
@@ -75,13 +75,13 @@ qx.Class.define("qx.ui.layout.Grow",
     */
 
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value) {
+      "true" : function(item, name, value) {
         this.assert(false, "The property '"+name+"' is not supported by the Grow layout!");
       },
 
-      "off" : null
+      "false" : null
     }),
 
 

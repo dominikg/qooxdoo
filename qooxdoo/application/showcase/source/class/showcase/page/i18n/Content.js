@@ -89,6 +89,16 @@ qx.Class.define("showcase.page.i18n.Content",
             {code: "DE", name: "Germany"},
             {code: "AT", name: "Austria"}
           ]
+        },
+        {
+          language: "sv",
+          selected: null,
+          countries: [{code: "SE", name: "Sweden"}]
+        },
+        {
+          language: "ro",
+          selected: null,
+          countries: [{code: "RO", name: "Romania"}]
         }
       ]);
 
@@ -125,7 +135,23 @@ qx.Class.define("showcase.page.i18n.Content",
     {
       if (country)
       {
-        var language = this.__controller.getSelection().getItem(0).getLanguage();
+        var selection = this.__controller.getSelection().getItem(0);
+        var countries = selection.getCountries();
+        // check if the country is valid for the selected language
+        var validCountry = false;
+        for (var i = 0; i < countries.getLength(); i++)
+        {
+          if (countries.getItem(i).getCode() == country)
+          {
+            validCountry = true;
+            break;
+          }
+        };
+        if (!validCountry) {
+          return;
+        }
+
+        var language = selection.getLanguage();
         qx.locale.Manager.getInstance().setLocale(language + "_" + country);
       }
     },

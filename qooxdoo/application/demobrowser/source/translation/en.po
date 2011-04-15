@@ -2,56 +2,96 @@
 msgid ""
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:326
+#: demobrowser/DemoBrowser.js:197
+msgid "Info"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:364
 msgid "Could not open the Playground."
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:378
+#: demobrowser/DemoBrowser.js:402
+msgid "Demo has been disposed."
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:406 demobrowser/DemoBrowser.js:428
+msgid "Unable to access application."
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:451
 msgid "Run"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:384
+#: demobrowser/DemoBrowser.js:457
 msgid "Stop"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:392
+#: demobrowser/DemoBrowser.js:469
 msgid "Previous"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:398
+#: demobrowser/DemoBrowser.js:475
 msgid "Next"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:404
+#: demobrowser/DemoBrowser.js:489
 msgid "Own Window"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:411
+#: demobrowser/DemoBrowser.js:497
 msgid "To Playground"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:450
+#: demobrowser/DemoBrowser.js:513
+msgid "API Viewer"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:516
+msgid "Open the qooxdoo API Viewer"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:521
+msgid "Manual"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:524
+msgid "Open the qooxdoo Manual"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:560
 msgid "Theme"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:463
+#: demobrowser/DemoBrowser.js:574
 msgid "Object Summary"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:467
+#: demobrowser/DemoBrowser.js:578
 msgid "Global Namespace Pollution"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:472
+#: demobrowser/DemoBrowser.js:583
 msgid "Dispose Demo"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:476
+#: demobrowser/DemoBrowser.js:587
 msgid "Debug"
 msgstr ""
 
-#: demobrowser/DemoBrowser.js:548
+#: demobrowser/DemoBrowser.js:818
 msgid "Clear log"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:906
+msgid "Demo Link"
+msgstr ""
+
+#: demobrowser/DemoBrowser.js:927
+msgid "Get Demo Link"
+msgstr ""
+
+#: demobrowser/InfoWindow.js:95
+msgid "OK"
 msgstr ""
 
 #: demobrowser/demo/showcase/Localization.js:69
@@ -185,22 +225,24 @@ msgstr ""
 msgid "Format of %1:"
 msgstr ""
 
-#: demobrowser/demo/showcase/Translation.js:102
+#: demobrowser/demo/showcase/Translation.js:117
 msgid "Hello World"
 msgstr ""
 
-#: demobrowser/demo/showcase/Translation.js:113
-#: demobrowser/demo/showcase/Translation.js:124
+#: demobrowser/demo/showcase/Translation.js:120
 msgid "I have an apple"
 msgid_plural "I have %1 apples"
 msgstr[0] ""
 msgstr[1] ""
 
 #. The mammal fox that is.
-#: demobrowser/demo/showcase/Translation.js:135
+#: demobrowser/demo/showcase/Translation.js:122
 msgid "The quick brown fox"
 msgstr ""
 
-#: demobrowser/demo/showcase/Translation.js:142
-msgid "One can"
+#: demobrowser/demo/showcase/Translation.js:124
+msgid "Orange"
 msgstr ""
+
+#~ msgid "two"
+#~ msgstr ""

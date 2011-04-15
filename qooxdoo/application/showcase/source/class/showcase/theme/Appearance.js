@@ -121,7 +121,7 @@ qx.Theme.define("showcase.theme.Appearance",
       {
         return {
           decorator: new qx.ui.decoration.HBox("showcase/images/tag-hor.png"),
-          opacity: qx.bom.client.Engine.MSHTML ? 1 : (states.hovered ? 1 : 0.6),
+          opacity: qx.core.Environment.get("engine.name") == "mshtml" ? 1 : (states.hovered ? 1 : 0.6),
           height: 12
         };
       }
@@ -150,7 +150,7 @@ qx.Theme.define("showcase.theme.Appearance",
       {
         return {
           // the header's shadow may block mouse events in the stack
-          marginTop: qx.bom.client.Feature.CSS_POINTER_EVENTS ? 0 : 8
+          marginTop: qx.core.Environment.get("event.pointer") ? 0 : 8
         };
       }
     },

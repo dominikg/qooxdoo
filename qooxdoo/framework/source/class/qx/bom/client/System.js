@@ -35,6 +35,8 @@
  * The listed constants are automatically filled on the initialization
  * phase of the class. The defaults listed in the API viewer need not
  * to be identical to the values at runtime.
+ *
+ * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
  */
 qx.Bootstrap.define("qx.bom.client.System",
 {
@@ -46,85 +48,173 @@ qx.Bootstrap.define("qx.bom.client.System",
 
   statics :
   {
-    /** {String} The name of the operating system */
+
+    /**
+     * {String} The name of the operating system
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     NAME : "",
 
-    /** {Boolean} Flag to detect if the client system has an installed Service Pack 1 */
+
+// WINDOWS
+
+    /**
+     * {Boolean} Flag to detect if the client system has an installed Service Pack 1
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     SP1 : false,
 
-    /** {Boolean} Flag to detect if the client system has an installed Service Pack 2 (only available in IE) */
+    /**
+     * {Boolean} Flag to detect if the client system has an installed Service Pack 2 (only available in IE)
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     SP2 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows 95 */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows 95
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WIN95 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows 98 */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows 98
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WIN98 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows ME */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows ME
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WINME : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows NT4 */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows NT4
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WINNT4 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows 2000 */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows 2000
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WIN2000 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows XP */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows XP
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WINXP : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows 2003 (Server) */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows 2003 (Server)
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WIN2003 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows Vista */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows Vista
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WINVISTA : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows 7 */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows 7
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WIN7 : false,
 
-    /** {Boolean} Flag to detect if the client system is Windows CE */
+    /**
+     * {Boolean} Flag to detect if the client system is Windows CE
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     WINCE : false,
 
-    /** {Boolean} Flag to detect if the client system is Linux */
+
+// Linux
+
+    /**
+     * {Boolean} Flag to detect if the client system is Linux
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     LINUX : false,
 
-    /** {Boolean} Flag to detect if the client system is SunOS */
+    /**
+     * {Boolean} Flag to detect if the client system is SunOS
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     SUNOS : false,
 
-    /** {Boolean} Flag to detect if the client system is FreeBSD */
+    /**
+     * {Boolean} Flag to detect if the client system is FreeBSD
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     FREEBSD : false,
 
-    /** {Boolean} Flag to detect if the client system is NetBSD */
+    /**
+     * {Boolean} Flag to detect if the client system is NetBSD
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     NETBSD : false,
 
-    /** {Boolean} Flag to detect if the client system is OpenBSD */
+    /**
+     * {Boolean} Flag to detect if the client system is OpenBSD
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     OPENBSD : false,
 
-    /** {Boolean} Flag to detect if the client system is Mac OS X */
+// osx
+
+    /**
+     * {Boolean} Flag to detect if the client system is Mac OS X
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     OSX : false,
 
-    /** {Boolean} Flag to detect if the client system is Mac OS 9 */
+    /**
+     * {Boolean} Flag to detect if the client system is Mac OS 9
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     OS9 : false,
 
-    /** {Boolean} Flag to detect if the client system is Symbian */
-    SYMBIAN : false,
+// mobile
 
-    /** {Boolean} Flag to detect if the client system is Nintendo DS */
-    NINTENDODS : false,
-
-    /** {Boolean} Flag to detect if the client system is Playstation Portable */
-    PSP : false,
-
-    /** {Boolean} Flag to detect if the client system is an iPhone or iPod touch */
+    /**
+     * {Boolean} Flag to detect if the client system is an iPhone or iPod touch
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     IPHONE : false,
 
-    /** {Boolean} Flag to detect if the client system is an iPad */
+    /**
+     * {Boolean} Flag to detect if the client system is an iPad
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     IPAD : false,
 
-    /** {Boolean} Flag to detect if the client system is an RIM BlackBerry PlayBook */
-    RIM_TABLET_OS : false,
+    /**
+     * {Boolean} Flag to detect if the client system is Symbian
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
+    SYMBIAN : false,
 
-    /** {Boolean} Flag to detect if the client system is assumed */
+// Hardware
+
+    /**
+     * {Boolean} Flag to detect if the client system is Nintendo DS
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
+    NINTENDODS : false,
+
+    /**
+     * {Boolean} Flag to detect if the client system is Playstation Portable
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
+    PSP : false,
+
+    /**
+     * {Boolean} Flag to detect if the client system is assumed
+     * @deprecated since 1.4: Please use qx.core.Environment.get() instead.
+     */
     UNKNOWN_SYSTEM : false,
 
     /** Maps user agent names to system IDs */
@@ -155,6 +245,8 @@ qx.Bootstrap.define("qx.bom.client.System",
       "Nitro" : "nintendods",
       "PSP" : "sonypsp",
 
+      "Mac OS X 10_6" : "osx6",
+      "Mac OS X 10.6" : "osx6",
       "Mac OS X 10_5" : "osx5",
       "Mac OS X 10.5" : "osx5",
       "Mac OS X 10_4" : "osx4",
@@ -168,9 +260,7 @@ qx.Bootstrap.define("qx.bom.client.System",
       "Mac OS X 10_0" : "osx0",
       "Mac OS X 10.0" : "osx0",
       "Mac OS X" : "osx",
-      "Mac OS 9" : "os9",
-
-      "RIM Tablet OS" : "rim_tablet_os"
+      "Mac OS 9" : "os9"
     },
 
 
@@ -189,18 +279,19 @@ qx.Bootstrap.define("qx.bom.client.System",
       }
 
       var reg = new RegExp("(" + str.join("|").replace(/\./g, "\.") + ")", "g");
+      var match = reg.exec(agent);
 
-      if (!reg.test(agent)) {
+      if (!match) {
         this.UNKNOWN_SYSTEM = true;
 
-        if(!qx.bom.client.Platform.UNKNOWN_PLATFORM)
+        if(!qx.bom.client.OperatingSystem.getName() == "")
         {
-          if (qx.bom.client.Platform.UNIX)
+          if (qx.bom.client.OperatingSystem.getName() == "unix")
           {
             this.NAME = "linux";
             this.LINUX = true;
           }
-          else if(qx.bom.client.Platform.MAC)
+          else if(qx.bom.client.OperatingSystem.getName() == "osx")
           {
             this.NAME = "osx5";
             this.OSX = true;
@@ -220,7 +311,8 @@ qx.Bootstrap.define("qx.bom.client.System",
         return;
       }
 
-      if (qx.bom.client.Engine.WEBKIT && RegExp(" Mobile/").test(navigator.userAgent))
+      if (qx.bom.client.Engine.getName() == "webkit" &&
+        RegExp(" Mobile/").test(agent))
       {
         if (RegExp("iPad").test(navigator.userAgent)) {
             this.IPAD = true;
@@ -232,14 +324,14 @@ qx.Bootstrap.define("qx.bom.client.System",
       }
       else
       {
-        this.NAME = this.__ids[RegExp.$1];
+        this.NAME = this.__ids[match[1]];
         this[this.NAME.toUpperCase()] = true;
 
-        if (qx.bom.client.Platform.WIN)
+        if (qx.bom.client.OperatingSystem.getName() == "win")
         {
           if (agent.indexOf("Windows NT 5.01")!==-1) {
             this.SP1 = true;
-          } else if (qx.bom.client.Engine.MSHTML && agent.indexOf("SV1")!==-1) {
+          } else if (qx.bom.client.Engine.getName() == "mshtml" && agent.indexOf("SV1")!==-1) {
             this.SP2 = true;
           }
         }
@@ -255,8 +347,35 @@ qx.Bootstrap.define("qx.bom.client.System",
      DEFER
   *****************************************************************************
   */
-
+  /**
+   * @lint ignoreUndefined(qxvariants)
+   */
   defer : function(statics) {
     statics.__init();
+
+    // only when debug is on (@deprecated)
+    if (qx.Bootstrap.DEBUG) {
+      // add @deprecation warnings
+      var keys = ["NAME", "SP1", "SP2", "WIN95", "WIN98", "WINME", "WINNT4",
+        "WIN2000", "WINXP", "WIN2003", "WINVISTA", "WIN7", "WINCE", "LINUX",
+        "SUNOS", "FREEBSD", "NETBSD", "OPENBSD", "OSX", "OS9", "IPHONE", "IPAD",
+        "SYMBIAN", "NINTENDODS", "PSP", "UNKNOWN_SYSTEM"];
+      for (var i = 0; i < keys.length; i++) {
+        // check if __defineGetter__ is available
+        if (statics.__defineGetter__) {
+          var constantValue = statics[keys[i]];
+          statics.__defineGetter__(keys[i], qx.Bootstrap.bind(function(key, c) {
+            var warning =
+              "The constant '"+ key + "' of '" + statics.classname + "'is deprecated: " +
+              "Please check the API documentation of qx.core.Environment."
+            if (qx.dev && qx.dev.StackTrace) {
+              warning += "\nTrace:" + qx.dev.StackTrace.getStackTrace().join("\n")
+            }
+            qx.Bootstrap.warn(warning);
+            return c;
+          }, statics, keys[i], constantValue));
+        }
+      }
+    }
   }
 });

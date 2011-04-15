@@ -90,9 +90,10 @@ qx.Class.define("qx.test.bom.Attribute",
       this._checkBox.setAttribute("checked", true);
       this.assertEquals(true, Attribute.get(this._checkBox, "checked"));
 
-      if (qx.core.Variant.isSet("qx.client", "mshtml") &&
-          (qx.bom.client.Engine.VERSION <= 7 ||
-           (qx.bom.client.Engine.VERSION == 8 && qx.bom.client.Engine.DOCUMENT_MODE == 7))) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml") &&
+          (parseFloat(qx.core.Environment.get("engine.version")) <= 7 ||
+           (parseFloat(qx.core.Environment.get("engine.version")) == 8 &&
+           qx.core.Environment.get("browser.documentmode") == 7))) {
         this._checkBox.setAttribute("checked", false);
       } else {
         this._checkBox.removeAttribute("checked");
@@ -128,7 +129,7 @@ qx.Class.define("qx.test.bom.Attribute",
       Attribute.set(this._input, "maxLength", 10);
       Attribute.set(this._input, "maxLength", null);
 
-      var maxLengthValue = qx.core.Variant.select("qx.client", {
+      var maxLengthValue = qx.core.Environment.select("engine.name", {
                             "mshtml": 2147483647,
                             "webkit": 524288,
                             "default": -1
@@ -167,7 +168,9 @@ qx.Class.define("qx.test.bom.Attribute",
       this.assertNull(Attribute.get(this._el, "innerHTML"));
 
       // Skip this for Safari 2
-      if (qx.bom.client.Engine.WEBKIT && qx.bom.client.Engine.VERSION < 530) {
+      if (qx.core.Environment.get("engine.name") == "webkit" &&
+        parseFloat(qx.core.Environment.get("engine.version")) < 530)
+      {
         this.warn("Test skipped in Safari 2.");
       } else {
         Attribute.set(this._el, "tabIndex", 10);

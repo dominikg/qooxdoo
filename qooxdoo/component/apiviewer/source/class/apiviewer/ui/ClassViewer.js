@@ -156,15 +156,15 @@ qx.Class.define("apiviewer.ui.ClassViewer",
       var html = '';
       var style;
 
-      if(qx.bom.client.Engine.WEBKIT) {
+      if(qx.core.Environment.get("engine.name") == "webkit") {
         html = '<span style="display:inline;position:relative;top:-2px;width:' + width + 'px;height:' + height + 'px' + ((styleAttributes == null) ? '' : (';' + styleAttributes)) + '">';
       } else {
         html = '<span style="display:inline-block;display:inline;padding-right:18px;position:relative;top:-2px;left:0;width:' + width + 'px;height:' + height + 'px' + ((styleAttributes == null) ? '' : (';' + styleAttributes)) + '">';
       }
 
-      if(qx.bom.client.Engine.WEBKIT) {
+      if(qx.core.Environment.get("engine.name") == "webkit") {
         style = "position:absolute;top:0px;left:0px;padding-right:18px;";
-      } else if(qx.bom.client.Engine.OPERA) {
+      } else if(qx.core.Environment.get("engine.name") == "opera") {
         style = "margin-right:-18px;";
       }else{
         style = "position:absolute;top:0px;left:0px";
@@ -323,7 +323,11 @@ qx.Class.define("apiviewer.ui.ClassViewer",
       {
         classHtml.add('<h2 class="warning">', "Internal:", '</h2>');
         classHtml.add('<p>');
-        classHtml.add("This ", classNode.getType(), " is internal!");
+        var type = classNode.getType();
+        if(type=='bootstrap') {
+          type+=' class';
+        }
+        classHtml.add("This ", type, " is internal!");
         classHtml.add('</p>');
       }
 
@@ -428,8 +432,8 @@ qx.Class.define("apiviewer.ui.ClassViewer",
       if (hierarchy.length <= 1) { return; }
 
       html.add("<h2>", "Inheritance hierarchy:", "</h2>");
-  
-      var indent = 0, l = hierarchy.length; 
+
+      var indent = 0, l = hierarchy.length;
       for (var i=l-1; i>=0; i--) {
         var name = hierarchy[i].getFullName();
         var icon = TreeUtil.getIconUrl(hierarchy[i]);
@@ -530,7 +534,18 @@ qx.Class.define("apiviewer.ui.ClassViewer",
       else if (itemNode.getListName() == "methods")
       {
         // Check for privates
-        if (itemName.indexOf("__") === 0) {
+        if (itemName.indexOf("__") === 0 || itemNode.isInternal()) {
+          uiModel.setShowPrivate(true);
+        }
+        // Check for protected
+        else if (itemName.indexOf("_") === 0){
+          uiModel.setShowProtected(true);
+        }
+      }
+      else if (itemNode.getListName() == "methods-static")
+      {
+        // Check for privates
+        if (itemName.indexOf("__") === 0 || itemNode.isInternal()) {
           uiModel.setShowPrivate(true);
         }
         // Check for protected

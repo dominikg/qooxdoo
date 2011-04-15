@@ -16,6 +16,11 @@
      * Martin Wittemann (martinwittemann)
 
 ************************************************************************ */
+
+/* ************************************************************************
+#ignore(demobrowser.demo.ui.CustomRenderer)
+************************************************************************ */
+
 /**
  * @lint ignoreDeprecated(alert)
  */
@@ -63,7 +68,7 @@ qx.Class.define("demobrowser.demo.ui.FormRendererCustom",
       // add some additional widgets
       form.add(new qx.ui.form.TextField(), "Country");
       form.add(
-        new qx.ui.form.TextArea(), "Bio", null, "bio", null, 
+        new qx.ui.form.TextArea(), "Bio", null, "bio", null,
         {placeholder: "Please tell us some details about you..."}
       );
 
@@ -127,7 +132,7 @@ qx.Class.define("demobrowser.demo.ui.CustomRenderer", {
         this._add(item, {row: row, column: this.__column + 1});
         // use the options
         if (options[i] && options[i].placeholder) {
-          item.setPlaceholder(options[i].placeholder);          
+          item.setPlaceholder(options[i].placeholder);
         }
 
         row++;

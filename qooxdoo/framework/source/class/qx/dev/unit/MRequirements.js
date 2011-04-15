@@ -79,7 +79,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasSsl : function()
     {
-      return qx.bom.client.Feature.SSL;
+      return qx.core.Environment.get("io.ssl");
     },
 
 
@@ -186,7 +186,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasTouch : function()
     {
-      return qx.bom.client.Feature.TOUCH;
+      return qx.core.Environment.get("event.touch");
     },
 
 
@@ -197,7 +197,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasFlash : function()
     {
-      return qx.bom.client.Flash.AVAILABLE;
+      return qx.core.Environment.get("plugin.flash");
     },
 
 
@@ -208,7 +208,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasChrome : function()
     {
-      return qx.bom.client.Browser.NAME === "chrome";
+      return qx.core.Environment.get("browser.name") === "chrome";
     },
 
 
@@ -219,7 +219,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasFirefox : function()
     {
-      return qx.bom.client.Browser.NAME === "firefox";
+      return qx.core.Environment.get("browser.name") === "firefox";
     },
 
 
@@ -230,7 +230,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasGecko : function()
     {
-      return qx.bom.client.Engine.GECKO;
+      return qx.core.Environment.get("engine.name") == "gecko";
     },
 
 
@@ -241,7 +241,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasIe : function()
     {
-      return qx.bom.client.Browser.NAME === "ie";
+      return qx.core.Environment.get("browser.name") === "ie";
     },
 
 
@@ -252,7 +252,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasMshtml : function()
     {
-      return qx.bom.client.Engine.MSHTML;
+      return qx.core.Environment.get("engine.name") == "mshtml";
     },
 
 
@@ -263,7 +263,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasOpera : function()
     {
-      return qx.bom.client.Engine.OPERA;
+      return qx.core.Environment.get("engine.name") == "opera";
     },
 
 
@@ -274,7 +274,7 @@ qx.Mixin.define("qx.dev.unit.MRequirements", {
      */
     hasWebkit : function()
     {
-      return qx.bom.client.Engine.WEBKIT;
+      return qx.core.Environment.get("engine.name") == "webkit";
     }
   }
 

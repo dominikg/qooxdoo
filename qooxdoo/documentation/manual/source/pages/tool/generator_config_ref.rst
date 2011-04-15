@@ -147,7 +147,7 @@ This key currently takes no subkeys, but you still have to provide an empty map.
 combine-images
 ==============
 
-Triggers the creation of combined image files that contain various other images. Takes a map. *This action key requires an external program (ImageMagic) to run successfully.*
+Triggers the creation of combined image files that contain various other images. Takes a map.
 
 ::
 
@@ -158,7 +158,6 @@ Triggers the creation of combined image files that contain various other images.
       "<output_image>" :
       {
         "prefix": [ "<string>", "<altstring>" ],
-        "type"  : ("extension"|"base64"),
         "layout": ("horizontal"|"vertical"),
         "input" : 
         [ 
@@ -175,12 +174,15 @@ Triggers the creation of combined image files that contain various other images.
 
   peer-keys: :ref:`pages/tool/generator_config_ref#cache`
 
+.. note::
+
+  Unless you are generating a base64 combined image, this key requires an external program (ImageMagic) to run successfully.
+
 * **images** : map with combine entries
 
-  * <output_image> : path of output file; may be relative to the config file location
+  * **<output_image>** : path of output file; may be relative to the config file location; the file ending determins the file format; use *.png*, *.gif*, etc. for binary formats, or *.b64.json* for base64 combined image
 
     * **prefix** *(required)*: takes a list; the first element is a prefix of the path given in <output_image>, leading up to, but not including, the library name space of the output image; this prefix will be stripped from the ouput path, and will be replaced by an optional second element of this setting, to eventually obtain the image id of the output image;  
-    * **type** : specify the type of the combined image; with *extension* the combined image's file extension is used, which should in this case represent a proper file format (e.g. ".png" or ".gif"); with *base64* the images will be base64-encoded and these encoded strings will be put into the combined "image", which is just a Json structure with encoded strings (default: *extension*)
     * **layout** : either "horizontal" or "vertical"; defines the layout of images within the combined image (default: "horizontal")
     * **input** *(required)*: list of groups of input files, each group sharing the same prefix; each group consists of:
 
@@ -248,7 +250,7 @@ Specify various options for compile (and other) keys. Takes a map.
       "locales"         : ["de", "en"],
       "optimize"        : ["variables", "basecalls", "privates", "strings"],
       "decode-uris-plug"  : "<path>",
-      "exclude"         : ["myapp.classA", "myapp.util.*"]
+      "except"          : ["myapp.classA", "myapp.util.*"]
     }
   }
 
@@ -276,7 +278,7 @@ Possible keys are
   * **locales** : (*build*) a list of locales to include (default: *["C"]*)
   * **optimize** : list of dimensions for optimization, max. '["variables", "basecalls", "privates", "strings"]' (default: *[]*) :ref:`special section <pages/tool/generator_config_articles#optimize_key>`
   * **decode-uris-plug** : path to a file containing JS code, which will be plugged into the loader script, into the ``qx.$$loader.decodeUris()`` method. This allows you to post-process script URIs, e.g. through pattern matching. The current produced script URI is available and can be modified in the variable ``euri``.
-  * **exclude** : (*hybrid*) exclude the classes specified in the class pattern list from compilation when creating a :ref:`hybrid <pages/tool/generator_config_ref#compile>` version of the application
+  * **except** : (*hybrid*) exclude the classes specified in the class pattern list from compilation when creating a :ref:`hybrid <pages/tool/generator_config_ref#compile>` version of the application
 
 .. _pages/tool/generator_config_ref#copy-files:
 
@@ -374,6 +376,32 @@ Provides some descriptive text for the job.
 
 The descriptive string provided here will be used when listing jobs on the command line. (Be aware since this is a normal job key it will be passed on through job inheritance, so when you look at a specific job in the job listing you might see the job description of some ancestor job).
 
+
+.. _pages/tool/generator_config_ref#environment:
+
+environment
+===========
+
+Define global key-value mappings for the application. Takes a map.
+
+::
+
+  "environment" :
+  {
+    "<key>" : (value | [<value>, ... ])
+  }
+
+The "environment" of a qooxdoo application can be viewed as a global, write-once key-value store. The *environment* key allows you to pre-define values for such keys. All key-value pairs are available at run time through `qx.core.Environment <http://api.qooxdoo.org/%{version}/#qx.core.Environment>`_. There are pre-defined keys that are established by qooxdoo, and you can add user-defined keys. Both are handled the same.
+
+Possible keys are
+
+* **<key>** : a global key; keys are just strings; see `qx.core.Environment`_ for a list of pre-defined keys; if you provide a user-defined key, make sure it starts with a name space and a dot (e.g. *"myapp.settingA"*); the entry's value is either a scalar value, or a list of such values.
+
+As soon as you specify more than one element in the list value for a key, the generator will generate different builds for each element. If the current job has more than one key defined with multiple elements in the value, the generator will generate a dedicated build **for each possible combination** of the given keys. See special section.
+
+:ref:`Special section <pages/tool/generator_config_articles#environment_key>`
+
+
 .. _pages/tool/generator_config_ref#exclude:
 
 exclude
@@ -386,6 +414,7 @@ Exclude classes from processing in the job. Takes an array of class specifiers.
   "exclude" : ["qx.util.*"]
 
 Classes specified through the *exclude* key are excluded from the job processing, e.g. from the generated build output. The class specifiers can include simple wildcards like "qx.util.*" denoting class id's matching this pattern, including those from sub-name spaces. 
+
 
 .. _pages/tool/generator_config_ref#export:
 
@@ -886,6 +915,9 @@ These jobs will all be run in place of the defining job (which is sort of a 'met
 
 settings
 ========
+
+*(Deprecated)*
+
 Define qooxdoo settings. Takes a map.
 
 ::
@@ -1036,6 +1068,8 @@ Each key is a
 variants
 ========
 
+*(Deprecated)*
+
 Define variants for the current app. Takes a map.
 
 ::
@@ -1051,5 +1085,5 @@ Possible keys are valid
 
 As soon as you specify more than one element in the list value for a variant, the generator will generate different builds for each element. If the current job has multiple variants defined, some of them with multiple elements in the value, the generator will generate a variant **for each possible combination** of the given values.
 
-:doc:`Special section </pages/development/variants>`
+:doc:`Special section </pages/core/variants_working>`
 

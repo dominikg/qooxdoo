@@ -85,7 +85,7 @@ qx.Class.define("qx.bom.Viewport",
   statics :
   {
     /**
-     * Returns the current width of the viewport (excluding a eventually visible scrollbar).
+     * Returns the current width of the viewport (excluding an eventually visible scrollbar).
      *
      * <code>clientWidth</code> is the inner width of an element in pixels. It includes padding
      * but not the vertical scrollbar (if present, if rendered), border or margin.
@@ -113,10 +113,10 @@ qx.Class.define("qx.bom.Viewport",
      * @param win {Window?window} The window to query
      * @return {Integer} The width of the viewable area of the page (excludes scrollbars).
      */
-    getWidth : qx.core.Variant.select("qx.client",
+    getWidth : qx.core.Environment.select("engine.name",
     {
       "opera" : function(win) {
-        if (qx.bom.client.Engine.VERSION < 9.5) {
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 9.5) {
           return (win||window).document.body.clientWidth;
         }
         else
@@ -127,7 +127,7 @@ qx.Class.define("qx.bom.Viewport",
       },
 
       "webkit" : function(win) {
-        if (qx.bom.client.Engine.VERSION < 523.15) { // Version < 3.0.4
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 523.15) { // Version < 3.0.4
           return (win||window).innerWidth;
         }
         else
@@ -146,7 +146,7 @@ qx.Class.define("qx.bom.Viewport",
 
 
     /**
-     * Returns the current height of the viewport (excluding a eventually visible scrollbar).
+     * Returns the current height of the viewport (excluding an eventually visible scrollbar).
      *
      * <code>clientHeight</code> is the inner height of an element in pixels. It includes padding
      * but not the vertical scrollbar (if present, if rendered), border or margin.
@@ -174,10 +174,10 @@ qx.Class.define("qx.bom.Viewport",
      * @param win {Window?window} The window to query
      * @return {Integer} The Height of the viewable area of the page (excludes scrollbars).
      */
-    getHeight : qx.core.Variant.select("qx.client",
+    getHeight : qx.core.Environment.select("engine.name",
     {
       "opera" : function(win) {
-        if (qx.bom.client.Engine.VERSION < 9.5) {
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 9.5) {
           return (win||window).document.body.clientHeight;
         }
         else
@@ -188,7 +188,7 @@ qx.Class.define("qx.bom.Viewport",
       },
 
       "webkit" : function(win) {
-        if (qx.bom.client.Engine.VERSION < 523.15) { // Version < 3.0.4
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 523.15) { // Version < 3.0.4
           return (win||window).innerHeight;
         }
         else {
@@ -226,7 +226,7 @@ qx.Class.define("qx.bom.Viewport",
      * @param win {Window?window} The window to query
      * @return {Integer} Scroll position from left edge, always a positive integer
      */
-    getScrollLeft : qx.core.Variant.select("qx.client",
+    getScrollLeft : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(win)
       {
@@ -261,7 +261,7 @@ qx.Class.define("qx.bom.Viewport",
      * @param win {Window?window} The window to query
      * @return {Integer} Scroll position from top edge, always a positive integer
      */
-    getScrollTop : qx.core.Variant.select("qx.client",
+    getScrollTop : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(win)
       {

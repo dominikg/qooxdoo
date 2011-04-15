@@ -56,15 +56,15 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/widget.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/widget.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  *
  * @state disabled set by {@link #enabled}
  */
 qx.Class.define("qx.ui.core.Widget",
 {
   extend : qx.ui.core.LayoutItem,
-  include : [qx.locale.MTranslation, qx.data.MBinding],
+  include : [qx.locale.MTranslation],
 
 
   /*
@@ -115,6 +115,7 @@ qx.Class.define("qx.ui.core.Widget",
      * newly created child widget.
      */
     createChildControl : "qx.event.type.Data",
+
 
     /**
      * Fired on resize (after layout) of the widget.
@@ -989,7 +990,7 @@ qx.Class.define("qx.ui.core.Widget",
      */
     _setLayout : function(layout)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         if (layout) {
           this.assertInstance(layout, qx.ui.layout.Abstract);
         }
@@ -1287,7 +1288,7 @@ qx.Class.define("qx.ui.core.Widget",
       var minHeight = this.getMinHeight();
       var maxHeight = this.getMaxHeight();
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (minWidth !== null && maxWidth !== null) {
           this.assert(minWidth <= maxWidth, "minWidth is larger than maxWidth!");
@@ -1393,7 +1394,7 @@ qx.Class.define("qx.ui.core.Widget",
         {
           var hint = layout.getSizeHint();
 
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
             var msg = "The layout " + layout.toString() + " of the widget " + this.toString() + " returned an invalid size hint!";
             this.assertInteger(hint.width, "Wrong 'width' value. " + msg);
@@ -1486,7 +1487,7 @@ qx.Class.define("qx.ui.core.Widget",
       {
         var inset = this.__decoratorElement.getInsets();
 
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           this.assertNumber(
             inset.top,
@@ -1679,7 +1680,7 @@ qx.Class.define("qx.ui.core.Widget",
         "$$widget": this.toHashCode()
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         attributes.qxType = "container";
         attributes.qxClass = this.classname;
@@ -1703,7 +1704,7 @@ qx.Class.define("qx.ui.core.Widget",
     {
       var el = this._createContentElement();
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         el.setAttribute("qxType", "content");
       }
 
@@ -1935,7 +1936,7 @@ qx.Class.define("qx.ui.core.Widget",
     /**
      * Recursively adds all children to the given queue
      *
-     * @param queue {Map} The queue to add widgets to
+     * @param queue {Array} The queue to add widgets to
      */
     addChildrenToQueue : function(queue)
     {
@@ -2027,7 +2028,7 @@ qx.Class.define("qx.ui.core.Widget",
      */
     _addBefore : function(child, before, options)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.assertInArray(before, this._getChildren(),
           "The 'before' widget is not a child of this widget!");
       }
@@ -2062,7 +2063,7 @@ qx.Class.define("qx.ui.core.Widget",
      */
     _addAfter : function(child, after, options)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.assertInArray(after, this._getChildren(),
           "The 'after' widget is not a child of this widget!");
       }
@@ -2195,7 +2196,7 @@ qx.Class.define("qx.ui.core.Widget",
      */
     __addHelper : function(child, options)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         this.assertInstance(child, qx.ui.core.LayoutItem, "Invalid widget to add: " + child);
         this.assertNotIdentical(child, this, "Could not add widget to itself: " + child);
@@ -2238,7 +2239,7 @@ qx.Class.define("qx.ui.core.Widget",
      */
     __removeHelper : function(child)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.assertNotUndefined(child);
       }
 
@@ -2343,7 +2344,7 @@ qx.Class.define("qx.ui.core.Widget",
 
       var protect = this.__protectorElement = new qx.html.Element;
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         protect.setAttribute("qxType", "protector");
       }
 
@@ -2365,7 +2366,7 @@ qx.Class.define("qx.ui.core.Widget",
       }
 
       // IE needs some extra love here to convince it to block events.
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         protect.setStyles({
           backgroundImage: "url(" + qx.util.ResourceManager.getInstance().toUri("qx/static/blank.gif") + ")",
@@ -2380,7 +2381,7 @@ qx.Class.define("qx.ui.core.Widget",
     // property apply
     _applyDecorator : function(value, old)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (value && typeof value === "object") {
           if (qx.ui.core.Widget.DEBUG) {
@@ -2398,7 +2399,7 @@ qx.Class.define("qx.ui.core.Widget",
 
       // if the browser supports pointer events the decorator will never receive
       // any mouse events so the protector is not required.
-      if (!this.__protectorElement && !qx.bom.client.Feature.CSS_POINTER_EVENTS) {
+      if (!this.__protectorElement && !qx.core.Environment.get("event.pointer")) {
         this._createProtectorElement();
       }
 
@@ -2636,12 +2637,7 @@ qx.Class.define("qx.ui.core.Widget",
       // Update visibility cache
       qx.ui.core.queue.Visibility.add(this);
     },
-    
-    
-        
-    
-    
-    
+
     /*
     ---------------------------------------------------------------------------
       OTHER PROPERTIES
@@ -2671,7 +2667,7 @@ qx.Class.define("qx.ui.core.Widget",
     _applyTextColor : function(value, old) {
       // empty template
     },
-    
+
 
 
     // property apply
@@ -2689,7 +2685,9 @@ qx.Class.define("qx.ui.core.Widget",
 
       // In Opera the cursor must be set directly.
       // http://bugzilla.qooxdoo.org/show_bug.cgi?id=1729
-      this.getContainerElement().setStyle("cursor", value, qx.bom.client.Engine.OPERA);
+      this.getContainerElement().setStyle(
+        "cursor", value, qx.core.Environment.get("engine.name") == "opera"
+      );
     },
 
 
@@ -2927,33 +2925,17 @@ qx.Class.define("qx.ui.core.Widget",
       {
         if (this.$$subparent)
         {
-          var obj = this;
-          var id = [];
-
-          do {
-            id.push(obj.$$subcontrol||obj.getAppearance());
-          } while (obj = obj.$$subparent);
-
-          // Combine parent control IDs, add top level appearance, filter result
-          // to not include positioning information anymore (e.g. #3)
-          structureSelector = id.reverse().join("/").replace(/#[0-9]+/g, "");
-        }
-        else
-        {
-          structureSelector = this.getAppearance();
-        }
-      }
-
-      // Query current selector
-      var stateSelector = "";
-      if (states) 
-      {
         var stateKeys = qx.Bootstrap.getKeys(states);
         var stateLength = stateKeys.length;
         if (stateLength == 1) {
           stateSelector = "." + stateKeys[0];
         } else if (stateLength > 1) {
           stateSelector = "." + stateKeys.sort().join(".");
+        }
+      }
+        else
+        {
+          structureSelector = this.getAppearance();
         }
       }
       
@@ -2984,6 +2966,8 @@ qx.Class.define("qx.ui.core.Widget",
           // This is duplicated somehow to the property group implementation, 
           // but is required to solve priority issues which arise otherwise
           if (config.group)
+        {
+            if (config.shorthand) 
           {
             if (config.shorthand) 
             {
@@ -3000,6 +2984,39 @@ qx.Class.define("qx.ui.core.Widget",
               }
             }
             
+            propertyGroup = config.group;
+            for (var i=0, l=propertyGroup.length; i<l; i++) 
+            {
+              var expandProp = propertyGroup[i];
+              
+              // There might occour the problem that the expanded property name is already
+              // in use. We need to find out whether the group or the other value is higher
+              // in priority: For maps we use the idea that the priority is increases with
+              // position in the map (e.g. using for-in loops)
+              var conflictValue = newStyles[expandProp];
+              if (conflictValue === undefined || qx.lang.Object.findWinnerKey(newStyles, prop, expandProp) === expandProp) {
+                newStyles[propertyGroup[i]] = newStyles[prop][i];
+              }
+            }
+            
+            delete newStyles[prop];
+              else
+              {
+                // Single value given without array => expand to 4 values
+                newStyles[prop] = [shorthandValue, shorthandValue, shorthandValue, shorthandValue];
+          }
+        }
+      }
+      
+      // Read old styles
+      var oldSelector = this.__appearanceSelector;
+      if (oldSelector) {
+        var oldStyles = styleCache[oldSelector];
+      }      
+      
+      // Store new selector
+      this.__appearanceSelector = newSelector;
+
             propertyGroup = config.group;
             for (var i=0, l=propertyGroup.length; i<l; i++) 
             {
@@ -3262,7 +3279,7 @@ qx.Class.define("qx.ui.core.Widget",
         target.setAttribute("tabIndex", tabIndex);
 
         // Omit native dotted outline border
-        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+        if ((qx.core.Environment.get("engine.name") == "mshtml")) {
           target.setAttribute("hideFocus", "true");
         } else {
           target.setStyle("outline", "none");
@@ -4209,7 +4226,7 @@ qx.Class.define("qx.ui.core.Widget",
     // it just slows down things a bit, so do not do them.
     if (!qx.core.ObjectRegistry.inShutDown)
     {
-      if (qx.core.Variant.isSet("qx.dynlocale", "on"))
+      if (qx.core.Environment.get("qx.dynlocale"))
       {
         if (this.__toolTipTextListenerId)
         {

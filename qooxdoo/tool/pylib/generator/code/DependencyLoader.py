@@ -157,16 +157,24 @@ class DependencyLoader(object):
 
             # process lists
             try:
-              skipNames = [x.name for x in deps["warn"] + deps["ignore"]]
-
-              for subitem in deps["load"]:
-                  if subitem.name not in resultNames and subitem.name not in skipNames:
-                      classlistFromClassRecursive(subitem, excludeWithDeps, variants, result, warn_deps, allowBlockLoaddeps)
-
-              for subitem in deps["run"]:
-                  if subitem.name not in resultNames and subitem.name not in skipNames:
-                      classlistFromClassRecursive(subitem, excludeWithDeps, variants, result, warn_deps, allowBlockLoaddeps)
-
+                skipNames = [x.name for x in deps["warn"] + deps["ignore"]]
+  
+                for subitem in deps["load"]:
+                    if subitem.name not in resultNames and subitem.name not in skipNames:
+                        classlistFromClassRecursive(subitem, excludeWithDeps, variants, result, warn_deps, allowBlockLoaddeps)
+  
+                ##
+                # putting this here allows sorting and expanding of the class
+                # list in one go! what's missing from sortClassesRecursor is
+                # the cycle check
+                #if depsItem.name not in resultNames:
+                #    result.append(depsItem)
+                #    resultNames.append(depsItem.name)
+  
+                for subitem in deps["run"]:
+                    if subitem.name not in resultNames and subitem.name not in skipNames:
+                        classlistFromClassRecursive(subitem, excludeWithDeps, variants, result, warn_deps, allowBlockLoaddeps)
+  
             except DependencyError, detail:
                 raise ValueError("Attempt to block load-time dependency of class %s to %s" % (depsItem.name, subitem.name))
 
@@ -266,19 +274,22 @@ class DependencyLoader(object):
                 if dep.name not in (x.name for x in runFinal):
                     runFinal.append(dep)
 
-        # fix source dependency to qx.core.Variant
-        if len(variants) and buildType in ("source","hybrid") and classObj.id != "qx.core.Variant":
+        # fix source dependency to qx.core.Variant etc.
+        variantSelectClasses = ("qx.core.Variant", "qx.core.Environment")
+        if len(variants) and (buildType in ("source","hybrid", "build")) and (classObj.id not in variantSelectClasses):
             depsUnOpt, _ = classObj.dependencies({})  # get unopt deps
             # this might incur extra generation if unoptimized deps
             # haven't computed before for this fileId
             for depItem in depsUnOpt["load"]:
-                if depItem.name == "qx.core.Variant":
+                if depItem.name in variantSelectClasses:
                     loadFinal.append(depItem)
-                    break
+                    # @deprecated
+                    #break
             for depItem in depsUnOpt["run"]:
-                if depItem.name == "qx.core.Variant":
+                if depItem.name in variantSelectClasses:
                     runFinal.append(depItem)
-                    break
+                    # @deprecated
+                    #break
 
         # add config dependencies
         if fileId in self._require:
@@ -324,10 +335,10 @@ class DependencyLoader(object):
     #  CLASS SORT SUPPORT
     ######################################################################
 
-    def sortClasses(self, includeWithDeps, variants, buildType=""):
+    def sortClasses(self, classList, variants, buildType=""):
 
-        def sortClassesRecurser(classId, available, variants, result, path):
-            if classId in result:
+        def sortClassesRecurser(classId, classListSorted, path):
+            if classId in classListSorted:
                 return
 
             # reading dependencies
@@ -343,7 +354,7 @@ class DependencyLoader(object):
             # process loadtime requirements
             for dep in deps["load"]:
                 dep_name = dep.name
-                if dep_name in available and not dep_name in result:
+                if dep_name in classList and not dep_name in classListSorted:
                     if dep_name in path:
                         self._console.warn("Detected circular dependency between: %s and %s" % (classId, dep_name))
                         self._console.indent()
@@ -351,26 +362,26 @@ class DependencyLoader(object):
                         self._console.outdent()
                         raise RuntimeError("Circular class dependencies")
                     else:
-                        sortClassesRecurser(dep_name, available, variants, result, path)
+                        sortClassesRecurser(dep_name, classListSorted, path)
 
-            if not classId in result:
+            if not classId in classListSorted:
                 # remove element from path
                 path.remove(classId)
 
                 # print "Add: %s" % classId
-                result.append(classId)
+                classListSorted.append(classId)
 
             return
 
         # ---------------------------------
 
-        result = []
+        classListSorted = []
         path   = []
 
-        for classId in includeWithDeps:
-            sortClassesRecurser(classId, includeWithDeps, variants, result, path)
+        for classId in classList:
+            sortClassesRecurser(classId, classListSorted, path)
 
-        return result
+        return classListSorted
 
 
     def sortClassesTopological(self, includeWithDeps, variants):

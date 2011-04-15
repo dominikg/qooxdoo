@@ -1,24 +1,20 @@
 {
   "info" : 
   {
-    "name" : "TestRunner",
+    "name" : "testrunner",
 
     "summary" : "Unit testing framework",
-    "description" : "A GUI test runner application to run JSUnit-like unit tests.",
+    "description" : "A modular test runner application to run JSUnit-like unit tests.",
     
     "keywords" : ["unit", "test", "test runner"],
-    "homepage" : "http://demo.qooxdoo.org/current/testrunner",
+    "homepage" : "http://demo.qooxdoo.org/",
 
     "license" : "LGPL/EPL",
     "authors" : 
     [
       {
-        "name" : "Fabian Jakobs (fjakobs)",
-        "email" : "fabian.jakobs@1und1.de"
-      },
-      {
-        "name" : "Thomas Herchenroeder (thron7)",
-        "email" : "thron7@users.sourceforge.net"
+        "name" : "Daniel Wagner (d_wagner)",
+        "email" : "daniel.wagner@1und1.de"
       }
     ],
 

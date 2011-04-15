@@ -242,7 +242,7 @@ qx.Class.define("qx.log.Logger",
      */
     deprecatedMethodWarning : function(fcn, msg)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var functionName = qx.lang.Function.getName(fcn);
         this.warn(
@@ -263,7 +263,7 @@ qx.Class.define("qx.log.Logger",
      */
     deprecatedClassWarning : function(clazz, msg)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var className = clazz.classname || "unknown";
         this.warn(
@@ -276,7 +276,7 @@ qx.Class.define("qx.log.Logger",
 
 
     /**
-     * Prints a event deprecation warning and a stack trace if the setting
+     * Prints an event deprecation warning and a stack trace if the setting
      * <code>qx.debug</code> is set to <code>on</code>.
      *
      * @param clazz {Class} reference to the deprecated class.
@@ -285,7 +285,7 @@ qx.Class.define("qx.log.Logger",
      */
     deprecatedEventWarning : function(clazz, event, msg)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var className = clazz.self ? clazz.self.classname : "unknown";
         this.warn(
@@ -306,7 +306,7 @@ qx.Class.define("qx.log.Logger",
      */
     deprecatedMixinWarning : function(clazz, msg)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var mixinName = clazz ? clazz.name : "unknown";
         this.warn(
@@ -329,7 +329,7 @@ qx.Class.define("qx.log.Logger",
      */
     deprecatedConstantWarning : function(clazz, constant, msg)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         // check if __defineGetter__ is available
         if (clazz.__defineGetter__) {
@@ -361,7 +361,7 @@ qx.Class.define("qx.log.Logger",
      */
     deprecateMethodOverriding : function(object, baseclass, methodName, msg)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var clazz = object.constructor;
 

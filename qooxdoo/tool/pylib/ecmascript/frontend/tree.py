@@ -19,10 +19,10 @@
 #
 ################################################################################
 
-import sys, os
+import sys, os, copy
 
 # reconfigure path to import own modules from modules subfolder
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "../"))
+#sys.path.append(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "../"))
 
 import simplejson
 
@@ -62,8 +62,8 @@ class NodeAccessException (Exception):
 
 class Node(object):
 
-    def __init__ (self, type):
-        self.type = type
+    def __init__ (self, ntype):
+        self.type = ntype
         self.parent = None
         self.children = []
 
@@ -101,15 +101,22 @@ class Node(object):
         if len(self.attributes) == 0:
             del self.attributes
 
+    def clone(self):
+        clone_ = copy.copy(self)
+        if hasattr(self, "attributes"):
+            clone_.attributes = copy.copy(self.attributes)
+        return clone_
+
     def hasParent(self):
         return self.parent
 
     ##
-    # checks whether the node hierarchy leading to node ends with contextPath, ie.
-    # if node.parent.type == contextPath[-1], node.parent.parent.type == contextPath[-2]
-    # asf. Example: varNode.hasParentContext("call/operand") checks whether varNode.parent
-    # is "operand" and varNode.parent.parent is "call" type, ie. it's a function being called
-    # wildcard '*' is allowed to indicate any parent type, like "call/*"
+    # checks whether the node hierarchy leading to node ends with contextPath,
+    # ie.  if node.parent.type == contextPath[-1], node.parent.parent.type ==
+    # contextPath[-2] asf. Example: varNode.hasParentContext("call/operand")
+    # checks whether varNode.parent is "operand" and varNode.parent.parent is
+    # "call" type, ie. it's a function being called; the wildcard '*' is allowed
+    # to indicate any type on a particular level, like "value/*/operand"
     def hasParentContext(self, contextPath):
         parents = contextPath.split('/')
 
@@ -143,6 +150,10 @@ class Node(object):
         else:
             return [c for c in self.children if c.type not in ("comment", "commentsBefore", "commentsAfter")]
 
+
+    getChildren = hasChildren
+
+
     def addChild(self, childNode, index = None):
         if childNode:
             if childNode.parent:
@@ -169,37 +180,50 @@ class Node(object):
             newChild.parent = self
             self.children.remove(oldChild)
 
-    def getChild(self, type, mandatory = True):
+    def getChild(self, ntype, mandatory = True):
         if self.children:
             for child in self.children:
-                if child.type == type:
+                if child.type == ntype:
                     return child
         if mandatory:
-            raise NodeAccessException("Node " + self.type + " has no child with type " + type, self)
+            raise NodeAccessException("Node " + self.type + " has no child with type " + ntype, self)
 
-    def hasChildRecursive(self, type):
-        if isinstance(type, basestring):
-            if self.type == type:
+    def hasChildRecursive(self, ntype):
+        if isinstance(ntype, basestring):
+            if self.type == ntype:
                 return True
-        elif isinstance(type, list):
-            if self.type in type:
+        elif isinstance(ntype, list):
+            if self.type in ntype:
                 return True
 
         if self.children:
             for child in self.children:
-                if child.hasChildRecursive(type):
+                if child.hasChildRecursive(ntype):
                     return True
 
         return False
 
-    def hasChild(self, type):
+    ##
+    # Whether <node> is self, or a descendant in the tree rooted by self.
+    def contains(self, node):
+        if self is node:
+            return node
+        else:
+            for child in self.children:
+                if child.contains(node):
+                    return node
+        return None
+
+    ##
+    # TODO: Rename this to hasChildByType
+    def hasChild(self, ntype):
         if self.children:
             for child in self.children:
-                if isinstance(type, basestring):
-                    if child.type == type:
+                if isinstance(ntype, basestring):
+                    if child.type == ntype:
                         return True
-                elif isinstance(type, list):
-                    if child.type in type:
+                elif isinstance(ntype, list):
+                    if child.type in ntype:
                         return True
 
         return False
@@ -417,14 +441,14 @@ class Node(object):
         if mandatory:
             raise NodeAccessException("Node " + self.type + " has no child with attribute " + key + " = " + value, self)
 
-    def getChildByTypeAndAttribute(self, type, key, value, mandatory = True):
+    def getChildByTypeAndAttribute(self, ntype, key, value, mandatory = True):
         if self.children:
             for child in self.children:
-                if child.type == type and child.get(key,mandatory) == value:
+                if child.type == ntype and child.get(key,mandatory) == value:
                     return child
 
         if mandatory:
-            raise NodeAccessException("Node " + self.type + " has no child with type " + type + " and attribute " + key + " = " + value, self)
+            raise NodeAccessException("Node " + self.type + " has no child with type " + ntype + " and attribute " + key + " = " + value, self)
 
     def getFirstChild(self, mandatory = True, ignoreComments = False):
         if self.children:
@@ -526,16 +550,16 @@ class Node(object):
         if mandatory:
             raise NodeAccessException("Node " + self.type + " has no child " + listName, self)
 
-    def getAllChildrenOfType(self, type):
-        return self._getAllChildrenOfType(type, [])
+    def getAllChildrenOfType(self, ntype):
+        return self._getAllChildrenOfType(ntype, [])
 
-    def _getAllChildrenOfType(self, type, found=[]):
+    def _getAllChildrenOfType(self, ntype, found=[]):
         if self.children:
             for child in self.children:
-                if child.type == type:
+                if child.type == ntype:
                     found.append(child)
 
-                child._getAllChildrenOfType(type, found)
+                child._getAllChildrenOfType(ntype, found)
 
         return found
 

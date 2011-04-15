@@ -58,8 +58,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/slideBar.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/slidebar.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.container.SlideBar",
 {
@@ -185,7 +185,7 @@ qx.Class.define("qx.ui.container.SlideBar",
            * Gecko does not update the scroll position after removing an
            * element. So we have to do this by hand.
            */
-          if (qx.bom.client.Engine.GECKO) {
+          if (qx.core.Environment.get("engine.name") == "gecko") {
             control.addListener("removeChildWidget", this._onRemoveChild, this);
           }
 

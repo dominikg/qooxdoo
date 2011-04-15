@@ -223,7 +223,7 @@ qx.Class.define("qx.lang.Function",
      */
     create : function(func, options)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertFunction(func, "Invalid parameter 'func'.");
       }
 
@@ -236,20 +236,20 @@ qx.Class.define("qx.lang.Function",
       if (!(options.self || options.args || options.delay != null || options.periodical != null || options.attempt)) {
         return func;
       }
-      
-      if (qx.core.Variant.isSet("qx.debug", "on"))
-      {
-        if (options.self && options.self instanceof qx.core.Object)
-        {
-          qx.core.Assert && qx.core.Assert.assertFalse(
-            options.self.isDisposed(),
-            "Trying to call a bound function with a disposed object as context: " + options.self.toString() + " :: " + qx.lang.Function.getName(func)
-          );
-        }
-      }
-      
+
       return function(event)
       {
+        if (qx.core.Environment.get("qx.debug"))
+        {
+          if (options.self instanceof qx.core.Object)
+          {
+            qx.core.Assert && qx.core.Assert.assertFalse(
+              options.self.isDisposed(),
+              "Trying to call a bound function with a disposed object as context: " + options.self.toString() + " :: " + qx.lang.Function.getName(func)
+            );
+          }
+        }
+
         // Convert (and copy) incoming arguments
         var args = qx.lang.Array.fromArguments(arguments);
 

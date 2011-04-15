@@ -7,19 +7,21 @@ RPC (Remote Procedure Call)
 
 The qooxdoo RPC is based on `JSON-RPC <http://json-rpc.org/>`_ as the serialization and method call protocol, and qooxdoo provides server backends for Java, PHP, and Perl projects. A Python backend library is also provided by a third party. All parameters and return values are automatically converted between JavaScript and the server-side language.
 
+.. _pages/rpc#json_rpc_protocol:
+
+JSON-RPC Protocol
+=================
+
+According to `JSON-RPC (Wikipedia) <http://en.wikipedia.org/wiki/JSON-RPC>`_ "[JSON-RPC] is a very simple protocol (and very similar to XML-RPC), defining only a handful of data types and commands. In contrast to XML-RPC or SOAP, it allows for bidirectional communication between the service and the client, treating each more like peers and allowing peers to call one another or send notifications to one another. It also allows multiple calls to be sent to a peer which may be answered out of order." The current servers do not yet support bi-directional communication.
+
 .. _pages/rpc#setup:
 
 Setup
-=====
+==============
 
 To make use of the RPC, you need to set up a server backend first.
 
-Configuration of each server backend needs slightly different treatment. Please see the page relevant to you:
-
-* :doc:`Java <rpc_java>`
-* :doc:`PHP <rpc_php>`
-* :doc:`Perl <rpc_perl>`
-* :doc:`Python <rpc_python>`
+Configuration of each server backend needs slightly different treatment. Please see the `backend <http://qooxdoo.org/contrib/project#backend>`_ relevant to you.
 
 Your favorite language is missing? Feel free to write your own qooxdoo RPC server, consult the :doc:`rpc_server_writer_guide` for details.
 
@@ -160,12 +162,12 @@ The following example shows how errors can be handled:
 The following ``origin``'s are defined:
 
 ====================================  ======================================================================================================================================================================
- Constant                              Meaning                                                                                                                                                                
+ Constant                              Meaning
 ====================================  ======================================================================================================================================================================
- qx.io.remote.Rpc.origin.server        The error occurred on the server (e.g. when a non-existing method is called).                                                                                          
- qx.io.remote.Rpc.origin.application  The error occurred inside the server application (i.e. during a method call in non-qooxdoo code).                                                                       
- qx.io.remote.Rpc.origin.transport     The error occurred in the communication layer (e.g. when the Rpc instance was constructed with an URL where no backend is deployed, resulting in an HTTP 404 error).   
- qx.io.remote.Rpc.origin.local         The error occurred locally (when the call timed out or when it was aborted).                                                                                           
+ qx.io.remote.Rpc.origin.server        The error occurred on the server (e.g. when a non-existing method is called).
+ qx.io.remote.Rpc.origin.application  The error occurred inside the server application (i.e. during a method call in non-qooxdoo code).
+ qx.io.remote.Rpc.origin.transport     The error occurred in the communication layer (e.g. when the Rpc instance was constructed with an URL where no backend is deployed, resulting in an HTTP 404 error).
+ qx.io.remote.Rpc.origin.local         The error occurred locally (when the call timed out or when it was aborted).
 ====================================  ======================================================================================================================================================================
 
 The ``code`` depends on the origin. For the server and application origins, the possible codes are defined by the backend implementation. For transport errors, it's the HTTP status code. For local errors, the following codes are defined:
@@ -258,146 +260,37 @@ There is one instance of a service class per session. To get access to the curre
 
 The environment provides access to the current request (via ``getRequest``) and the RpcServlet instance that is handling the current call (via ``getRpcServlet``).
 
-.. _pages/rpc#advanced_java_topics:
+.. _pages/rpc#debugging_backends:
 
-Advanced Java topics
+Debugging Backends
+==================
+
+In order to debug your service methods on the backend independently of the client application, use the `RpcConsole <http://qooxdoo.org/contrib/project#rpcconsole>`_ contribution.
+
+.. _pages/rpc#creating_mockup_data:
+
+Creating mockup data
 ====================
 
-.. _pages/rpc#automatic_client_configuration:
+The RpcConsole also contains a mixin class for qx.io.remote.Rpc which allows to prepare code relying on a json-rpc backend to work with static mockup data independently of the server. This allows to develop client and server independently and to create static demos. For more information, see the documentation of the `RpcConsole (project) <http://qooxdoo.org/contrib/project/rpcconsole>`_ contribution.
 
-Automatic client configuration
-------------------------------
+.. _pages/rpc#qooxdoo_json_rpc_specification:
 
-The Java RPC backend contains an auto-config mechanism, mainly used for automatically detecting the server URL. You can access it by including the following script tag in your HTML page:
+qooxdoo JSON-RPC specification
+===============================
 
-.. code-block:: html
+In order to qualify as a qooxdoo json-rpc backend, a server must comply with the qooxdoo JSON-RPC server specifications. See the  :doc:`rpc_server_writer_guide` for more details.
 
-    <html>
-        <head>
-            <!-- ... -->
-            <script type="text/javascript" src=".qxrpc"></script>
-        </head>
-    </html>
+.. _pages/rpc#adding_to_the_standard:
 
-Provided the HTML page is part of the webapp (and not loaded via file:\*...), and provided that you didn't change the default mapping of the RpcServlet (``.qxrpc``), any request to ``http://server/app/foo/bar.qxrpc`` (or anything else that ends with .qxrpc) will always be directed to the RpcServlet. The RpcServlet fills a structure with basic information about the server. It may answer with something like
-
-::
-
-    qx.core.ServerSettings = {serverPathPrefix: 'http://server/app', ...}
-
-and this is used by the ``makeServerURL()`` helper method in the RPC class. You can use this when instantiating an RPC instance:
-
-::
-
-    var rpc = new qx.io.remote.Rpc(
-        qx.io.remote.Rpc.makeServerURL(),
-        "my.package.MyService"
-    );
-
-This way, you don't need to hardcode the URL of the service. Your client code will work without modifications, no matter what the name of your application is or where it is deployed. By generating absolute URLs you don't have to worry about moving around web pages and scripts in the directory structure, which is a common shortcoming of relative URLs. The auto-configration feature is also convenient if you need to embed a session id into the URL.
-
-.. _pages/rpc#subclassing_rpcservlet:
-
-Subclassing RpcServlet
+Adding to the standard
 ----------------------
 
-It can be useful to create your own version of qooxdoo's ``RpcServlet``. Some of the benefits of subclassing it are:
+If you think that the standard is missing a feature that should be implemented in all backends, please add it as a `bug <http://bugzilla.qooxdoo.org/enter_bug.cgi?product=contrib&component=RpcExample>`_, marking it as a "core feature request". 
 
-#. **Custom object conversion**: By creating your own subclass, you can provide code for custom conversion of objects. This is especially useful for classes that don't have a default constructor.
-#. **Detailed server logging**: You can hook your own code into the method calling mechanism, e.g. to provide detailed failure logging (the JavaScript side only receives rather generic errors).
-#. **Property filtering**: For methods that return JavaBeans, you can filter the properties that should be sent to the client. This can save a lot of bandwidth without having to completely wrap the result in a custom object.
-#. **Class hinting**: For security reasons, the class hinting mechanism isn't active by default (otherwise, client code could instantiate arbitrary server classes). By overriding a method, you can enable it on a case-by-case basis.
+.. _pages/rpc#extending_the_standard:
 
-The following example code shows how all of this can be done:
+Extending the standard
+----------------------
 
-::
-
-    package my.package;
-
-    import java.lang.reflect.InvocationTargetException;
-    import java.util.Calendar;
-    import java.util.Map;
-
-    import net.sf.qooxdoo.rpc.RpcServlet;
-    import net.sf.qooxdoo.rpc.RemoteCallUtils;
-
-    import org.json.JSONArray;
-
-    public class MyRpcServlet extends RpcServlet {
-
-        protected RemoteCallUtils getRemoteCallUtils() {
-            return new RemoteCallUtils() {
-
-                // log exceptions by overriding callCompatibleMethod
-
-                protected Object callCompatibleMethod(Object instance,
-                        String methodName, JSONArray parameters)
-                        throws Exception {
-                    try {
-                        return super.callCompatibleMethod(instance, methodName, parameters);
-                    } catch (Exception exc) {
-                        exc.printStackTrace();
-                        throw exc;
-                    }
-                }
-
-                // influence object conversion
-
-                public Object toJava(Object obj, Class targetType) {
-                    // insert custom conversion to Java here
-                    // (default: call super method)
-                    return super.toJava(obj, targetType);
-                }
-
-                public Object fromJava(Object obj)
-                    throws IllegalAccessException, InvocationTargetException,
-                    NoSuchMethodException {
-
-                    // use Dates instead of Calendars (so that the
-                    // client code receives native JavaScript dates)
-                    if (obj instanceof Calendar) {
-                        return super.fromJava(((Calendar) obj).getTime());
-                    }
-
-                    return super.fromJava(obj);
-                }
-
-                // filter unwanted bean properties
-
-                protected Map filter(Object obj, Map map) {
-                    if (obj instanceof Date) {
-                        map.remove("timezoneOffset");
-                    }
-                    return super.filter(obj, map);
-                }
-
-                // class hinting
-
-                protected Class resolveClassHint(String requestedTypeName,
-                        Class targetType) throws Exception {
-                    // allow class hinting in some cases
-                    // (useful for methods that expect a superclass
-                    // of SubClassA and SubClassB)
-                    if (requestedTypeName.equals("my.package.SubClassA") ||
-                        requestedTypeName.equals("my.package.SubClassB")) {
-                        return Class.forName(requestedTypeName);
-                    } else {
-                        return super.resolveClassHint(requestedTypeName, targetType);
-                    }
-                }
-            };
-        }
-    }
-
-To make use of class hinting on the client side, you have to send objects with a ``class`` attribute:
-
-::
-
-    rpc.callAsync(handler, "testMethod",
-        {"class": "my.package.SubClassA",
-         property1: 123,
-         property2: 456,
-         /* ... */
-        });
-
-Please note that ``class`` is a reserved word in JavaScript, so you have to enclose it in quotes.
+If a server *extends* the standard with a certain optional behavior, please add a detailed description to it on the `JSON-RPC Extensions page <http://qooxdoo.org/documentation/general/rpc/jsonrpc_extensions>`_, with information which server implements this behavior. Please also add a `bug <http://bugzilla.qooxdoo.org/enter_bug.cgi?product=contrib&component=RpcExample>`_, marked as a "extension" so that other server maintainers can discuss the pros and cons of adding the extension to their own servers. 

@@ -88,7 +88,7 @@ qx.Class.define("qx.event.dispatch.Direct",
     // interface implementation
     dispatchEvent : function(target, event, type)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (target instanceof qx.core.Object)
         {
@@ -120,6 +120,17 @@ qx.Class.define("qx.event.dispatch.Direct",
         for (var i=0, l=listeners.length; i<l; i++)
         {
           var context = listeners[i].context || target;
+
+          if (qx.core.Environment.get("qx.debug")) {
+            // warn if the context is disposed
+            if (context && context.isDisposed && context.isDisposed()) {
+              this.warn(
+                "The context object '" + context + "' for the event '" +
+                type + "' of '" + target + "'is already disposed."
+              );
+            }
+          }
+
           listeners[i].handler.call(context, event);
         }
       }

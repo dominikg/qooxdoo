@@ -39,7 +39,7 @@ qx.Class.define("qx.ui.popup.Manager",
   {
     this.base(arguments);
 
-    // Create data structure, usa an array becasue order matters [BUG #4323]
+    // Create data structure, use an array becasue order matters [BUG #4323]
     this.__objects = [];
 
     // Register mousedown handler
@@ -71,7 +71,7 @@ qx.Class.define("qx.ui.popup.Manager",
      */
     add : function(obj)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!(obj instanceof qx.ui.popup.Popup)) {
           throw new Error("Object is no popup: " + obj);
@@ -90,7 +90,7 @@ qx.Class.define("qx.ui.popup.Manager",
      */
     remove : function(obj)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!(obj instanceof qx.ui.popup.Popup)) {
           throw new Error("Object is no popup: " + obj);

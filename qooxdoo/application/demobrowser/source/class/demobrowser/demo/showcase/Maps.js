@@ -17,6 +17,15 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+#ignore(YMap)
+#ignore(YAHOO_MAP_REG)
+#ignore(google.maps.Map)
+#ignore(google.maps.MapTypeId)
+#ignore(google.maps.event)
+#ignore(google.maps.LatLng)
+************************************************************************ */
+
 /**
  * @tag showcase
  * @lint ignoreUndefined(google, YMap, YAHOO_MAP_REG)
@@ -33,44 +42,45 @@ qx.Class.define("demobrowser.demo.showcase.Maps",
       var yahooMap = this._createYahooMap();
       var googleMap = this._createGoogleMap();
 
-      this.getRoot().add(this._createWindow("Yahoo Maps", yahooMap),{
-        left : 10,
-        top  : 10
+      this.getRoot().add(this._createMapContainer("Yahoo Maps", yahooMap), {
+        left : 20,
+        top  : 20
       });
-      this.getRoot().add(this._createWindow("Google Maps", googleMap),{
-        left : 100,
-        top  : 100
+      this.getRoot().add(this._createMapContainer("Google Maps", googleMap), {
+        left : 490,
+        top  : 20
       });
 
     },
 
-    _createWindow : function(title, map)
+    _createMapContainer : function(title, map)
     {
-      var win = new qx.ui.window.Window(title);
-      win.setLayout(new qx.ui.layout.VBox);
-      win.setMaxWidth(450);
-      win.setMaxHeight(400);
-      win.setMinWidth(450);
-      win.setMinHeight(400);
-      win.setAllowMaximize(false);
-      win.setContentPadding(0);
-      win.add(map);
-      win.open();
-      return win;
+      var comp = new qx.ui.container.Composite();
+      comp.setLayout(new qx.ui.layout.VBox().set({spacing: 10}));
+      comp.setWidth(450);
+      comp.setHeight(400);
+      
+      var headline = new qx.ui.basic.Label("<b>" + title + "</b>").set({
+        rich: true
+      });
+      comp.add(headline);
+      comp.add(map);
+      return comp;
     },
 
     _createYahooMap : function()
     {
       var isle = new qx.ui.core.Widget().set({
         width: 450,
-        height: 400
+        height: 400,
+        decorator: "main"
       });
 
       isle.addListenerOnce("appear", function() {
         var map = new YMap(isle.getContentElement().getDomElement());
         map.addTypeControl();
         map.setMapType(YAHOO_MAP_REG);
-        map.drawZoomAndCenter("Karlsruhe", 5);      
+        map.drawZoomAndCenter("Karlsruhe", 5);
       });
       return isle;
     },
@@ -81,18 +91,18 @@ qx.Class.define("demobrowser.demo.showcase.Maps",
         width: 450,
         height: 400
       });
-      
+
       // Since the decorator requires a bit of extra code, we set
       // an decorator for demonstration purpose here. Of course,
       // you may not need a decorator.
       isle.setDecorator("main");
-     
+
       isle.addListenerOnce("appear", function() {
         var map = new google.maps.Map(isle.getContentElement().getDomElement(), {
             zoom: 13,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         });
-        
+
         // Fix for [BUG #4178]
         // Make sure zIndex of map element is higher than zIndex of decorator
         // (Maps apparently resets zIndex on init)
@@ -103,7 +113,7 @@ qx.Class.define("demobrowser.demo.showcase.Maps",
             isle.getContentElement().getDomElement().style.zIndex = zIndex;
           }, 500);
         });
-        
+
         map.setCenter(new google.maps.LatLng(49.011899,8.403311));
       });
       return isle;

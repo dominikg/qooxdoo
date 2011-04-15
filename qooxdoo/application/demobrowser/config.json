@@ -63,6 +63,8 @@
     "APPLICATION"  : "demobrowser",
     "API_EXCLUDE"  : ["qx.test.*", "${APPLICATION}.demo.*", "${APPLICATION}.test.*"],
     "QOOXDOO_PATH" : "../..",
+    // need to include all locales used in demos here, so 'translation' job picks them up
+    "LOCALES"      : ["en", "en_US", "de", "de_DE", "fr", "fr_FR"],
     "THEME"        : "demobrowser.Theme"
   },
 
@@ -91,12 +93,13 @@
         "${THEME}"
       ],
 
-      "settings" :
+      "environment" :
       {
         "qx.version" : "${QOOXDOO_VERSION}",
         "qx.revision" : "${QOOXDOO_REVISION}",
         "qx.application" : "${APPLICATION}.Application",
-        "qx.theme" : "${THEME}"
+        "qx.theme" : "${THEME}",
+        "qx.allowUrlSettings" : true
       },
 
       // the next is in since resource copying is done here for the demos as well
@@ -225,7 +228,7 @@
         "SIMULATOR_REPORTSERVER" : false
       },
       
-      "settings" :
+      "environment" :
       {
         "simulator.selServer"   : "${SELENIUM_SERVER}",
         "simulator.selPort"     : "${SELENIUM_PORT}",

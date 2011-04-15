@@ -83,6 +83,19 @@ qx.Class.define("qx.ui.toolbar.SplitButton",
 
   members :
   {
+    // overridden
+    /**
+     * @lint ignoreReferenceField(_forwardStates)
+     */
+    _forwardStates :
+    {
+      hovered : true,
+      focused : true,
+      left : true,
+      middle : true,
+      right : true
+    },
+
     /*
     ---------------------------------------------------------------------------
       WIDGET API

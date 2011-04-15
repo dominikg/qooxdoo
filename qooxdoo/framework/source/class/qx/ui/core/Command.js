@@ -18,7 +18,7 @@
 ************************************************************************ */
 /**
  * Commands can be used to globally define keyboard shortcuts. They could
- * also be used to assign a execution of a command sequence to multiple
+ * also be used to assign an execution of a command sequence to multiple
  * widgets. It is possible to use the same Command in a MenuButton and
  * ToolBarButton for example.
  */
@@ -165,5 +165,6 @@ qx.Class.define("qx.ui.core.Command",
   destruct : function()
   {
     this._disposeObjects("_shortcut");
+    this.removeListener("execute", this.execute, this);
   }
 });

@@ -33,6 +33,20 @@
 
 /* ************************************************************************
 
+*#require(qx.type.BaseArray)
+
+#require(qx.bom.Document)
+ *#require(qx.bom.Element)
+ *#require(qx.bom.Input)
+#require(qx.bom.Viewport)
+#require(qx.bom.Selector)
+
+ *#require(qx.bom.element.Attribute)
+ *#require(qx.bom.element.Class)
+ *#require(qx.bom.element.Location)
+ *#require(qx.bom.element.Style)
+
+TODO: Check if element2 or element should be used
 #### OPTIONALS: Add these classes to enable specific features
 #optional(qx.bom.Element)
 
@@ -989,7 +1003,7 @@
         var col = [];
         for (var i=0, l=args.length; i<l; i++)
         {
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
             if (typeof args[i] !== "string") {
               throw new Error("Invalid argument for selector query: " + args[i]);

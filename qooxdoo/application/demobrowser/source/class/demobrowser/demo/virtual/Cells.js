@@ -17,7 +17,6 @@
 
 ************************************************************************ */
 
-
 /* ************************************************************************
 
 #asset(qx/icon/${qx.icontheme}/16/apps/internet-feed-reader.png)
@@ -28,8 +27,9 @@
 
 ************************************************************************ */
 
-
-
+/**
+ * @tag test
+ */
 qx.Class.define("demobrowser.demo.virtual.Cells",
 {
   extend : qx.application.Standalone,
@@ -56,7 +56,7 @@ qx.Class.define("demobrowser.demo.virtual.Cells",
       this.runTest("testHtmlCell");
 
       // TODO: This does not work in Classic!
-      if(qx.core.Setting.get("qx.theme") == "qx.theme.Modern")
+      if(qx.core.Environment.get("qx.theme") == "qx.theme.Modern")
       {
         this.runTest("testImageCell");
         this.runTest("testBooleanCell");
@@ -266,7 +266,7 @@ qx.Class.define("demobrowser.demo.virtual.Cells",
     _getCellSizeStyle : function(width, height, insetX, insetY)
     {
       var style = "";
-      if (qx.bom.client.Feature.CONTENT_BOX)
+      if (qx.core.Environment.get("css.boxmodel") == "content")
       {
         width -= insetX;
         height -= insetY;

@@ -19,11 +19,12 @@
 /**
  * Border implementation with two CSS borders. Both borders can be styled
  * independent of each other.
+ * This mixin is usually used by {@link qx.ui.decoration.DynamicDecorator}.
  */
-qx.Mixin.define("qx.ui.decoration.MDoubleBorder", 
+qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
 {
   include : [qx.ui.decoration.MSingleBorder, qx.ui.decoration.MBackgroundImage],
-  
+
   construct : function() {
     // override the methods of single border and background image
     this._getDefaultInsetsForBorder = this.__getDefaultInsetsForDoubleBorder;
@@ -31,8 +32,8 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
     this._styleBorder = this.__styleDoubleBorder;
     this._generateMarkup = this.__generateMarkupDoubleBorder;
   },
-  
-  
+
+
   /*
   *****************************************************************************
      PROPERTIES
@@ -79,7 +80,7 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
     innerWidth :
     {
       group : [ "innerWidthTop", "innerWidthRight", "innerWidthBottom", "innerWidthLeft" ],
-      shorthand : true
+      mode : "shorthand"
     },
 
 
@@ -125,19 +126,20 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
     innerColor :
     {
       group : [ "innerColorTop", "innerColorRight", "innerColorBottom", "innerColorLeft" ],
-      shorthand : true
+      mode : "shorthand"
     }
-  },  
-  
-  
+  },
+
+
   members :
   {
     __ownMarkup : null,
-    
+
     /**
-     * Takes a styles map and adds the inner border styles styles in place 
-     * to the given map.
-     * 
+     * Takes a styles map and adds the inner border styles styles in place
+     * to the given map. This is the needed behavior for
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param styles {Map} A map to add the styles.
      */
     __styleDoubleBorder : function(styles)
@@ -170,7 +172,7 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
         styles["border-left"] = width + "px " + this.getStyleLeft() + " " + Color.resolve(this.getInnerColorLeft());
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!styles["border-top"] && !styles["border-right"] &&
           !styles["border-bottom"] && !styles["border-left"]) {
@@ -178,13 +180,13 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
         }
       }
     },
-    
-    
+
+
     /**
-     * Special generator for the markup which creates the containing div and 
-     * the sourrounding div as well. 
-     * 
-     * @param styles {Map} The styles for the inner 
+     * Special generator for the markup which creates the containing div and
+     * the sourrounding div as well.
+     *
+     * @param styles {Map} The styles for the inner
      * @return {String} The generated decorator HTML.
      */
     __generateMarkupDoubleBorder : function(styles) {
@@ -202,8 +204,12 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
 
       // Do not set the line-height on IE6, IE7, IE8 in Quirks Mode and IE8 in IE7 Standard Mode
       // See http://bugzilla.qooxdoo.org/show_bug.cgi?id=3450 for details
-      if ((qx.bom.client.Engine.MSHTML && qx.bom.client.Engine.VERSION < 8) ||
-          (qx.bom.client.Engine.MSHTML && qx.bom.client.Engine.DOCUMENT_MODE < 8)) {
+      if (
+        (qx.core.Environment.get("engine.name") == "mshtml" &&
+         parseFloat(qx.core.Environment.get("engine.version")) < 8) ||
+        (qx.core.Environment.get("engine.name") == "mshtml" &&
+         qx.core.Environment.get("browser.documentmode") < 8)
+      ) {
         styles["line-height"] = '';
       }
 
@@ -227,7 +233,7 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
         styles["border-left"] = width + "px " + this.getStyleLeft() + " " + Color.resolve(this.getColorLeft());
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (styles["border-top"] == '' && styles["border-right"] == '' &&
           styles["border-bottom"] == '' && styles["border-left"] == '') {
@@ -243,17 +249,18 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
       // Store
       return this.__ownMarkup = this._generateBackgroundMarkup(styles, innerHtml);
     },
-    
-    
+
+
 
 
     /**
-     * Resize function for the decorator.
-     * 
+     * Resize function for the decorator. This is suitable for the
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param element {Element} The element which could be resized.
      * @param width {Number} The new width.
      * @param height {Number} The new height.
-     * @return {Map} A map containing the desired position and dimension and a 
+     * @return {Map} A map containing the desired position and dimension and a
      *   emelent to resize.
      *   (width, height, top, left, elementToApplyDimensions).
      */
@@ -271,7 +278,7 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
         insets.top -
         this.getWidthTop() -
         this.getInnerWidthTop();
-        
+
       return {
         left: left,
         top: top,
@@ -279,13 +286,13 @@ qx.Mixin.define("qx.ui.decoration.MDoubleBorder",
         height: height,
         elementToApplyDimensions : element.firstChild
       };
-    },   
-   
-   
+    },
+
+
    /**
     * Implementation of the interface for the double border.
-    * 
-    * @return {Map} A map containing the default insets. 
+    *
+    * @return {Map} A map containing the default insets.
     *   (top, right, bottom, left)
     */
     __getDefaultInsetsForDoubleBorder : function()

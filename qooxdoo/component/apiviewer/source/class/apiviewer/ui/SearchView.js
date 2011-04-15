@@ -61,7 +61,6 @@ qx.Class.define("apiviewer.ui.SearchView",
   {
 
     __note : null,
-    __button : null,
     __initresult : null,
     __table : null,
     __typeFilter: null,
@@ -78,61 +77,113 @@ qx.Class.define("apiviewer.ui.SearchView",
       //--------------------------------------------------------
 
       // Search form
-      var layout = new qx.ui.layout.Grid(4,4);
+      var layout = new qx.ui.layout.Grid(4, 4);
+      layout.setColumnFlex(1, 1);
+      layout.setRowAlign(2, "left", "middle");
+
       var sform = new qx.ui.container.Composite(layout);
       sform.setPadding(10);
 
       // Search form - input field
       this.sinput = new qx.ui.form.TextField().set({
-        allowGrowY: true,
-        placeholder : "Search..."
+        placeholder : "Enter search term ..."
       });
-
-      // Search form - submit button
-      this.__button = new qx.ui.form.Button("Find");
-      this.__button.setEnabled(false);
 
       sform.add(this.sinput, {
-        row: 0, column: 0
+        row: 0, column: 0, colSpan: 2
       });
-      sform.add(this.__button, {row: 0, column: 1});
 
       this.__typesIndex =
       {
         "PACKAGE":0,
-        "ENTRY":7,
+        "ENTRY":4,
         "CLASS":1,
-        "INTERFACE":10,
+        "INTERFACE":1,
         "METHOD_PUB":2,
         "METHOD_PROT":2,
         "METHOD_PRIV":2,
-        "PROPERTY_PUB":6,
-        "EVENT":8,
-        "CONSTANT":4,
-        "CHILDCONTROL":9
+        "PROPERTY_PUB":4,
+        "EVENT":5,
+        "CONSTANT":3,
+        "CHILDCONTROL":6
       };
-      this.__typeFilter = new qx.data.Array([true, true, true,true,true,true,true,true,true]);
-      var types = ['package','class','method','constant','property','entry','event','child control','interface'];
-      
-      var typeContainer = new qx.ui.container.Composite(new qx.ui.layout.Grid(1));
-      
-      for(var i=0;i<types.length;i++)
+      this.__typeFilter = new qx.data.Array([true, true, true, true, true, true, true]);
+      var types = ["Packages", "Classes, Mixins, Interfaces", "Methods", "Constants", "Properties", "Events", "Child Controls"];
+      var iconNameParts = ["package", "class", "method_public", "constant", "property", "event", "childcontrol"];
+
+      var typeContainer = new qx.ui.container.Composite(new qx.ui.layout.HBox());
+
+      for(var i=0; i<types.length; i++)
       {
         var type=types[i];
-        var checkboxType = new qx.ui.form.CheckBox(type);
-        checkboxType.bind('value',this.__typeFilter,'array['+i+']');
-        checkboxType.setValue(true);
-        typeContainer.add(checkboxType, {row: parseInt(i/3) , column: i%3});
+        var iconNamePart = iconNameParts[i];
+        var typeToggleButton = new qx.ui.form.ToggleButton("", "apiviewer/image/"+iconNamePart+"18.gif");
+        typeToggleButton.setToolTipText(type);
+        // we need variable paddingLeft in order to accommodate the icons in the center of the toggleButton
+        var paddingLeft = 0;
+        var paddingBottom = 0;
+        var paddingTop = 0;
+        if(["class", "interface"].indexOf(iconNamePart)!=-1)
+        {
+          paddingLeft = 2;
+        }
+        else if(["package", "childcontrol"].indexOf(iconNamePart)!=-1)
+        {
+           paddingLeft = 1;
+           if(iconNamePart === "childcontrol") {
+             paddingBottom = 2;
+           }
+        }
+        else if (iconNamePart === "constant")
+        {
+          paddingTop = 1;
+        }
+        typeToggleButton.setFocusable(false);
+        typeToggleButton.setPadding(paddingTop, 0, paddingBottom, paddingLeft);
+        typeToggleButton.setMarginRight(2);
+        typeToggleButton.setGap(0);
+        typeToggleButton.setIconPosition("top");
+        typeToggleButton.setShow("icon");
+        typeToggleButton.bind("value", this.__typeFilter, "array["+i+"]");
+        typeToggleButton.setKeepFocus(true);
+        typeToggleButton.setValue(true);
+        typeContainer.add(typeToggleButton);
+        typeToggleButton.addListener("click", function(e) {
+          this._searchResult(this.sinput.getValue() || "");
+        }, this);
+        this.__typeFilter.bind("["+i+"]", typeToggleButton, "value");
       }
-      
+
+        var typeToggleButtonAll = new qx.ui.form.ToggleButton("Toggle Filters");
+        typeToggleButtonAll.setFocusable(false);
+        typeToggleButtonAll.setPadding(1, 3, 1, 3);
+        typeToggleButtonAll.setShow("label");
+        typeToggleButtonAll.setValue(true);
+        typeToggleButtonAll.setGap(0);
+        typeToggleButtonAll.setToolTipText("Deactivate all filters");
+        typeToggleButtonAll.setKeepFocus(true);
+        typeToggleButtonAll.setMarginLeft(10);
+        typeContainer.add(typeToggleButtonAll);
+        typeToggleButtonAll.addListener("changeValue", function(e) {
+          for(var i=0; i<this.__typeFilter.length; i++){
+            this.__typeFilter.setItem(i, e.getData());
+          }
+          this._searchResult(this.sinput.getValue() || "");
+          typeToggleButtonAll.setToolTipText(e.getData() ? "Deactivate all filters" : "Activate all filters");
+        }, this);
+
       sform.add(typeContainer, {row: 1, column: 0, colSpan: 2});
-      
+
       this.namespaceTextField = new qx.ui.form.TextField().set({
-        allowGrowY: true,
-        placeholder : "Namespace..."
+        placeholder : ""
       });
-      
-      sform.add(this.namespaceTextField, {row: 2, column: 0, colSpan: 2});
+
+      sform.add(new qx.ui.basic.Label("Namespace starts with"), {row: 2, column: 0});
+      sform.add(this.namespaceTextField, {row: 2, column: 1});
+
+      this.namespaceTextField.addListener("keyup", function(e) {
+        this._searchResult(this.sinput.getValue() || "");
+      }, this);
 
       this.add(sform);
 
@@ -171,17 +222,17 @@ qx.Class.define("apiviewer.ui.SearchView",
       resizeBehavior.set(1, {width:"1*"});
 
 
-      tcm.setDataCellRenderer(0, new qx.ui.table.cellrenderer.Image());
+      tcm.setDataCellRenderer(0, new qx.ui.table.cellrenderer.Image(20, 20));
 
 
       this.__initresult = true;
       this.__table = table;
 
-      table.addListener("appear", this.__handleNote, this);
+      //table.addListener("appear", this.__handleNote, this);
 
-      table.addListener("disappear", function(e) {
-        this.__note.hide();
-      }, this);
+      //table.addListener("disappear", function(e) {
+      //  this.__note.hide();
+      //}, this);
 
 
       this.add(table, {flex : 1})
@@ -195,10 +246,6 @@ qx.Class.define("apiviewer.ui.SearchView",
 
       // Submit events
       this.sinput.addListener("keyup", function(e) {
-        this._searchResult(this.sinput.getValue() || "");
-      }, this);
-      
-      this.__button.addListener("execute", function(e) {
         this._searchResult(this.sinput.getValue() || "");
       }, this);
 
@@ -216,14 +263,25 @@ qx.Class.define("apiviewer.ui.SearchView",
       var svalue = qx.lang.String.trim(svalue);
 
       // Hide the note if text is typed into to search field.
-      if (svalue.length > 0) {
-        this.__note.hide();
-      } else {
-        this.__note.show();
+      //      if (svalue.length > 0) {
+      //        this.__note.hide();
+      //      } else {
+      //        this.__note.show();
+      //      }
+
+      // If all toggle butons are disabled stop here
+      var allFiltersDisabled = true;
+      for( var i=0; i<this.__typeFilter.length; i++ )
+      {
+        if(this.__typeFilter.getItem(i) === true)
+        {
+          allFiltersDisabled = false;
+          break;
+        }
       }
 
       // If empty or too short search string stop here
-      if (svalue.length < 3)
+      if (svalue.length < 3 || allFiltersDisabled)
       {
         // Reset the result list
         if (this.__initresult) {
@@ -241,7 +299,6 @@ qx.Class.define("apiviewer.ui.SearchView",
         {
           var search = this._validateInput(svalue);
           new RegExp(search[0]);
-          this.__button.setEnabled(true);
         }
         catch(ex)
         {
@@ -316,8 +373,8 @@ qx.Class.define("apiviewer.ui.SearchView",
       var index = this.apiindex.__index__;
       var fullNames = this.apiindex.__fullNames__;
       var types = this.apiindex.__types__;
-      
-      var namespaceFilter = this.namespaceTextField.getValue() != null ? qx.lang.String.trim(this.namespaceTextField.getValue()) : '';
+
+      var namespaceFilter = this.namespaceTextField.getValue() != null ? qx.lang.String.trim(this.namespaceTextField.getValue()) : "";
       var useNamespaceFilter = namespaceFilter.length>0;
 
       for (var key in index) {
@@ -341,7 +398,7 @@ qx.Class.define("apiviewer.ui.SearchView",
             for (var i=0, l=index[key].length; i<l; i++) {
               elemtype = types[index[key][i][0]].toUpperCase();
               fullname = fullNames[index[key][i][1]];
-              
+
               if(this._isTypeFilteredIn(elemtype)){
                 if(!useNamespaceFilter || fullname.indexOf(namespaceFilter)===0) {
 
@@ -350,6 +407,9 @@ qx.Class.define("apiviewer.ui.SearchView",
                   } else {
                     if (elemtype != "PACKAGE" && elemtype != "INTERFACE") {  // just consider attribute types
                       fullname += key;
+                    }
+                    if (elemtype === "ENTRY") {
+                      fullname = key.substring(1);
                     }
                     icon = apiviewer.TreeUtil["ICON_" + elemtype];
                   }
@@ -372,7 +432,7 @@ qx.Class.define("apiviewer.ui.SearchView",
     _isTypeFilteredIn: function(type){
       return this.__typeFilter.getItem(this.__typesIndex[type]);
     },
-    
+
     /**
      * Set data for the listview
      *
@@ -410,22 +470,28 @@ qx.Class.define("apiviewer.ui.SearchView",
     {
       var icons =
       {
-        "package":0,
-        "class_abstract":1,
-        "class":2,
+        "package": 0,
+        "class_abstract": 1,
+        "class": 2,
         "class_singleton": 3,
-        "interface":4,
-        "mixin":5,
-        "method_public":6,
-        "method_protected":7,
-        "method_private":8,
-        "property":9,
-        "property_protected":10,
-        "property_private":11,
-        "event":12,
-        "constructor":13,
-        "constant":14,
-        "childcontrol":15
+        "class_static": 4,
+        "class_warning": 5,
+        "class_static_warning": 6,
+        "class_abstract_warning" : 7,
+        "class_singleton_warning" : 8,
+        "interface":  9,
+        "mixin": 10,
+        "mixin_warning": 11,
+        "method_public": 12,
+        "method_protected": 13,
+        "method_private": 14,
+        "property": 15,
+        "property_protected": 16,
+        "property_private": 17,
+        "event": 18,
+        "constructor": 19,
+        "constant": 20,
+        "childcontrol": 21
       };
       // Get the filename
       var aType = a[0];
@@ -524,7 +590,6 @@ qx.Class.define("apiviewer.ui.SearchView",
     {
       this._tableModel.setData([]);
       this._tableModel.setColumns([ "", ""]);
-      this.__button.setEnabled(false);
     },
 
 
@@ -567,7 +632,7 @@ qx.Class.define("apiviewer.ui.SearchView",
   {
     this.apiindex = this._table = this.__table = this._tableModel = this.__typeFilter = this.__typesIndex =
       this._selectionModel = null;
-    this._disposeObjects("sinput", "__button", "__note");
+    this._disposeObjects("sinput", "__note");
     this._disposeArray("listdata");
   }
 });

@@ -43,7 +43,7 @@ qx.Class.define("demobrowser.demo.mobile.ScaleImage",
     __currentScale : 0,
 
     /**
-     * This method contains the initial application code and gets called 
+     * This method contains the initial application code and gets called
      * during startup of the application
      */
     main : function()
@@ -52,7 +52,7 @@ qx.Class.define("demobrowser.demo.mobile.ScaleImage",
       this.base(arguments);
 
       // Enable logging in debug variant
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         // support native logging capabilities, e.g. Firebug for Firefox
         qx.log.appender.Native;
@@ -65,7 +65,9 @@ qx.Class.define("demobrowser.demo.mobile.ScaleImage",
       container.setRoot(true);
 
 
-      if (!qx.bom.client.Engine.WEBKIT || (!qx.bom.client.Feature.TOUCH && qx.core.Variant.isSet("qx.mobile.emulatetouch", "off")))
+      if (qx.core.Environment.get("engine.name") != "webkit" || (
+        !qx.core.Environment.get("event.touch") &&
+        qx.core.Environment.get("qx.mobile.emulatetouch") == false))
       {
         var warningLabelStyle = {
           "color" : "green",
@@ -118,7 +120,7 @@ qx.Class.define("demobrowser.demo.mobile.ScaleImage",
     },
 
 
-    __onTouchEnd : function(e) 
+    __onTouchEnd : function(e)
     {
       if (e.isMultiTouch())
       {

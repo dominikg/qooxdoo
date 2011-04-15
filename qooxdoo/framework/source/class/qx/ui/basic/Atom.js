@@ -39,8 +39,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/atom.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/atom.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  *
  *
  * @childControl label {qx.ui.basic.Label} label part of the atom
@@ -63,7 +63,7 @@ qx.Class.define("qx.ui.basic.Atom",
    */
   construct : function(label, icon)
   {
-    if (qx.core.Variant.isSet("qx.debug", "on")) {
+    if (qx.core.Environment.get("qx.debug")) {
       this.assertArgumentsCount(arguments, 0, 2);
     }
 

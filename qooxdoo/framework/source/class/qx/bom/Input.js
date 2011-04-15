@@ -87,7 +87,7 @@ qx.Class.define("qx.bom.Input",
      */
     create : function(type, attributes, win)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert.assertKeyInMap(type, this.__types, "Unsupported input type.");
       }
 
@@ -168,7 +168,7 @@ qx.Class.define("qx.bom.Input",
         }
       }
       else if ((type === "text" || type === "textarea") &&
-        qx.core.Variant.isSet("qx.client", "mshtml"))
+        (qx.core.Environment.get("engine.name") == "mshtml"))
       {
         // These flags are required to detect self-made property-change
         // events during value modification. They are used by the Input
@@ -250,14 +250,14 @@ qx.Class.define("qx.bom.Input",
 
     /**
      * Sets the text wrap behaviour of a text area element.
-     * This property uses the attribute "wrap" respectively 
+     * This property uses the attribute "wrap" respectively
      * the style property "whiteSpace"
      *
      * @signature function(element, wrap)
      * @param element {Element} DOM element to modify
      * @param wrap {Boolean} Whether to turn text wrap on or off.
      */
-    setWrap : qx.core.Variant.select("qx.client",
+    setWrap : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, wrap) {
         var wrapValue = wrap ? "soft" : "off";

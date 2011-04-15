@@ -55,7 +55,9 @@ qx.Class.define("qx.ui.form.AbstractField",
     this.base(arguments);
 
     // shortcut for placeholder feature detection
-    this.__useQxPlaceholder = !qx.bom.client.Feature.PLACEHOLDER;
+    this.__useQxPlaceholder = !qx.core.Environment.get("css.placeholder") ||
+      (qx.core.Environment.get("engine.name") == "gecko" && 
+       parseFloat(qx.core.Environment.get("engine.version")) >= 2);
 
     if (value != null) {
       this.setValue(value);
@@ -66,7 +68,7 @@ qx.Class.define("qx.ui.form.AbstractField",
     );
 
     // translation support
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().addListener(
         "changeLocale", this._onChangeLocale, this
       );
@@ -302,7 +304,7 @@ qx.Class.define("qx.ui.form.AbstractField",
 
     /**
      * Hook into {@link qx.ui.form.AbstractField#renderLayout} method.
-     * Called after the contentElement has a width and a innerWidth.
+     * Called after the contentElement has a width and an innerWidth.
      *
      * Note: This was introduced to fix BUG#1585
      *
@@ -345,12 +347,14 @@ qx.Class.define("qx.ui.form.AbstractField",
       el.setAttribute("spellcheck", "false");
 
       // Block resize handle in Safari
-      if (qx.core.Variant.isSet("qx.client", "webkit")) {
+      if (qx.core.Environment.get("engine.name") == "webkit" ||
+        qx.core.Environment.get("engine.name") == "gecko")
+      {
         el.setStyle("resize", "none");
       }
 
       // IE8 in standard mode needs some extra love here to receive events.
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         el.setStyles({
           backgroundImage: "url(" + qx.util.ResourceManager.getInstance().toUri("qx/static/blank.gif") + ")"
@@ -805,9 +809,9 @@ qx.Class.define("qx.ui.form.AbstractField",
      * @signature function(e)
      * @param e {Event} the change event
      */
-    _onChangeLocale : qx.core.Variant.select("qx.dynlocale",
+    _onChangeLocale : qx.core.Environment.select("qx.dynlocale",
     {
-      "on" : function(e)
+      "true" : function(e)
       {
         var content = this.getPlaceholder();
         if (content && content.translate) {
@@ -815,7 +819,7 @@ qx.Class.define("qx.ui.form.AbstractField",
         }
       },
 
-      "off" : null
+      "false" : null
     }),
 
 
@@ -885,7 +889,7 @@ qx.Class.define("qx.ui.form.AbstractField",
   {
     this.__placeholder = null;
 
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().removeListener("changeLocale", this._onChangeLocale, this);
     }
   }

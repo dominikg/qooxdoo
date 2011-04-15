@@ -64,10 +64,10 @@ qx.Class.define("qx.ui.root.Inline",
   construct : function(el, dynamicX, dynamicY)
   {
     // check the parameter
-    if (qx.core.Variant.isSet("qx.debug", "on")) {
+    if (qx.core.Environment.get("qx.debug")) {
       this.assertElement(el, "Please use a DOM element to create an inline root.");
     }
-    
+
     // Temporary storage of element to use
     this.__elem = el;
 
@@ -95,13 +95,13 @@ qx.Class.define("qx.ui.root.Inline",
 
     // Input type file does only work, when the root element is selectable.
     // See http://bugzilla.qooxdoo.org/show_bug.cgi?id=3408 for details.
-    if (qx.core.Variant.isSet("qx.client", "opera")) {
+    if ((qx.core.Environment.get("engine.name") == "opera")) {
       this.setSelectable(true);
     }
 
     // Avoid the automatically scroll in to view.
     // See http://bugzilla.qooxdoo.org/show_bug.cgi?id=3236 for details.
-    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+    if ((qx.core.Environment.get("engine.name") == "mshtml")) {
       this.setKeepFocus(true);
     }
   },
@@ -127,7 +127,7 @@ qx.Class.define("qx.ui.root.Inline",
     {
       if (this.__dynX || this.__dynY)
       {
-        // Check the DOM element for a usable width and height
+        // Check the DOM element for an usable width and height
         var elementDimensions = qx.bom.element.Dimension.getSize(this.__elem);
 
         if (this.__dynX && elementDimensions.width < 1) {
@@ -168,8 +168,8 @@ qx.Class.define("qx.ui.root.Inline",
         // If any of the ancestor elements has a position "relative" it is
         // necessary for IE6 to apply this style also to the root element to
         // avoid any problems when resizing the browser window (see Bug #2035)
-        if (qx.core.Variant.isSet("qx.client", "mshtml") &&
-            qx.bom.client.Engine.VERSION == 6)
+        if ((qx.core.Environment.get("engine.name") == "mshtml") &&
+            qx.core.Environment.get("engine.version") == 6)
         {
           var bodyElement = qx.dom.Node.getBodyElement(el);
           var ancestorElement;

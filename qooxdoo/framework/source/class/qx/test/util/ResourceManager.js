@@ -57,14 +57,16 @@ qx.Class.define("qx.test.util.ResourceManager",
     testIsClippedImage : function()
     {
       var ResourceManager = qx.util.ResourceManager.getInstance();
-      this.assertFalse(ResourceManager.isClippedImage("qx/static/blank.gif"));
+      this.assertFalse(ResourceManager.getCombinedFormat("qx/static/blank.gif") != "");
     },
 
     testToUri : function()
     {
       var ResourceManager = qx.util.ResourceManager.getInstance();
       var resourceUri = qx.$$libraries["qx"].resourceUri + "/" + "qx/static/blank.gif";
-      if (qx.bom.client.Engine.MSHTML && qx.bom.client.Feature.SSL) {
+      if (qx.core.Environment.get("engine.name") == "mshtml" &&
+        qx.core.Environment.get("io.ssl"))
+      {
         var href = window.location.href;
         resourceUri = href.substring(0, href.lastIndexOf("/") + 1) + resourceUri;
       }

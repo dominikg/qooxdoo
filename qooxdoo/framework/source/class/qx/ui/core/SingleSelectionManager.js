@@ -46,7 +46,7 @@ qx.Class.define("qx.ui.core.SingleSelectionManager",
   construct : function(selectionProvider) {
     this.base(arguments);
 
-    if (qx.core.Variant.isSet("qx.debug", "on")) {
+    if (qx.core.Environment.get("qx.debug")) {
       qx.core.Assert.assertInterface(selectionProvider,
         qx.ui.core.ISingleSelectionProvider,
         "Invalid selectionProvider!");
@@ -194,7 +194,7 @@ qx.Class.define("qx.ui.core.SingleSelectionManager",
         }
       }
 
-      // in case of a user selecable list, remove the enabled items
+      // in case of an user selecable list, remove the enabled items
       if (!all) {
         for (var i = result.length -1; i >= 0; i--) {
           if (!result[i].getEnabled()) {

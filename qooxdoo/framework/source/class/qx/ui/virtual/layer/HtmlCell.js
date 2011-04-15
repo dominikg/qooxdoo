@@ -39,7 +39,7 @@ qx.Class.define("qx.ui.virtual.layer.HtmlCell",
     this.base(arguments);
     this.setZIndex(2);
 
-    if (qx.core.Variant.isSet("qx.debug", "on")) {
+    if (qx.core.Environment.get("qx.debug")) {
       this.assertInterface(htmlCellProvider, qx.ui.virtual.core.IHtmlCellProvider);
     }
     this._cellProvider = htmlCellProvider;
@@ -69,7 +69,7 @@ qx.Class.define("qx.ui.virtual.layer.HtmlCell",
     _getCellSizeStyle : function(width, height, insetX, insetY)
     {
       var style = "";
-      if (qx.bom.client.Feature.CONTENT_BOX)
+      if (qx.core.Environment.get("css.boxmodel") == "content")
       {
         width -= insetX;
         height -= insetY;

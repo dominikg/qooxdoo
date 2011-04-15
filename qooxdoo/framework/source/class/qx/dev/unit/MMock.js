@@ -46,11 +46,15 @@
  *
  *       // Assert that spy was called
  *       this.assertCalled(obj.doSpecial);
- *
- *       // Depending on the life cycle of the object you spied upon, this
- *       // may or may not be necessary. Restore the original method.
- *       // obj.restore();
  *     },
+ *
+ *     tearDown: function() {
+ *       // Restore all stubs, spies and overridden host objects.
+ *       //
+ *       // It is a good idea to always run this in the tearDown()
+ *       // method, especially when overwriting global or host objects.
+ *       this.getSandbox().restore();
+ *     }
  *   }
  * });
  *
@@ -92,14 +96,21 @@ qx.Mixin.define("qx.dev.unit.MMock",
 {
   construct: function()
   {
+    var sinon = this.__getSinon();
     // Expose Sinon.JS assertions. Provides methods such
     // as assertCalled(), assertCalledWith().
     // (http://sinonjs.org/docs/api/#assert-expose)
-    this.__getSinon().assert.expose(this, {includeFail: false});
+    sinon.assert.expose(this, {includeFail: false});
+
+    this.__sandbox = sinon.sandbox;
   },
 
   members :
   {
+
+    __sandbox: null,
+
+    __fakeXhr: null,
 
     /**
     * Get the Sinon.JS object.
@@ -160,6 +171,10 @@ qx.Mixin.define("qx.dev.unit.MMock",
     *
     * See http://sinonjs.org/docs/api/#spies.
     *
+    * Note: Spies are transparently added to a sandbox. To restore
+    * the original function for all spies run this.getSandbox().restore()
+    * in your tearDown() method.
+    *
     * @param  function_or_object {Function?null|Object?null}
     *         Spies on the provided function or object.
     * @param  method {String?null}
@@ -169,8 +184,7 @@ qx.Mixin.define("qx.dev.unit.MMock",
     *         methods that allow for introspection.
     */
     spy: function(function_or_object, method) {
-      var sinon = this.__getSinon();
-      return sinon.spy.apply(sinon, arguments);
+      return this.__sandbox.spy.apply(this.__sandbox, arguments);
     },
 
     /**
@@ -198,6 +212,10 @@ qx.Mixin.define("qx.dev.unit.MMock",
     *
     * See http://sinonjs.org/docs/api/#stubs.
     *
+    * Note: Stubs are transparently added to a sandbox. To restore
+    * the original function for all stubs run this.getSandbox().restore()
+    * in your tearDown() method.
+    *
     * @param  object {Object?null}
     *         Object to stub. Stubs all methods if no
     *         method is given.
@@ -211,8 +229,7 @@ qx.Mixin.define("qx.dev.unit.MMock",
     *
     */
     stub: function(object, method) {
-      var sinon = this.__getSinon();
-      return sinon.stub.apply(sinon, arguments);
+      return this.__sandbox.stub.apply(this.__sandbox, arguments);
     },
 
     /**
@@ -253,21 +270,74 @@ qx.Mixin.define("qx.dev.unit.MMock",
       var sinon = this.__getSinon();
       return sinon.mock.apply(sinon, arguments);
     },
-    
+
     /**
     * Replace the native XMLHttpRequest object in browsers that support it with
     * a custom implementation which does not send actual requests.
-    * 
-    * Note: You must not forget to call restore() in your TestCase tearDown or
-    * equivalent to prevent your test from leaking.
-    * 
+    *
+    * Note: The fake XHR is transparently added to a sandbox. To restore
+    * the original host method run this.getSandbox().restore()
+    * in your tearDown() method.
+    *
     * See http://sinonjs.org/docs/api/#useFakeXMLHttpRequest.
-    * 
+    *
     * @return {Xhr}
     */
     useFakeXMLHttpRequest: function() {
-      var sinon = this.__getSinon();
-      return sinon.useFakeXMLHttpRequest();
+      return this.__fakeXhr = this.__sandbox.useFakeXMLHttpRequest();
+    },
+
+    /**
+    * Get requests made with faked XHR or server.
+    *
+    * Each request can be queried for url, method, requestHeaders,
+    * status and more.
+    *
+    * See http://sinonjs.org/docs/api/#FakeXMLHttpRequest.
+    *
+    * @return {Array} Array of faked requests.
+    */
+    getRequests: function() {
+      return this.__fakeXhr.requests;
+    },
+
+    /**
+    * As {@link #useFakeXMLHttpRequest}, but additionally provides a high-level
+    * API to setup server responses. To setup responses, use the server
+    * returned by {@link #getServer}.
+    *
+    * See http://sinonjs.org/docs/api/#server.
+    *
+    * Note: The fake server is transparently added to a sandbox. To restore
+    * the original host method run this.getSandbox().restore()
+    * in your tearDown() method.
+    *
+    * @return {Server}
+    */
+    useFakeServer: function() {
+      return this.__fakeXhr = this.__sandbox.useFakeServer();
+    },
+
+    /**
+    * Get fake server created by {@link #useFakeServer}.
+    *
+    * @return {Object} Fake server.
+    */
+    getServer: function() {
+      return this.__sandbox.server;
+    },
+
+    /**
+    * Get sandbox.
+    *
+    * The sandbox holds all stubs and mocks. Run this.getSandbox().restore()
+    * to restore all mock objects.
+    *
+    * @return {Object}
+    *        Sandbox object.
+    */
+    getSandbox: function() {
+      return this.__sandbox;
     }
   }
 });

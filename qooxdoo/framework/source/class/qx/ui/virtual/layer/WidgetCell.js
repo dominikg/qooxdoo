@@ -43,7 +43,7 @@ qx.Class.define("qx.ui.virtual.layer.WidgetCell",
     this.base(arguments);
     this.setZIndex(2);
 
-    if (qx.core.Variant.isSet("qx.debug", "on")) {
+    if (qx.core.Environment.get("qx.debug")) {
       this.assertInterface(
         widgetCellProvider,
         qx.ui.virtual.core.IWidgetCellProvider
@@ -70,11 +70,11 @@ qx.Class.define("qx.ui.virtual.layer.WidgetCell",
        init: false
      }
    },
-   
+
   events :
   {
     /**
-     * Is fired when the {@link #_fullUpdate} or the 
+     * Is fired when the {@link #_fullUpdate} or the
      * {@link #_updateLayerWindow} is finished.
      */
     updated : "qx.event.type.Event"
@@ -207,7 +207,7 @@ qx.Class.define("qx.ui.virtual.layer.WidgetCell",
         top += rowSizes[y];
         left = 0;
       }
-      
+
       this.fireEvent("updated");
     },
 
@@ -227,7 +227,7 @@ qx.Class.define("qx.ui.virtual.layer.WidgetCell",
       //
 
 
-    if (qx.core.Variant.isSet("qx.debug", "on"))
+    if (qx.core.Environment.get("qx.debug"))
     {
       this.assertPositiveInteger(firstRow);
       this.assertPositiveInteger(firstColumn);
@@ -330,7 +330,7 @@ qx.Class.define("qx.ui.virtual.layer.WidgetCell",
         top += rowSizes[y];
         left = 0;
       }
-      
+
       this.fireEvent("updated");
     }
   },

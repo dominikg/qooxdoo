@@ -44,8 +44,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/repeatbutton.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/repeatbutton.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.form.RepeatButton",
 {
@@ -163,7 +163,7 @@ qx.Class.define("qx.ui.form.RepeatButton",
      * Usually the {@link #release} function will be called before the call of
      * this function.
      *
-     * @param fireExecuteEvent {Boolean?true} flag which signals, if a event should be fired
+     * @param fireExecuteEvent {Boolean?true} flag which signals, if an event should be fired
      * @return {void}
      */
     release : function(fireExecuteEvent)

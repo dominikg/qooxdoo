@@ -75,6 +75,8 @@
  * * Android 1.5 (Webkit 528) => 4
  * * Android 2.0 (Webkit xxx) => 5
  * * Chrome 4 (Webkit xxx) => 5
+ *
+ * @deprecated since 1.4: Please use qx.core.Environment instead.
  */
 qx.Bootstrap.define("qx.bom.client.Version",
 {
@@ -103,7 +105,9 @@ qx.Bootstrap.define("qx.bom.client.Version",
      DEFER
   *****************************************************************************
   */
-
+  /**
+   * @lint ignoreUndefined(qxvariants)
+   */
   defer : function(statics)
   {
     var agent = navigator.userAgent;
@@ -113,7 +117,7 @@ qx.Bootstrap.define("qx.bom.client.Version",
     if (/Presto[\s\/]([0-9]+\.[0-9\.]+)/.test(agent))
     {
       name = "presto";
-      version = parseFloat(RegExp.$1, 10);
+      version = parseFloat(RegExp.$1);
 
       if (version >= 2.4) {
         version = 4;
@@ -130,7 +134,7 @@ qx.Bootstrap.define("qx.bom.client.Version",
     else if (/Opera[\s\/]([0-9]+)\.([0-9])/.test(agent))
     {
       name = "presto";
-      version = parseFloat(RegExp.$1 + "." + RegExp.$2, 10);
+      version = parseFloat(RegExp.$1 + "." + RegExp.$2);
 
       if (version >= 9.7) {
         version = 3;
@@ -154,7 +158,7 @@ qx.Bootstrap.define("qx.bom.client.Version",
       }
 
       // Parse and convert version number
-      version = parseFloat(version, 10);
+      version = parseFloat(version);
       if (version >= 526) {
         version = 4;
       } else if (version >= 525) {
@@ -221,5 +225,28 @@ qx.Bootstrap.define("qx.bom.client.Version",
     statics.NAME = name;
     statics.VERSION = version;
     statics.TITLE = name + " " + version;
+
+    // only when debug is on (@deprecated)
+    if (qx.Bootstrap.DEBUG) {
+      // @deprecated since 1.4 (whole class)
+      // add @deprecation warnings
+      var keys = ["NAME", "TITLE", "VERSION"];
+      for (var i = 0; i < keys.length; i++) {
+        // check if __defineGetter__ is available
+        if (statics.__defineGetter__) {
+          var constantValue = statics[keys[i]];
+          statics.__defineGetter__(keys[i], qx.Bootstrap.bind(function(key, c) {
+            var warning =
+              "The constant '"+ key + "' of '" + statics.classname + "'is deprecated: " +
+              "Please check the API documentation of qx.core.Environment."
+            if (qx.dev && qx.dev.StackTrace) {
+              warning += "\nTrace:" + qx.dev.StackTrace.getStackTrace().join("\n")
+            }
+            qx.Bootstrap.warn(warning);
+            return c;
+          }, statics, keys[i], constantValue));
+        }
+      }
+    }
   }
 });

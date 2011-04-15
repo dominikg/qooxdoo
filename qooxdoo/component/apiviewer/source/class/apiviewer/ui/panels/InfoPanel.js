@@ -221,7 +221,7 @@ qx.Class.define("apiviewer.ui.panels.InfoPanel", {
                 var iconUrl = apiviewer.TreeUtil.getIconUrl(itemNode);
                 var iconCode = apiviewer.ui.ClassViewer.createImageHtml(iconUrl);
 
-                if (qx.core.Variant.isSet("qx.client", "webkit"))
+                if (qx.core.Environment.get("engine.name") == "webkit")
                 {
                   if(iconCode.indexOf("overlay_") !== -1) {
                     style = "margin-left:18px;";
@@ -239,7 +239,8 @@ qx.Class.define("apiviewer.ui.panels.InfoPanel", {
 
           // Opera 10.5 loses the reference to "window"
           // See http://bugzilla.qooxdoo.org/show_bug.cgi?id=3516 for details
-          if (qx.bom.client.Engine.OPERA && qx.bom.client.Engine.VERSION > 9)
+          if (qx.core.Environment.get("engine.name") == "opera" &&
+            qx.core.Environment.get("engine.version") > 9)
           {
             protocol = location.protocol;
             host = location.host;
@@ -388,14 +389,14 @@ qx.Class.define("apiviewer.ui.panels.InfoPanel", {
         return "";
       }
     },
-    
+
     /**
      * Gets a class item from baseClassNode. if it is not found there, the class' hierarchy is searched until the item is found.
-     * 
+     *
      * @param itemName {String} the name of the item.
      * @param baseClassNode {apiviewer.dao.Class} class doc node
      * @return {apiviewer.dao.ClassItem} the classItem
-     * 
+     *
      */
     __getItemFromClassHierarchy : function(itemName,baseClassNode)
     {

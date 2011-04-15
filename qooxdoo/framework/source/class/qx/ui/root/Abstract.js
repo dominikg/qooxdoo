@@ -174,7 +174,7 @@ qx.Class.define("qx.ui.root.Abstract",
 
 
     // property apply
-    _applyGlobalCursor : qx.core.Variant.select("qx.client",
+    _applyGlobalCursor : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(value, old) {
         // empty implementation
@@ -230,7 +230,7 @@ qx.Class.define("qx.ui.root.Abstract",
     *
     * @param e {qx.event.type.KeySequence} The KeySequence event
     */
-    __preventScrollWhenFocused: function(e) {      
+    __preventScrollWhenFocused: function(e) {
       // Require space pressed
       if (e.getKeyIdentifier() !== "Space") {
         return;
@@ -256,7 +256,7 @@ qx.Class.define("qx.ui.root.Abstract",
 
 
     // property apply
-    _applyNativeHelp : qx.core.Variant.select("qx.client",
+    _applyNativeHelp : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(value, old)
       {

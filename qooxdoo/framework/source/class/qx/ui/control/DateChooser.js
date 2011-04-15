@@ -38,7 +38,7 @@
  * });
  * </pre>
  *
- * Additionally to a selection event a execute event is available which is
+ * Additionally to a selection event an execute event is available which is
  * fired by doubleclick or taping the space / enter key. With this event you
  * can for example save the selection and close the date chooser.
  *
@@ -102,7 +102,7 @@ qx.Class.define("qx.ui.control.DateChooser",
     this.showMonth(shownDate.getMonth(), shownDate.getFullYear());
 
     // listen for locale changes
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().addListener("changeLocale", this._updateDatePane, this);
     }
 
@@ -125,12 +125,12 @@ qx.Class.define("qx.ui.control.DateChooser",
      * {string} The format for the date year label at the top center.
      */
     MONTH_YEAR_FORMAT : qx.locale.Date.getDateTimeFormat("yyyyMMMM", "MMMM yyyy"),
-    
+
     /**
      * {string} The format for the weekday labels (the headers of the date table).
      */
     WEEKDAY_FORMAT : "EE",
-    
+
     /**
      * {string} The format for the week numbers (the labels of the left column).
      */
@@ -757,7 +757,7 @@ qx.Class.define("qx.ui.control.DateChooser",
 
   destruct : function()
   {
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().removeListener("changeLocale", this._updateDatePane, this);
     }
 

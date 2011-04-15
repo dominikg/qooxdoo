@@ -15,13 +15,19 @@
    Authors:
      * Carsten Lergenmueller (carstenl)
      * Fabian Jakobs (fbjakobs)
+     * Martin Wittemann (martinwittemann)
 
 ************************************************************************ */
 
 /**
  * Determines browser-dependent information about the transport layer.
+ *
+ * This class is used by {@link qx.core.Environment} and should not be used
+ * directly. Please check its class comment for details how to use it.
+ *
+ * @internal
  */
-qx.Class.define("qx.bom.client.Transport",
+qx.Bootstrap.define("qx.bom.client.Transport",
 {
   /*
   *****************************************************************************
@@ -43,15 +49,15 @@ qx.Class.define("qx.bom.client.Transport",
      * detected from JavaScript and because modern browsers have enough
      * parallel connections already - it's unlikely an app will require more
      * than 4 parallel XMLHttpRequests to one server at a time.
+     *
+     * @internal
      */
     getMaxConcurrentRequestCount: function()
     {
       var maxConcurrentRequestCount;
 
-      var Engine = qx.bom.client.Engine;
-
       // Parse version numbers.
-      var versionParts = Engine.FULLVERSION.split(".");
+      var versionParts = qx.bom.client.Engine.getVersion().split(".");
       var versionMain = 0;
       var versionMajor = 0;
       var versionMinor = 0;
@@ -76,12 +82,12 @@ qx.Class.define("qx.bom.client.Transport",
       if (window.maxConnectionsPerServer){
         maxConcurrentRequestCount = window.maxConnectionsPerServer;
 
-      } else if (Engine.OPERA){
+      } else if (qx.bom.client.Engine.getName() == "opera") {
         // Opera: 8 total
         // see http://operawiki.info/HttpProtocol
         maxConcurrentRequestCount = 8;
 
-      } else if (Engine.WEBKIT) {
+      } else if (qx.bom.client.Engine.getName() == "webkit") {
         // Safari: 4
         // http://www.stevesouders.com/blog/2008/03/20/roundup-on-parallel-connections/
 
@@ -91,7 +97,7 @@ qx.Class.define("qx.bom.client.Transport",
 
         maxConcurrentRequestCount = 4;
 
-      } else if (Engine.GECKO
+      } else if (qx.bom.client.Engine.getName() == "gecko"
                  && ( (versionMain >1)
                       || ((versionMain == 1) && (versionMajor > 9))
                       || ((versionMain == 1) && (versionMajor == 9) && (versionMinor >= 1)))){
@@ -106,6 +112,58 @@ qx.Class.define("qx.bom.client.Transport",
       }
 
       return maxConcurrentRequestCount;
+    },
+
+
+    /**
+     * Checks whether the app is loaded with SSL enabled which means via https.
+     *
+     * @internal
+     * @return {Boolean} <code>true</code>, if the app runs on https
+     */
+    getSsl : function() {
+      return window.location.protocol === "https:";
+    },
+
+    /**
+     * Checks what kind of XMLHttpRequest object the browser supports
+     * for the current protocol, if any.
+     *
+     * The standard XMLHttpRequest is preferred over ActiveX XMLHTTP.
+     *
+     * @internal
+     * @return {String}
+     *  <code>"xhr"</code>, if the browser provides standard XMLHttpRequest.<br/>
+     *  <code>"activex"</code>, if the browser provides ActiveX XMLHTTP.<br/>
+     *  <code>""</code>, if there is not XHR support at all.
+     */
+    getXmlHttpRequest : function() {
+      // Standard XHR can be disabled in IE's security settings,
+      // therefore provide ActiveX as fallback. Additionaly,
+      // standard XHR in IE7 is broken for file protocol.
+      var supports = window.ActiveXObject ?
+        (function() {
+          if ( window.location.protocol !== "file:" ) {
+            try {
+              new window.XMLHttpRequest();
+              return "xhr";
+            } catch(noXhr) {}
+          }
+
+          try {
+            new window.ActiveXObject("Microsoft.XMLHTTP");
+            return "activex";
+          } catch(noActiveX) {}
+        })()
+        :
+        (function() {
+          try {
+            new window.XMLHttpRequest();
+            return "xhr";
+          } catch(noXhr) {}
+        })();
+
+      return supports || "";
     }
   }
 });

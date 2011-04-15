@@ -17,7 +17,6 @@
    #
    ################################################################################
 
-.. _index#manual_1.2:
 
 Manual |version|
 ****************
@@ -75,6 +74,16 @@ Manual |version|
    :maxdepth: 2
 
    pages/low_level.rst
+
+
+.. _index#mobile
+
+.. Mobile Framework
+
+.. toctree::
+   :maxdepth: 2
+
+   pages/mobile.rst
 
 
 .. _index#communication:

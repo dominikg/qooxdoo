@@ -37,14 +37,11 @@
         "qx.theme"     : ["Modern"]
       },
       "cache" : { "compile" : "${TMPDIR}/qx${QOOXDOO_VERSION}/cache" },
-      "settings" : {
+      "environment" : {
         "qx.application" : "${DCLASS}",
         "qx.theme"       : "${DTHEME}",
-        "qx.allowUrlVariants" : "true",
-        "qx.allowUrlSettings" : "true"
-      },
-      "variants" : {
-        "qx.${DPACKAGE}" : ["on"]
+        "qx.allowUrlVariants" : true,
+        "qx.allowUrlSettings" : true
       },
       "compile-options" : {
         "paths" : {

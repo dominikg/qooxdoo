@@ -5,7 +5,7 @@
    http://qooxdoo.org
 
    Copyright:
-     2007-2008 1&1 Internet AG, Germany, http://www.1und1.de
+     2007-2010 1&1 Internet AG, Germany, http://www.1und1.de
 
    License:
      LGPL: http://www.gnu.org/licenses/lgpl.html
@@ -26,13 +26,14 @@
 qx.Class.define("qx.test.ui.embed.Flash",
 {
   extend : qx.test.ui.LayoutTestCase,
+  include : qx.dev.unit.MMock,
 
   statics :
   {
     isFlashReady : false,
 
-    flashCallback : function()
-    {
+
+    flashCallback : function() {
       qx.test.ui.embed.Flash.isFlashReady = true;
     }
   },
@@ -41,12 +42,16 @@ qx.Class.define("qx.test.ui.embed.Flash",
   {
     __flash : null,
 
+
     __params : null,
+
 
     __variables : null,
 
+
     setUp : function()
     {
+      this.flush();
       this.__params = {
         wmode : "opaque",
         quality : "best",
@@ -71,16 +76,74 @@ qx.Class.define("qx.test.ui.embed.Flash",
       flash.setMenu(true);
 
       this.getRoot().add(this.__flash, {edge: 10});
-      this.flush();
     },
+
 
     tearDown : function() {
       qx.test.ui.embed.Flash.isFlashReady = false;
       this.getRoot().removeAll();
       this.__flash.destroy();
       this.__flash = null;
-      this.flush();
     },
+
+
+    testEvents : function()
+    {
+      var test = {
+        loading : function() {},
+        loaded : function() {},
+        timeout : function() {}
+      };
+
+      var loading = this.spy(test, "loading");
+      var loaded = this.spy(test, "loaded");
+      var timeout = this.spy(test, "timeout");
+      this.__flash.addListener("loading", test.loading);
+      this.__flash.addListener("loaded", test.loaded);
+      this.__flash.addListener("timeout", test.timeout);
+
+      var that = this;
+      this.wait(2000, function()
+      {
+        that.assertCalled(loading);
+        that.assertCalled(loaded);
+        that.assertNotCalled(timeout);
+        loaded.calledAfter(loading);
+      });
+    },
+
+
+    testLoadTimeout : function()
+    {
+      var test = {
+        loading : function() {},
+        loaded : function() {},
+        timeout : function() {}
+      };
+
+      var loading = this.spy(test, "loading");
+      var loaded = this.spy(test, "loaded");
+      var timeout = this.spy(test, "timeout");
+
+      var flash = new qx.ui.embed.Flash("qx/test/invalidmovie.swf", "invalidmovie");
+      flash.setLoadTimeout(1000);
+      this.getRoot().removeAll();
+      this.getRoot().add(flash, {edge: 10});
+
+      flash.addListener("loading", test.loading);
+      flash.addListener("loaded", test.loaded);
+      flash.addListener("timeout", test.timeout);
+
+      var that = this;
+      this.wait(2000, function()
+      {
+        that.assertCalled(loading);
+        that.assertNotCalled(loaded);
+        that.assertCalled(timeout);
+        timeout.calledAfter(loading);
+      });
+    },
+
 
     testCreateFlash : function()
     {
@@ -98,7 +161,7 @@ qx.Class.define("qx.test.ui.embed.Flash",
         that.assertIdentical("flashmovie", flash.id);
 
         // object attribute tests for IE or other browser
-        if (qx.core.Variant.isSet("qx.client", "mshtml"))
+        if ((qx.core.Environment.get("engine.name") == "mshtml"))
         {
           that.assertIdentical("clsid:D27CDB6E-AE6D-11cf-96B8-444553540000", flash.classid);
         }
@@ -193,60 +256,6 @@ qx.Class.define("qx.test.ui.embed.Flash",
         {
           that.__flash.setVariables({key: "value"});
         }, Error, null, "Error expected by calling 'setVariables'!");
-      });
-    },
-
-    testReloadWithExclude : function()
-    {
-      // TODO activate test if bug #2367 is fixed
-      //this.__testReload("exclude");
-    },
-
-    testReloadWithHide : function()
-    {
-      // TODO activate test if bug #2367 is fixed
-      //this.__testReload("hide");
-    },
-
-    __testReload : function(method)
-    {
-      // skip this test because it only runs with a webserver
-      if (location.protocol.indexOf("http") !== 0) {
-        this.warn("Skipped test 'testReload', because a webserver " +
-          "is needed to run this test.");
-        return;
-      }
-
-      var result = 0;
-
-      var that = this;
-      this.wait(5000, function()
-      {
-        if (!qx.test.ui.embed.Flash.isFlashReady)
-        {
-          that.warn("ExternalInterface not ready -> skipped test");
-          return;
-        }
-
-        var flash = that.__flash.getFlashElement();
-
-        if (flash.setValue) {
-          flash.setValue(99);
-          result = flash.getValue();
-        }
-
-        that.assertIdentical(99, result, "Test setup error!");
-
-        that.__flash[method]();
-        that.flush();
-        that.__flash.show();
-        that.flush();
-
-        that.wait(5000, function()
-        {
-          result = flash.getValue();
-          that.assertIdentical(99, result, "Flash is reinitialized!!");
-        });
       });
     },
 

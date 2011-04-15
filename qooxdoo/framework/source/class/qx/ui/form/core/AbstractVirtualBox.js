@@ -18,8 +18,8 @@
 ************************************************************************ */
 
 /**
- * Basic class for widgets which need a virtual list as popup for example a 
- * SelectBox. It's basically supports a drop-down as popup with a virtual list 
+ * Basic class for widgets which need a virtual list as popup for example a
+ * SelectBox. It's basically supports a drop-down as popup with a virtual list
  * and the whole children management.
  *
  * @childControl dropdown {qx.ui.form.core.VirtualDropDownList} The drop-down list.
@@ -47,7 +47,6 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
     // Register listeners
     this.addListener("keypress", this._handleKeyboard, this);
     this.addListener("click", this._handleMouse, this);
-    this.addListener("mousewheel", this._handleMouse, this);
     this.addListener("blur", this._onBlur, this);
     this.addListener("resize", this._onResize, this);
 
@@ -91,8 +90,7 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
 
     /**
      * Delegation object which can have one or more functions defined by the
-     * {@link qx.ui.list.core.IListDelegate} interface, but *note* the grouping
-     * feature is not supported. 
+     * {@link qx.ui.list.core.IListDelegate} interface.
      */
     delegate :
     {
@@ -127,8 +125,8 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
       event: "changeLabelOptions",
       nullable: true
     },
-    
-    
+
+
     /**
      * The path to the property which holds the information that should be
      * displayed as an icon. This is only needed if objects are stored in the
@@ -166,7 +164,7 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
 
 
     /**
-     * The maximum height of the drop-down list. Setting this value to 
+     * The maximum height of the drop-down list. Setting this value to
      * <code>null</code> will set cause the list to be auto-sized.
      */
     maxListHeight :
@@ -188,7 +186,7 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
       focused : true
     },
 
-    
+
     /*
     ---------------------------------------------------------------------------
       PUBLIC API
@@ -196,14 +194,6 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
     */
 
 
-    // overridden
-    syncWidget : function()
-    {
-      this._removeBindings();
-      this._addBindings();
-    },
-    
-    
     /**
      * Shows the drop-down.
      */
@@ -227,21 +217,21 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
      */
     toggle : function() {
       var dropDown =this.getChildControl("dropdown");
-      
+
       if (dropDown.isVisible()) {
         this.close();
       } else {
         this.open();
       }
     },
-    
-    
+
+
     /*
     ---------------------------------------------------------------------------
       INTERNAL API
     ---------------------------------------------------------------------------
     */
-    
+
 
     // overridden
     _createChildControlImpl : function(id, hash)
@@ -260,64 +250,40 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
 
 
     /**
-     * This abstract method is called when the binding can be added to the 
-     * widget. For e.q. bind the drop-down selection with the widget.
-     */
-    _addBindings : function() {
-      throw new Error("Abstract method: '_addBindings()' called!");
-    },
-    
-    
-    /**
-     * This abstract method is called when the binding can be removed from the 
-     * widget. For e.q. remove the bound drop-down selection.
-     */
-    _removeBindings : function() {
-      throw new Error("Abstract method: '_removeBindings()' called!");
-    },
-
-    
-    /**
      * This method is called before the drop-down is opened.
      */
     _beforeOpen: function() {},
-    
-    
+
+
     /**
      * This method is called before the drop-down is closed.
      */
     _beforeClose: function() {},
-    
-    
+
+
     /**
-     * Returns the action dependent on the user interaction: <code>open</code>,
-     * <code>close</code>, <code>selectPrevious</code>, <code>selectNext</code>,
-     * <code>selectFirst</code> or <code>selectLast</code>.
+     * Returns the action dependent on the user interaction: e. q. <code>open</code>,
+     * or <code>close</code>.
      *
      * @param event {qx.event.type.KeySequence} The keyboard event.
-     * @return {String|null} The action or <code>null</code> when interaction 
+     * @return {String|null} The action or <code>null</code> when interaction
      *  doesn't hit any action.
      */
     _getAction : function(event)
     {
       var keyIdentifier = event.getKeyIdentifier();
       var isOpen = this.getChildControl("dropdown").isVisible();
+      var isModifierPressed = this._isModifierPressed(event);
 
       if (
-        !isOpen && event.isAltPressed() && 
+        !isOpen && !isModifierPressed &&
         (keyIdentifier === "Down" || keyIdentifier === "Up")
       ) {
         return "open";
-      } else if (isOpen && keyIdentifier === "Escape") {
+      } else if (
+        isOpen && !isModifierPressed && keyIdentifier === "Escape"
+      ) {
         return "close";
-      } else if (!isOpen && keyIdentifier === "Up") {
-        return "selectPrevious";
-      } else if (!isOpen && keyIdentifier === "Down") {
-        return "selectNext";
-      } else if (!isOpen && keyIdentifier === "PageUp") {
-        return "selectFirst";
-      } else if (!isOpen && keyIdentifier === "PageDown") {
-        return "selectLast";
       } else {
         return null;
       }
@@ -341,7 +307,27 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
 
       return bindPath;
     },
-    
+
+    /**
+     * Helper method to check if one modifier key is pressed. e.q.
+     * <code>Control</code>, <code>Shift</code>, <code>Meta</code> or
+     * <code>Alt</code>.
+     *
+     * @param event {qx.event.type.KeySequence} The keyboard event.
+     * @return {Boolen} <code>True</code> when a modifier key is pressed,
+     *   <code>false</code> otherwise.
+     */
+    _isModifierPressed : function(event)
+    {
+      var isAltPressed = event.isAltPressed();
+      var isCtrlOrCommandPressed = event.isCtrlOrCommandPressed();
+      var isShiftPressed = event.isShiftPressed();
+      var isMetaPressed = event.isMetaPressed();
+
+      return (isAltPressed || isCtrlOrCommandPressed ||
+        isShiftPressed || isMetaPressed);
+    },
+
 
     /*
     ---------------------------------------------------------------------------
@@ -361,8 +347,8 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
 
 
     /**
-     * Handles the complete keyboard events for user interaction. If there is 
-     * no defined user interaction {@link #_getAction}, the event is delegated 
+     * Handles the complete keyboard events for user interaction. If there is
+     * no defined user interaction {@link #_getAction}, the event is delegated
      * to the {@link qx.ui.form.core.VirtualDropDownList#_handleKeyboard} method.
      *
      * @param event {qx.event.type.KeySequence} The keyboard event.
@@ -370,6 +356,7 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
     _handleKeyboard : function(event)
     {
       var action = this._getAction(event);
+      var isOpen = this.getChildControl("dropdown").isVisible();
 
       switch(action)
       {
@@ -381,24 +368,10 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
           this.close();
           break;
 
-        case "selectPrevious":
-          this.getChildControl("dropdown").selectPrevious();
-          break;
-
-        case "selectNext":
-          this.getChildControl("dropdown").selectNext();
-          break;
-
-        case "selectFirst":
-          this.getChildControl("dropdown").selectFirst();
-          break;
-
-        case "selectLast":
-          this.getChildControl("dropdown").selectLast();
-          break;
-
         default:
-          this.getChildControl("dropdown")._handleKeyboard(event);
+          if (isOpen) {
+            this.getChildControl("dropdown")._handleKeyboard(event);
+          }
           break;
       }
     },
@@ -409,21 +382,7 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
      *
      * @param event {qx.event.type.Mouse|qx.event.type.MouseWheel} The mouse event.
      */
-    _handleMouse : function(event)
-    {
-      var type = event.getType();
-      var isOpen = this.getChildControl("dropdown").isVisible();
-
-      if (type === "mousewheel" && !isOpen)
-      {
-        var selectNext = event.getWheelDelta() > 0 ? true : false;
-        if (selectNext == true) {
-          this.getChildControl("dropdown").selectNext();
-        } else {
-          this.getChildControl("dropdown").selectPrevious();
-        }
-      }
-    },
+    _handleMouse : function(event) {},
 
 
     /**
@@ -435,7 +394,7 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
       this.getChildControl("dropdown").setMinWidth(event.getData().width);
     },
 
-    
+
     /*
     ---------------------------------------------------------------------------
       APPLY ROUTINES
@@ -471,8 +430,8 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
       this.getChildControl("dropdown").getChildControl("list").setLabelOptions(value);
       qx.ui.core.queue.Widget.add(this);
     },
-    
-    
+
+
     // property apply
     _applyIconPath : function(value, old)
     {
@@ -499,10 +458,5 @@ qx.Class.define("qx.ui.form.core.AbstractVirtualBox",
     _applyMaxListHeight : function(value, old) {
       this.getChildControl("dropdown").getChildControl("list").setMaxHeight(value);
     }
-  },
-  
-  
-  destruct : function() {
-    this._removeBindings();
   }
 });

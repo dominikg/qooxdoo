@@ -57,8 +57,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/stack.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/stack.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.container.Stack",
 {
@@ -205,7 +205,7 @@ qx.Class.define("qx.ui.container.Stack",
     //overriden
     _afterAddChild : function(child) {
       var selected = this.getSelection()[0];
-      
+
       if (!selected) {
         this.setSelection([child]);
       } else if (selected !== child) {
@@ -216,13 +216,13 @@ qx.Class.define("qx.ui.container.Stack",
         }
       }
     },
-    
+
 
     //overriden
     _afterRemoveChild : function(child) {
       if (this.getSelection()[0] === child) {
         var first = this._getChildren()[0];
-        
+
         if (first) {
           this.setSelection([first]);
         } else {

@@ -106,7 +106,7 @@ qx.Class.define("qx.bom.Iframe",
      * @return {Document} The DOM document object of the iframe.
      * @signature function(iframe)
      */
-    getDocument : qx.core.Variant.select("qx.client",
+    getDocument : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(iframe)
       {
@@ -178,8 +178,8 @@ qx.Class.define("qx.bom.Iframe",
           {
             // Webkit on Mac can't set the source when the iframe is still
             // loading its current page
-            if (qx.core.Variant.isSet("qx.client", "webkit") &&
-                qx.bom.client.Platform.MAC)
+            if ((qx.core.Environment.get("engine.name") == "webkit") &&
+                qx.core.Environment.get("os.name") == "osx")
             {
               var contentWindow = this.getWindow(iframe);
               if (contentWindow) {

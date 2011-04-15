@@ -246,7 +246,7 @@ qx.Class.define("playground.Application",
       this.setOriginCode(this.__editor.getCode());
       this.setName(e.getData().name);
       this.run();
-      
+
       // update the URL
       var id = e.getData().id;
       this.__history.addToHistory("gist=" + id);
@@ -292,7 +292,7 @@ qx.Class.define("playground.Application",
     __onApiOpen : function() {
       window.open(
         "http://demo.qooxdoo.org/" +
-        qx.core.Setting.get("qx.version") +
+        qx.core.Environment.get("qx.version") +
         "/apiviewer/"
       );
     },
@@ -303,7 +303,7 @@ qx.Class.define("playground.Application",
      */
     __onManualOpen : function() {
       window.open(
-        "http://manual.qooxdoo.org/" + qx.core.Setting.get("qx.version")
+        "http://manual.qooxdoo.org/" + qx.core.Environment.get("qx.version")
       );
     },
 
@@ -314,11 +314,11 @@ qx.Class.define("playground.Application",
     __onDemoBrowser : function() {
       window.open(
         "http://demo.qooxdoo.org/" +
-        qx.core.Setting.get("qx.version") +
+        qx.core.Environment.get("qx.version") +
         "/demobrowser/"
       );
     },
-    
+
     // ***************************************************
     // HISTORY SUPPORT
     // ***************************************************
@@ -419,7 +419,7 @@ qx.Class.define("playground.Application",
       } catch (e) {
         var error = this.tr("// Could not handle URL parameter! \n// %1", e);
 
-        if (qx.bom.client.Engine.MSHTML) {
+        if (qx.core.Environment.get("engine.name") == "mshtml") {
           error += this.tr("// Your browser has a length restriction of the " +
                           "URL parameter which could have caused the problem.");
         }
@@ -435,7 +435,7 @@ qx.Class.define("playground.Application",
      */
     __addCodeToHistory : function(code) {
       var codeJson = '{"code": ' + '"' + encodeURIComponent(code) + '"}';
-      if (qx.bom.client.Engine.MSHTML && codeJson.length > 1300) {
+      if (qx.core.Environment.get("engine.name") == "mshtml" && codeJson.length > 1300) {
         if (!this.__ignoreSaveFaults && confirm(
           this.tr("Cannot append sample code to URL, as it is too long. " +
                   "Disable this warning in the future?"))
@@ -508,7 +508,7 @@ qx.Class.define("playground.Application",
           return "FAIL!";
         }
       }};
-      var store = new qx.data.store.Yql(query, delegate, qx.bom.client.Feature.SSL);
+      var store = new qx.data.store.Yql(query, delegate, qx.core.Environment.get("io.ssl"));
       store.addListener("loaded", this.__onGistsLoaded, this);
     },
 
@@ -520,7 +520,7 @@ qx.Class.define("playground.Application",
     __loadGist : function(id)
     {
       var query = 'USE "http://github.com/wittemann/yql-tables/raw/master/github/github.gist.content.xml" AS gh; SELECT * FROM gh WHERE repo="' + id + '"';
-      var store = new qx.data.store.Yql(query, null, qx.bom.client.Feature.SSL);
+      var store = new qx.data.store.Yql(query, null, qx.core.Environment.get("io.ssl"));
 
       store.addListener("loaded", function(e) {
         try {
@@ -581,7 +581,7 @@ qx.Class.define("playground.Application",
      */
     __isCodeNotEqual : function(code1, code2)
     {
-      if (qx.core.Variant.isSet("qx.client", "opera")) {
+      if (qx.core.Environment.get("engine.name") == "opera") {
         code1 = code1.replace(/\r?\n/g, "\n");
         code2 = code2.replace(/\r?\n/g, "\n");
         return code1 != code2;

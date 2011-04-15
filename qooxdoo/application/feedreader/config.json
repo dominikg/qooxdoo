@@ -25,9 +25,68 @@
   
   "jobs" :
   {
+    "source-mobile" : 
+    {
+      "extend" : ["source"],
+      "let" : 
+      {
+        "APPLICATION_MAIN_CLASS" : "${APPLICATION}.MobileApplication"
+      },
+      
+      "environment" :
+      {
+        "qx.mobile.emulatetouch" : true
+      },
+
+      "compile-options" :
+      {
+        "paths" : { "file" : "source/script/${APPLICATION}-mobile.js" }
+      },
+
+      "=packages" : {}
+    },
+
+
+    "build-mobile" : 
+    {
+      "extend" : ["build"],
+      "let" :
+      {
+        "APPLICATION_MAIN_CLASS" : "${APPLICATION}.MobileApplication",
+        "BUILD_PATH" : "build-mobile"
+      },
+
+      "environment" :
+      {
+        "qx.mobile.emulatetouch" : true
+      },
+
+      "compile-options" :
+      {
+        "paths" : { 
+          "file" : "build-mobile/script/${APPLICATION}.js",
+          "scripts-add-hash" : false
+        }
+      },
+
+      "copy-files" :
+      {
+        "files" :
+        [
+          "index.html"
+        ],
+
+        "source" : "${ROOT}/source/resource",
+        "target" : "${BUILD_PATH}"
+      },
+
+      "=packages" : {}
+    },
+
+
     "common" :
     {
-      "settings" :
+      "environment" :
       {
         "qx.nativeScrollBars" : true
       },
@@ -35,7 +94,7 @@
       "compile-options" :
       {
         "paths" : { "scripts-add-hash" : true },
-        "uris"  : { "add-nocache-param": false}
+        "uris"  : { "add-nocache-param": false }
       },
 
       "packages" : 
@@ -63,6 +122,51 @@
         {
           "min-package" : 10
         } 
+      }
+    },
+    
+    "simulation-run" :
+    {
+      "let" : 
+      {
+        "SELENIUM_SERVER" : "localhost",
+        "SELENIUM_PORT" : 4444,
+        "SELENIUM_BROWSER" : "*firefox3",
+        "SIMULATOR_APPLICATION" : "simulator.reporter.Application",
+        //set by shell macro definition:
+        "AUT_HOST" : null,
+        "AUT_PATH" : null,
+        "SIMULATOR_REPORTSERVER" : null
+      },
+      
+      "environment" :
+      {
+        "simulator.selServer"   : "${SELENIUM_SERVER}",
+        "simulator.selPort"     : "${SELENIUM_PORT}",
+        "simulator.testBrowser" : "${SELENIUM_BROWSER}",
+        "simulator.autHost"     : "${AUT_HOST}",
+        "simulator.autPath"     : "${AUT_PATH}",
+        "simulator.reportServer": "${SIMULATOR_REPORTSERVER}",
+        "simulator.applicationLog" : true,
+        "simulator.globalErrorLogging" : true
+      }
+    },
+    
+    "simulation-build" :
+    {
+      "let" :
+      {
+        "SIMULATION_INCLUDE" : "feedreader.simulation.ria.*"
+      }
+    },
+    
+    "simulation-build-mobile" :
+    {
+      "extend" : ["simulation-build"],
+    
+      "let" :
+      {
+        "SIMULATION_INCLUDE" : "feedreader.simulation.mobile.*"
       }
     }
   }  

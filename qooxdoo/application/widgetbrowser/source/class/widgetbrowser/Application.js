@@ -17,6 +17,11 @@
 
 ************************************************************************ */
 
+/*
+ * The next is to inform resource copying
+ #asset(widgetbrowser/helper.js)
+ */
+
 qx.Class.define("widgetbrowser.Application",
 {
   extend : qx.application.Standalone,
@@ -34,12 +39,14 @@ qx.Class.define("widgetbrowser.Application",
 
     __tabs: null,
 
+    __scroll: null,
+
     main: function()
     {
       this.base(arguments);
 
       // Enable logging in debug variant
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         // support native logging capabilities, e.g. Firebug for Firefox
         qx.log.appender.Native;
         // support additional cross-browser console. Press F7 to toggle visibility
@@ -54,7 +61,7 @@ qx.Class.define("widgetbrowser.Application",
       this.__header = new widgetbrowser.view.Header();
       dockLayoutComposite.add(this.__header, {edge: "north"});
 
-      var scroll = new qx.ui.container.Scroll();
+      var scroll = this.__scroll = new qx.ui.container.Scroll();
       dockLayoutComposite.add(scroll);
 
       this.__tabs = new widgetbrowser.view.TabView();
@@ -65,6 +72,11 @@ qx.Class.define("widgetbrowser.Application",
       })
       scroll.add(this.__tabs);
 
+    },
+
+    getScroll: function()
+    {
+      return this.__scroll;
     }
   }
 });

@@ -16,6 +16,14 @@
      * Martin Wittemann (martinwittemann)
 
 ************************************************************************ */
+
+/* ************************************************************************
+#ignore(qx.test.SVB)
+#ignore(qx.test.TwoProperties)
+#ignore(qx.Target)
+#ignore(qx.Test)
+************************************************************************ */
+
 /**
  * Test-Class for testing the single value binding
  */
@@ -35,9 +43,10 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
     },
 
     tearDown : function() {
+      qx.data.SingleValueBinding.removeAllBindingsForObject(this.__a);
+      qx.data.SingleValueBinding.removeAllBindingsForObject(this.__b);
       this.__a.dispose();
       this.__b.dispose();
-      qx.data.SingleValueBinding.removeAllBindings();
     },
 
     testStringPropertyBinding : function()
@@ -46,10 +55,11 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
       this.__a.setAppearance("affe");
       this.assertEquals("affe", this.__b.getAppearance(), "String binding does not work!");
 
-      var affe = new qx.test.data.singlevalue.TextFieldDummy()
+      var affe = new qx.test.data.singlevalue.TextFieldDummy();
       affe.setAppearance("Jonny");
       qx.data.SingleValueBinding.bind(affe, "appearance", this.__b, "appearance");
       this.assertEquals("Jonny", this.__b.getAppearance(), "String binding does not work!");
+      qx.data.SingleValueBinding.removeAllBindingsForObject(affe);
       affe.dispose();
     },
 
@@ -80,12 +90,12 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
 
     testWrongPropertyNames : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         var a = this.__a;
         var b = this.__b;
 
         // only in source version
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           // wrong source
           this.assertException(function() {
             qx.data.SingleValueBinding.bind(a, "BacccccckgroundColor", b, "backgroundColor");
@@ -97,12 +107,12 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
 
     testWrongEventType : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         var a = this.__a;
         var b = this.__b;
 
         // only in source version
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           // wrong eventName
           this.assertException(function() {
             qx.data.SingleValueBinding.bind(a, "affe", b, "backgroundColor");
@@ -139,6 +149,7 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
       s.setFloatt(13.5);
       this.assertEquals("13.5", this.__b.getAppearance(), "Float --> String does not work!");
 
+      qx.data.SingleValueBinding.removeAllBindingsForObject(s);
       s.dispose();
     },
 
@@ -163,7 +174,7 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
       this.assertEquals(0, bindings.length, "Binding still in the registry!");
 
       // only in source version
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         // test wrong binding id
         var a = this.__a;
         this.assertException(function() {
@@ -221,13 +232,13 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
       var bindings = qx.data.SingleValueBinding.getAllBindingsForObject(this.__a);
       this.assertEquals(0, bindings.length, "Still bindings there!");
 
-      // check if a remove of a object without a binding works
+      // check if a remove of an object without a binding works
       var o = new qx.core.Object();
       qx.data.SingleValueBinding.removeAllBindings();
       o.dispose();
 
       // only test in the source version
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         // test for null object
         this.assertException(function() {
           qx.data.SingleValueBinding.removeAllBindingsForObject(null);
@@ -347,6 +358,7 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
       affe.setAppearance("Jonny");
       qx.data.SingleValueBinding.bind(affe, "appearance", this.__b, "appearance");
       this.assertEquals("Jonny", this.__b.getAppearance(), "String binding does not work!");
+      qx.data.SingleValueBinding.removeAllBindingsForObject(affe);
       affe.dispose();
     },
 
@@ -554,6 +566,8 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
       a.setX(null);
       this.assertEquals(a.getX(), b.getX());
 
+      qx.data.SingleValueBinding.removeAllBindingsForObject(a);
+      qx.data.SingleValueBinding.removeAllBindingsForObject(b);
       a.dispose();
       b.dispose();
       qx.Class.undefine("qx.test.SVB");
@@ -582,6 +596,9 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
 
       this.assertEquals(a.getX(), b.getX());
 
+      qx.data.SingleValueBinding.removeAllBindingsForObject(a);
+      qx.data.SingleValueBinding.removeAllBindingsForObject(b);
+
       a.dispose();
       b.dispose();
       qx.Class.undefine("qx.test.SVB");
@@ -607,9 +624,29 @@ qx.Class.define("qx.test.data.singlevalue.Simple",
         qx.data.SingleValueBinding.bind(a, "x", b, "x");
       }, qx.core.AssertionError, "Binding property x of object qx.test.SVB");
 
+      qx.data.SingleValueBinding.removeAllBindingsForObject(a);
+      qx.data.SingleValueBinding.removeAllBindingsForObject(b);
+
       a.dispose();
       b.dispose();
       qx.Class.undefine("qx.test.SVB");
+    },
+
+
+    testConverterParam : function() {
+      var self = this;
+      var options = {converter : function(data, model, source, target) {
+        // will be called twice (init and set)
+        self.assertEquals(self.__a, source);
+        self.assertEquals(self.__b, target);
+        return data;
+      }};
+
+      qx.data.SingleValueBinding.bind(
+        this.__a, "appearance", this.__b, "appearance", options
+      );
+      this.__a.setAppearance("affe");
+      this.assertEquals("affe", this.__b.getAppearance(), "String binding does not work!");
     }
   }
 });

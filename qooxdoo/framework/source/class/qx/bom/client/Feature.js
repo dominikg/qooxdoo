@@ -18,19 +18,12 @@
 
 ************************************************************************ */
 
-/* ************************************************************************
-
-#require(qx.bom.client.Engine)
-
-************************************************************************ */
-
 /**
  * This class comes with all relevant information regarding
  * the client's implemented features.
  *
- * The listed constants are automatically filled on the initialization
- * phase of the class. The defaults listed in the API viewer need not
- * to be identical to the values at runtime.
+ * @deprecated since 1.4: Please use qx.core.Environment to access all feature
+ * checks.
  */
 qx.Bootstrap.define("qx.bom.client.Feature",
 {
@@ -42,204 +35,119 @@ qx.Bootstrap.define("qx.bom.client.Feature",
 
   statics :
   {
-    /** {Boolean} Flag to detect if the current document is rendered in standard mode */
-    STANDARD_MODE : false,
-
-    /** {Boolean} Flag to detect if the current document is rendered in quirks mode */
-    QUIRKS_MODE : false,
-
-    /** {Boolean} Flag to detect if the client uses the W3C box model to render the current document */
-    CONTENT_BOX : false,
-
-    /** {Boolean} Flag to detect if the client uses the IE box model to render the current document */
-    BORDER_BOX : false,
-
-    /** {Boolean} Flag to detect if the client supports SVG graphics */
-    SVG : false,
-
-    /** {Boolean} Flag to detect if the client supports Canvas graphics */
-    CANVAS : !!window.CanvasRenderingContext2D,
-
-    /** {Boolean} Flag to detect if the client supports VML graphics */
-    VML : false,
-
-    /** {Boolean} Flag to detect if the client supports XPATH queries */
-    XPATH : !!document.evaluate,
-
-    /** {Boolean} Flag to detect if is an AIR client */
-    AIR : navigator.userAgent.toLowerCase().indexOf("adobeair") !== -1,
-
-    /** {Boolean} Flag to detect if is a Gears client */
-    GEARS : !!(window.google && window.google.gears),
-
-    /** {Boolean} Flag to detect if the client runs in SSL mode */
-    SSL : window.location.protocol === "https:",
-
-    /** {BOOLEAN} Whether the object type supports the <code>__count__</code> property */
-    ECMA_OBJECT_COUNT : (({}).__count__ == 0),
-
-    /** {BOOLEAN} Whether the client supports the "pointer-events" CSS property */
+    /**
+     * {BOOLEAN} Whether the client supports the "pointer-events" CSS property
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
     CSS_POINTER_EVENTS : false,
 
-    /** {BOOLEAN} Whether the client supports XUL */
-    XUL : false,
+    /**
+     * {BOOLEAN} Whether the client supports the "text-overflow" CSS property
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    CSS_TEXT_OVERFLOW : false,
 
-    /** {BOOLEAN} Whether the client supports the "text-overflow" CSS property */
-    CSS_TEXT_OVERFLOW : (
-      "textOverflow" in document.documentElement.style ||
-      "OTextOverflow" in document.documentElement.style
-    ),
+    /**
+     * {BOOLEAN} Whether the client supports placeholders for input fields
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    PLACEHOLDER : false,
+
+    /**
+     * {Boolean} Flag to detect if the current document is rendered in standard mode
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    STANDARD_MODE : false,
+
+    /**
+     * {Boolean} Flag to detect if the current document is rendered in quirks mode
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    QUIRKS_MODE : false,
 
     /**
      * {Boolean} Whether the browser supports CSS class lists
      *   http://hacks.mozilla.org/2010/01/classlist-in-firefox-3-6/
+     * @deprecated since 1.4: Please use qx.core.Environment.get
      */
     HTML5_CLASSLIST : !!(document.documentElement.classList &&
       qx.Bootstrap.getClass(document.documentElement.classList) === "DOMTokenList"
     ),
 
-    /** {BOOLEAN} Whether the device is touch enabled. */
-    TOUCH : ("ontouchstart" in window),
-
-    /** {BOOLEAN} Whether the client supports placeholders for input fields */
-    PLACEHOLDER : false,
-
-
-    /** {BOOLEAN} Whether the client supports data urls or not. */
-    DATA_URL : false,
-
-
-    /** {BOOLEAN} Whether the client supports the css border radius property.*/
-    CSS_BORDER_RADIUS : (
-      "borderRadius" in document.documentElement.style ||
-      "MozBorderRadius" in document.documentElement.style || 
-      "WebkitBorderRadius" in document.documentElement.style
-    ),
-
-
-    /** {BOOLEAN} Whether the client supports the css box shadow property.*/    
-    CSS_BOX_SHADOW : (
-      "BoxShadow" in document.documentElement.style ||
-      "MozBoxShadow" in document.documentElement.style || 
-      "WebkitBoxShadow" in document.documentElement.style
-    ),
-
-
-    /** {BOOLEAN} Whether the client supports gradients as css background.*/
-    CSS_GRADIENTS : (function() {
-      var el;
-      try {
-        el = document.createElement("div");
-      } catch (ex) {
-        el = document.createElement();
-      }
-
-      var style = [
-        "-webkit-gradient(linear,0% 0%,100% 100%,from(white), to(red))",
-        "-moz-linear-gradient(0deg, white 0%, red 100%)",
-        "-o-linear-gradient(0deg, white 0%, red 100%)",
-        "linear-gradient(0deg, white 0%, red 100%)"
-      ];
-      
-      for (var i=0; i < style.length; i++) {
-        // try catch for IE
-        try {
-          el.style["background"] = style[i];
-          if (el.style["background"].indexOf("gradient") != -1) {
-            return true
-          }
-        } catch (ex) {}
-      };
-
-      return false;
-    })(),
-
-
-    /** {Boolean} Whether the client supports Web Workers */
-    WEB_WORKER: window.Worker != null,
-
-    /** {Boolean} Whether the client supports Geolocation */
-    GEO_LOCATION: navigator.geolocation != null,
-
-    /** {Boolean} Whether the client supports Audio */
-    AUDIO: window.Audio != null,
-
-    /** {Boolean} Whether the client supports Video */
-    VIDEO: window.Video !=null,
-
-    /** {Boolean} Whether the client supports LocalStorage */
-    LOCAL_STORAGE: window.LocalStorage != null,
-
-    /** {Boolean} Whether the client supports SessionStorage */
-    SESSION_STORAGE: window.SessionStorage != null,
-
+    /**
+     * {Boolean} Flag to detect if the client runs in SSL mode
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    SSL : window.location.protocol === "https:",
 
     /**
-     * Internal initialize helper
-     *
-     * @return {void}
+     * {Boolean} Flag to detect if is a Gears client
+     * @deprecated since 1.4: Please use qx.core.Environment.get
      */
-    __init : function()
-    {
-      this.QUIRKS_MODE = this.__isQuirksMode();
-      this.STANDARD_MODE = !this.QUIRKS_MODE;
-
-      this.CONTENT_BOX = !qx.bom.client.Engine.MSHTML || this.STANDARD_MODE;
-      this.BORDER_BOX = !this.CONTENT_BOX;
-
-      this.SVG = document.implementation && document.implementation.hasFeature &&
-        (document.implementation.hasFeature("org.w3c.dom.svg", "1.0") ||
-        document.implementation.hasFeature(
-          "http://www.w3.org/TR/SVG11/feature#BasicStructure",
-          "1.1"
-        )
-      );
-      this.VML = qx.bom.client.Engine.MSHTML;
-
-      try {
-        document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "label");
-        this.XUL = true;
-      } catch (e) {
-        this.XUL = false;
-      }
-
-      var i = document.createElement("input");
-      this.PLACEHOLDER = "placeholder" in i;
-
-      // Check if browser reports that pointerEvents is a known style property
-      if ("pointerEvents" in document.documentElement.style) {
-        // Opera 10.63 incorrectly advertises support for CSS pointer events (#4229).
-        // Do not rely on pointer events in Opera until this browser issue is fixed.
-        if (qx.bom.client.Engine.OPERA) {
-          this.CSS_POINTER_EVENTS = false;
-        } else {
-          this.CSS_POINTER_EVENTS = true;
-        }
-      }
-
-      var data = new Image();
-      data.onload = data.onerror = function() {
-        if (data.width == 1 && data.height == 1) {
-          qx.bom.client.Feature.DATA_URL = true;
-        }
-      }
-      data.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-    },
-
+    GEARS : !!(window.google && window.google.gears),
 
     /**
-     * Whether the document is in quirks mode (e.g. non XHTML, HTML4 Strict or missing doctype)
-     *
-     * @return {Boolean} true when containing document is in quirks mode
+     * {Boolean} Flag to detect if the client uses the W3C box model to
+     * render the current document
+     * @deprecated since 1.4: Please use qx.core.Environment.get
      */
-    __isQuirksMode : function()
-    {
-      if(qx.bom.client.Engine.MSHTML && qx.bom.client.Engine.VERSION >= 8) {
-        return qx.bom.client.Engine.DOCUMENT_MODE === 5;
-      } else {
-        return document.compatMode !== "CSS1Compat";
-      }
-    }
+    CONTENT_BOX : false,
+
+    /**
+     * {Boolean} Flag to detect if the client uses the IE box model to render
+     * the current document
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    BORDER_BOX : false,
+
+    /**
+     * {Boolean} Flag to detect if the client supports SVG graphics
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    SVG : false,
+
+    /**
+     * {Boolean} Flag to detect if the client supports Canvas graphics
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    CANVAS : !!window.CanvasRenderingContext2D,
+
+    /**
+     * {Boolean} Flag to detect if the client supports VML graphics
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    VML : false,
+
+    /**
+     * {Boolean} Flag to detect if the client supports XPATH queries
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    XPATH : !!document.evaluate,
+
+    /**
+     * {BOOLEAN} Whether the client supports XUL
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    XUL : false,
+
+    /**
+     * {Boolean} Flag to detect if is an AIR client
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    AIR : navigator.userAgent.indexOf("adobeair") !== -1,
+
+    /**
+     * {BOOLEAN} Whether the device is touch enabled.
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    TOUCH : false,
+
+    /**
+     * {BOOLEAN} Whether the object type supports the
+     * <code>__count__</code> property.
+     * @deprecated since 1.4: Please use qx.core.Environment.get
+     */
+    ECMA_OBJECT_COUNT : (({}).__count__ == 0)
   },
 
 
@@ -248,8 +156,50 @@ qx.Bootstrap.define("qx.bom.client.Feature",
      DEFER
   *****************************************************************************
   */
-
+  /**
+   * @lint ignoreUndefined(qxvariants)
+   */
   defer : function(statics) {
-    statics.__init();
+    // @deprecated since 1.4 (this entire defer block)
+    statics.PLACEHOLDER = qx.bom.client.Css.getPlaceholder();
+    statics.CSS_TEXT_OVERFLOW = qx.bom.client.Css.getTextOverflow();
+    statics.CSS_POINTER_EVENTS = qx.bom.client.Event.getPointer();
+
+    statics.QUIRKS_MODE = qx.bom.client.Browser.getQuirksMode();
+    statics.STANDARD_MODE = !statics.QUIRKS_MODE;
+
+    statics.BORDER_BOX = qx.bom.client.Css.getBoxModel() == "border";
+    statics.CONTENT_BOX = qx.bom.client.Css.getBoxModel() == "content";
+
+    statics.SVG = qx.bom.client.Html.getSvg();
+    statics.VML = qx.bom.client.Html.getVml();
+    statics.XUL = qx.bom.client.Html.getXul();
+
+    statics.TOUCH = qx.bom.client.Event.getTouch();
+
+    // only when debug is on (@deprecated)
+    if (qx.Bootstrap.DEBUG) {
+      // add @deprecation warnings
+      var keys = ["STANDARD_MODE","QUIRKS_MODE","CONTENT_BOX","BORDER_BOX", "SVG",
+        "CANVAS", "VML", "XPATH", "AIR", "GEARS", "SSL", "ECMA_OBJECT_COUNT",
+        "CSS_POINTER_EVENTS", "XUL", "CSS_TEXT_OVERFLOW", "HTML5_CLASSLIST",
+        "TOUCH", "PLACEHOLDER"];
+      for (var i = 0; i < keys.length; i++) {
+        // check if __defineGetter__ is available
+        if (statics.__defineGetter__) {
+          var constantValue = statics[keys[i]];
+          statics.__defineGetter__(keys[i], qx.Bootstrap.bind(function(key, c) {
+            var warning =
+              "The constant '"+ key + "' of '" + statics.classname + "'is deprecated: " +
+              "Please check the API documentation of qx.core.Environment."
+            if (qx.dev && qx.dev.StackTrace) {
+              warning += "\nTrace:" + qx.dev.StackTrace.getStackTrace().join("\n")
+            }
+            qx.Bootstrap.warn(warning);
+            return c;
+          }, statics, keys[i], constantValue));
+        }
+      }
+    }
   }
 });

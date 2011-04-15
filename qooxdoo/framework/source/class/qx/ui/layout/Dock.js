@@ -85,8 +85,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/layout/dock.html'>
- * Extended documentation</a> and links to demos of this layout in the qooxdoo wiki.
+ * <a href='http://manual.qooxdoo.org/1.4/pages/layout/dock.html'>
+ * Extended documentation</a> and links to demos of this layout in the qooxdoo manual.
  */
 qx.Class.define("qx.ui.layout.Dock",
 {
@@ -217,9 +217,9 @@ qx.Class.define("qx.ui.layout.Dock",
 
 
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value)
+      "true" : function(item, name, value)
       {
         this.assertInArray(name, ["flex", "edge", "height", "width"], "The property '"+name+"' is not supported by the Dock layout!");
 
@@ -236,7 +236,7 @@ qx.Class.define("qx.ui.layout.Dock",
         }
       },
 
-      "off" : null
+      "false" : null
     }),
 
 

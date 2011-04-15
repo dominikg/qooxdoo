@@ -103,6 +103,28 @@ qx.Class.define("inspector.view.ToolBar",
     this._reloadButton.addListener("execute", function(e) {
       this.fireEvent("executeReloadButton");
     }, this);
+
+    // enable overflow handling
+    this.setOverflowHandling(true);
+    this.setRemovePriority(this._seleniumButton, 5);
+    this.setRemovePriority(this._propertyButton, 4);
+    this.setRemovePriority(this._widgetsButton, 3);
+    this.setRemovePriority(this._objectsButton, 2);
+    this.setRemovePriority(this._consoleButton, 1);
+
+    // add a button for overflow handling
+    var chevron = new qx.ui.toolbar.MenuButton(null, "icon/16/actions/media-seek-forward.png");
+    chevron.setAppearance("toolbar-button");  // hide the down arrow icon
+    this.add(chevron);
+    this.setOverflowIndicator(chevron);
+
+    // add the overflow menu
+    this.__overflowMenu = new qx.ui.menu.Menu();
+    chevron.setMenu(this.__overflowMenu);
+
+    // add the listener
+    this.addListener("hideItem", this._onHideItem, this);
+    this.addListener("showItem", this._onShowItem, this);
   },
 
 
@@ -122,6 +144,8 @@ qx.Class.define("inspector.view.ToolBar",
     __state : null,
 
     __menuItemStore : null,
+
+    __overflowMenu : null,
 
     getTextField : function() {
       return this._urlTextField;
@@ -183,6 +207,58 @@ qx.Class.define("inspector.view.ToolBar",
       this._seleniumButton.setEnabled(value);
       this._inspectButton.setEnabled(value);
       this._selectedWidgetLabel.setEnabled(value);
+    },
+
+    _onHideItem : function(e) {
+      var item = e.getData();
+
+      if (item == this._consoleButton) {
+        this._separator.setVisibility("excluded");
+      }
+
+      var menuItem = this._getMenuItem(item);
+      menuItem.setVisibility("visible");
+    },
+
+
+    _onShowItem : function(e) {
+      var item = e.getData();
+
+      if (item == this._consoleButton) {
+        this._separator.setVisibility("visible");
+      }
+
+      var menuItem = this._getMenuItem(item);
+      menuItem.setVisibility("excluded");
+    },
+
+
+    _getMenuItem : function(toolbarItem) {
+      var cachedItem = this.__menuItemStore[toolbarItem.toHashCode()];
+
+      if (!cachedItem)
+      {
+        cachedItem = new qx.ui.menu.CheckBox(
+          toolbarItem.getLabel()
+        );
+
+        toolbarItem.bind("value", cachedItem, "value");
+        cachedItem.bind("value", toolbarItem, "value");
+
+        this.__overflowMenu.addAt(cachedItem, 0);
+        this.__menuItemStore[toolbarItem.toHashCode()] = cachedItem;
+      }
+
+      return cachedItem;
+    },
+
+    _getNextToHide : function()
+    {
+      if (this._separator.getVisibility() == "visible") {
+        return this.base(arguments);
+      } else {
+        return null;
+      }
     }
   },
 
@@ -200,10 +276,11 @@ qx.Class.define("inspector.view.ToolBar",
     this._consoleButton.dispose();
     this._seleniumButton.dispose();
     this._consoleWindow.dispose();
+    this.__overflowMenu.dispose();
 
-    this._separator = this._inspectButton = this._selectedWidgetLabel = 
+    this._separator = this._inspectButton = this._selectedWidgetLabel =
       this._urlTextField = this._reloadButton = this._objectsButton =
-      this._widgetsButton = this._propertyButton = this._consoleButton = 
-      this._seleniumButton = this._consoleWindow = null;
+      this._widgetsButton = this._propertyButton = this._consoleButton =
+      this._seleniumButton = this._consoleWindow = this.__overflowMenu = null;
   }
 });

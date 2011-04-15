@@ -90,7 +90,7 @@ class CodeGenerator(object):
             def fillTemplate(vals, template):
                 # Fill the code template with various vals 
                 templ  = MyTemplate(template)
-                result = templ.safe_substitute(vals)
+                result = templ.substitute(vals)
 
                 return result
 
@@ -160,7 +160,7 @@ class CodeGenerator(object):
                 
                 template = filetool.read(loaderFile)
 
-                return template
+                return template, loaderFile
 
             # ---------------------------------------------------------------
 
@@ -244,10 +244,14 @@ class CodeGenerator(object):
             vals["Type"] = version
             
             # Locate and load loader basic script
-            template = loadTemplate(bootCode)
+            template, loaderFile = loadTemplate(bootCode)
 
             # Fill template gives result
-            result = fillTemplate(vals, template)
+            try:
+                result = fillTemplate(vals, template)
+            except KeyError, e:
+                raise ValueError("Unknown macro used in loader template (%s): '%s'" % 
+                                 (loaderFile, e.args[0])) 
 
             return result
 
@@ -295,7 +299,11 @@ class CodeGenerator(object):
             self._console.indent()
 
             # Compile file content
-            pkgCode = self._treeCompiler.compileClasses(package.classes, variants, optimize, format)
+            if "variants" not in optimize:
+                variats = {}
+            else:
+                variats = variants
+            pkgCode = self._treeCompiler.compileClasses(package.classes, variats, optimize, format)
             pkgData = getPackageData(package)
             hash    = sha.getHash(pkgData + pkgCode)[:12]  # first 12 chars should be enough
 
@@ -422,6 +430,9 @@ class CodeGenerator(object):
         format = compConf.get("code/format", False)
         script.scriptCompress = compConf.get("paths/gzip", False)
 
+        # Read optimizaitons
+        optimize = compConf.get("code/optimize", [])
+
         # Read in settings
         settings = self.getSettings()
         script.settings = settings
@@ -453,9 +464,15 @@ class CodeGenerator(object):
             scriptUri   = None
 
         # Get global script data (like qxlibraries, qxresources,...)
-        globalCodes                = {}
-        globalCodes["Settings"]    = settings
-        globalCodes["Variants"]    = self.generateVariantsCode(variants)
+        globalCodes = {}
+        globalCodes["Settings"] = settings
+        variantsMap = self.generateVariantsCode(variants)
+        globalCodes["Variants"] = dict((k,v) for (k,v) in variantsMap.iteritems() if not k.startswith("<env>:"))
+        #globalCodes["EnvSettings"] = dict(j for i in (globalCodes["Settings"], globalCodes["Variants"]) for j in i.iteritems())  # variants currently contain script.envsettings
+        globalCodes["EnvSettings"] = dict((k.replace('<env>:','',1), v) for (k,v) in variantsMap.iteritems() if k.startswith("<env>:"))
+        # add optimizations
+        for val in optimize:
+            globalCodes["EnvSettings"]["qx.optimization."+val] = True
         globalCodes["Libinfo"]     = self.generateLibInfoCode(libs, format, resourceUri, scriptUri)
         # add synthetic output lib
         if scriptUri: out_sourceUri= scriptUri
@@ -630,6 +647,10 @@ class CodeGenerator(object):
         if variants:
             for key in variants:
                 pattern = "{%s}" % key
+                fileName = fileName.replace(pattern, str(variants[key]))
+            # @deprecated
+            for key in variants:
+                pattern = "{%s}" % key.replace('<env>:', '', 1)
                 fileName = fileName.replace(pattern, str(variants[key]))
 
         if settings:

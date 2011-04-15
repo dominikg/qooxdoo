@@ -154,7 +154,7 @@ qx.Class.define("qx.dom.Hierarchy",
      * @param target {Node} Child node
      * @return {Boolean}
      */
-    contains : qx.core.Variant.select("qx.client",
+    contains : qx.core.Environment.select("engine.name",
     {
       "webkit|mshtml|opera" : function(element, target)
       {
@@ -211,21 +211,49 @@ qx.Class.define("qx.dom.Hierarchy",
      * Whether the element is inserted into the document
      * for which it was created.
      *
+     * @signature function(element)
      * @param element {Element} DOM element to check
      * @return {Boolean} <code>true</code> when the element is inserted
      *    into the document.
      */
-    isRendered : function(element)
+    isRendered : qx.core.Environment.select("engine.name",
     {
-      // Offset parent is a good start to test. It omits document detection
-      // and function calls.
-      if (!element.parentNode || !element.offsetParent) {
-        return false;
-      }
+      // This module is highly used by new qx.html.Element
+      // Copied over details from qx.dom.Node.getDocument() and
+      // this.contains() for performance reasons.
+      "mshtml" : function(element)
+      {
+        // Fast check for all elements which are not in the DOM
+        if (!element.parentNode || !element.offsetParent) {
+          return false;
+        }
 
-      var doc = element.ownerDocument || element.document;
-      return this.contains(doc.body, element);
-    },
+        var doc = element.ownerDocument || element.document;
+        return doc.body.contains(element);
+      },
+
+      "gecko" : function(element)
+      {
+        // Gecko way, DOM3 method
+        var doc = element.ownerDocument || element.document;
+        return !!(doc.compareDocumentPosition(element) & 16);
+      },
+
+      "default" : function(element)
+      {
+        // Fast check for all elements which are not in the DOM
+        if (!element.parentNode || !element.offsetParent) {
+          return false;
+        }
+
+        var doc = element.ownerDocument || element.document;
+
+        // This is available after most browser excluding gecko have copied it
+        // from mshtml.
+        // Contains() is only available on real elements in webkit and not on the document.
+        return doc.body.contains(element);
+      }
+    }),
 
 
     /**
@@ -270,23 +298,66 @@ qx.Class.define("qx.dom.Hierarchy",
      * @param element2 {Element} Second element
      * @return {Element} the found parent, if none was found <code>null</code>
      */
-    getCommonParent : function(element1, element2)
+    getCommonParent : qx.core.Environment.select("engine.name",
     {
-      if (element1 === element2) {
-        return element1;
-      }
-
-      while (element1 && element1.nodeType == 1)
+      "mshtml|opera" : function(element1, element2)
       {
-        if (this.contains(element1, element2)) {
+        if (element1 === element2) {
           return element1;
         }
 
-        element1 = element1.parentNode;
-      }
+        while (element1 && qx.dom.Node.isElement(element1))
+        {
+          if (element1.contains(element2)) {
+            return element1;
+          }
 
-      return null;
-    },
+          element1 = element1.parentNode;
+        }
+
+        return null;
+      },
+
+      "default" : function(element1, element2)
+      {
+        if (element1 === element2) {
+          return element1;
+        }
+
+        var known = {};
+        var obj = qx.core.ObjectRegistry;
+        var h1, h2;
+
+        while (element1 || element2)
+        {
+          if (element1)
+          {
+            h1 = obj.toHashCode(element1);
+
+            if (known[h1]) {
+              return known[h1];
+            }
+
+            known[h1] = element1;
+            element1 = element1.parentNode;
+          }
+
+          if (element2)
+          {
+            h2 = obj.toHashCode(element2);
+
+            if (known[h2]) {
+              return known[h2];
+            }
+
+            known[h2] = element2;
+            element2 = element2.parentNode;
+          }
+        }
+
+        return null;
+      }
+    }),
 
 
     /**

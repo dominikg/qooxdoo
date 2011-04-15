@@ -177,16 +177,16 @@ qx.Class.define("qx.ui.core.queue.Manager",
      * @param callback {Function} the callback function
      * @param finallyCode {Function} function to be called in the finally block
      */
-    __executeAndRescheduleOnError : qx.core.Variant.select("qx.debug",
+    __executeAndRescheduleOnError : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(callback, finallyCode)
+      "true" : function(callback, finallyCode)
       {
         callback();
         finallyCode();
       },
 
 
-      "off" : function(callback, finallyCode)
+      "false" : function(callback, finallyCode)
       {
         var self = qx.ui.core.queue.Manager;
 
@@ -196,7 +196,7 @@ qx.Class.define("qx.ui.core.queue.Manager",
         }
         catch (e)
         {
-          if (qx.core.Variant.isSet("qx.debug", "on")) {
+          if (qx.core.Environment.get("qx.debug")) {
             qx.log.Logger.error(
               "Error while layout flush: " + e + "\n" +
               "Stack trace: \n" +
@@ -208,7 +208,10 @@ qx.Class.define("qx.ui.core.queue.Manager",
           self.__retries += 1;
 
           // this hack is used to fix [BUG #3688]
-          if(qx.bom.client.Browser.NAME == 'ie' && qx.bom.client.Browser.VERSION<=7) {
+          if(
+            qx.core.Environment.get("browser.name") == 'ie' &&
+            qx.core.Environment.get("browser.version") <= 7
+          ) {
             finallyCode();
           }
 
@@ -285,7 +288,8 @@ qx.Class.define("qx.ui.core.queue.Manager",
 
     // Register to user action
     qx.event.Registration.addListener(window, "useraction",
-      qx.bom.client.Feature.TOUCH ? statics.__onUserAction : statics.flush
+      qx.core.Environment.get("event.touch") ?
+        statics.__onUserAction : statics.flush
     );
   }
 });

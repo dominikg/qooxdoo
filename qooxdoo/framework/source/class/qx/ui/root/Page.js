@@ -74,7 +74,7 @@ qx.Class.define("qx.ui.root.Page",
 
     // Avoid the automatically scroll in to view.
     // See http://bugzilla.qooxdoo.org/show_bug.cgi?id=3236 for details.
-    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+    if ((qx.core.Environment.get("engine.name") == "mshtml")) {
       this.setKeepFocus(true);
     }
   },
@@ -113,9 +113,9 @@ qx.Class.define("qx.ui.root.Page",
       // Mark the element of this root with a special attribute to prevent
       // that qx.event.handler.Focus is performing a focus action.
       // This would end up in a scrolling to the top which is not wanted in
-      // a inline scenario
+      // an inline scenario
       // see Bug #2740
-      if (qx.core.Variant.isSet("qx.client", "gecko")) {
+      if ((qx.core.Environment.get("engine.name") == "gecko")) {
         root.setAttribute("qxIsRootPage", 1);
       }
 

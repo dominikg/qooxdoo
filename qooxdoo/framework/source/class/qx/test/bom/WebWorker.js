@@ -28,6 +28,7 @@
 qx.Class.define("qx.test.bom.WebWorker",
 {
   extend : qx.dev.unit.TestCase,
+  include: [qx.dev.unit.MRequirements],
 
   members :
   {
@@ -35,9 +36,15 @@ qx.Class.define("qx.test.bom.WebWorker",
     _worker: null,
     _send: null,
 
+    hasWorker: function() {
+      return qx.core.Environment.get("html.webworker");
+    },
+
     setUp: function() {
+      this.require(["worker"]);
       this._url = qx.util.ResourceManager.getInstance().toUri("qx/test/webworker.js");
       this._worker = new qx.bom.WebWorker(this._url);
+
       this._send = function(message, fn) {
         this._worker.addListener("message", function(e) {
           this.resume(function() {
@@ -50,6 +57,12 @@ qx.Class.define("qx.test.bom.WebWorker",
         this._worker.postMessage(message);
         this.wait();
       };
+    },
+
+    tearDown: function() {
+      this._worker = null;
+      this._send = null;
+      this._url = null;
     },
 
     testConstructor: function() {

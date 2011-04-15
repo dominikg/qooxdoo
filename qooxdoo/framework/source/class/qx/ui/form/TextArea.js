@@ -197,7 +197,7 @@ qx.Class.define("qx.ui.form.TextArea",
             // disappears. Therefore, hide scroll-bar and force re-wrap in
             // WebKit. Otherwise, the height would be computed based on decreased
             // width due to the scroll-bar in content
-            if (qx.bom.client.Engine.WEBKIT) {
+            if (qx.core.Environment.get("engine.name") == "webkit") {
               var area = this.getContentElement();
               var value = this.getValue();
 
@@ -270,7 +270,7 @@ qx.Class.define("qx.ui.form.TextArea",
 
         this.__scrollCloneToBottom(clone);
 
-        if (qx.bom.client.Engine.MSHTML) {
+        if (qx.core.Environment.get("engine.name") == "mshtml") {
           // Flush required for scrollTop to return correct value
           // when initial value should be taken into consideration
           if (!cloneDom.scrollTop) {
@@ -396,7 +396,7 @@ qx.Class.define("qx.ui.form.TextArea",
 
     // property apply
     _applyAutoSize: function(value, old) {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.__warnAutoSizeAndHeight();
       }
 
@@ -422,7 +422,7 @@ qx.Class.define("qx.ui.form.TextArea",
     _applyDimension : function(value) {
       this.base(arguments);
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.__warnAutoSizeAndHeight();
       }
 

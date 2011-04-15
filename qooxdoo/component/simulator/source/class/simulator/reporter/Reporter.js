@@ -20,7 +20,7 @@
 
 /**
  * Sends test report data to a server using HTTP.
- * 
+ *
  * @lint ignoreUndefined(readUrl)
  */
 qx.Class.define("simulator.reporter.Reporter", {
@@ -30,13 +30,13 @@ qx.Class.define("simulator.reporter.Reporter", {
     SERVER_URL : null,
     DATABASE_ID : null,
     DATE_FORMAT : null,
-    
+
     /**
      * Writes a message to the file.
      *
      * @param logMessage {String} Message to be logged
      * @param level {String} Log level. One of "debug", "info", "warn", "error"
-     * 
+     *
      * @lint ignoreUndefined(readUrl)
      */
     log : function(logMessage, level)
@@ -44,30 +44,22 @@ qx.Class.define("simulator.reporter.Reporter", {
       if (!this.DATE_FORMAT) {
         this.DATE_FORMAT = new qx.util.format.DateFormat("YYYY-MM-dd_HH-mm-ss");
       }
-      
+
       if (!this.DATABASE_ID) {
         this.__createReport();
       }
-      
+
       var entry = {
         test_id : this.DATABASE_ID,
         date : this.DATE_FORMAT.format(new Date()),
         log_level : level,
         message : logMessage
       };
-      
+
       var stringData = qx.lang.Json.stringify(entry);
       var encodedData = encodeURIComponent(stringData);
       var url = this.SERVER_URL + "?entry=" + encodedData;
-      if (level === "warn") {
-        print(url);
-      }
       readUrl(url);
-      /*
-      if (response.indexOf("saved") > 0) {
-        this.DATABASE_ID = /ID\:\ (.*)/.exec(response)[1];
-      }
-      */
     },
     /**
      * Logs a debug message
@@ -108,7 +100,7 @@ qx.Class.define("simulator.reporter.Reporter", {
     {
       this.log(logMessage, "error");
     },
-    
+
     /**
      * Process a log entry object from qooxdoo's logging system.
      *
@@ -127,41 +119,44 @@ qx.Class.define("simulator.reporter.Reporter", {
         }
       }
     },
-    
+
     /**
+     * Collects environment information and sends initial test data to the
+     * server.
+     *
      * @lint ignoreUndefined(readUrl)
      */
     __createReport : function()
     {
       var startDate = this.DATE_FORMAT.format(new Date());
-      var autWin = simulator.QxSimulation.AUTWINDOW + ".";
-      var autName = String(simulator.QxSelenium.getInstance().getEval(autWin + 'qx.core.Setting.get("qx.application")'));
+      var autWin = simulator.Simulation.AUTWINDOW + ".";
+      var autName = String(simulator.QxSelenium.getInstance().getEval(autWin + 'qx.core.Environment.get("qx.application")'));
       autName = /(.*?)\./.exec(autName)[1];
       autName = autName.replace(/^./, autName[0].toUpperCase());
-      var testOs = String(simulator.QxSelenium.getInstance().getEval(autWin + "qx.bom.client.System.NAME"));
-      var qxRevision = String(simulator.QxSelenium.getInstance().getEval(autWin + 'qx.core.Setting.get("qx.revision")'));
+      var testOs = String(simulator.QxSelenium.getInstance().getEval(autWin + "qx.core.Environment.get('os.name')"));
+      var qxRevision = String(simulator.QxSelenium.getInstance().getEval(autWin + 'qx.core.Environment.get("qx.revision")'));
       var userAgent = String(simulator.QxSelenium.getInstance().getEval(autWin + "navigator.userAgent"));
-      var browserTitle = String(simulator.QxSelenium.getInstance().getEval(autWin + 'qx.bom.client.Browser.TITLE'));
-      
+      var browserTitle = String(simulator.QxSelenium.getInstance().getEval(autWin + 'qx.core.Environment.get("browser.name")'));
+
       var testData = {
         aut_name : autName,
-        aut_host : qx.core.Setting.get("simulator.autHost"),
-        aut_path : qx.core.Setting.get("simulator.autPath"),
+        aut_host : qx.core.Environment.get("simulator.autHost"),
+        aut_path : qx.core.Environment.get("simulator.autPath"),
         test_os : testOs,
         test_useragent : userAgent,
         test_browsertitle : browserTitle,
         svn_revision : qxRevision,
         start_date : startDate
       };
-      
+
       var stringData = qx.lang.Json.stringify(testData);
       var encodedData = encodeURIComponent(stringData);
       var url = this.SERVER_URL + "?test=" + encodedData;
-      
+
       var response = readUrl(url);
       if (response.indexOf("saved") > 0) {
         this.DATABASE_ID = /ID\:\ (.*)/.exec(response)[1];
-      }    
+      }
     }
   }
 });

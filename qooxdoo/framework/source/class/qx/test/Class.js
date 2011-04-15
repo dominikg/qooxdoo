@@ -17,6 +17,21 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+#ignore(qx.DeferFoo)
+#ignore(qx.MyClass)
+#ignore(qx.test.u.u)
+#ignore(qx.FuncName)
+#ignore(qx.Defer)
+#ignore(qx.Single1)
+#ignore(qx.ConcreteCar)
+#ignore(qx.AbstractCar)
+#ignore(qx.Bmw)
+#ignore(qx.Car)
+#ignore(qx.Empty)
+#ignore(qx.DeferFoo)
+************************************************************************ */
+
 qx.Class.define("qx.test.Class",
 {
   extend : qx.dev.unit.TestCase,
@@ -140,7 +155,7 @@ qx.Class.define("qx.test.Class",
       if (this.isDebugOn())
       {
         this.assertException(function() {
-          var car = new qx.AbstractCar("blue");
+          new qx.AbstractCar("blue");
         }, Error, new RegExp("The class .* is abstract"));
       }
 
@@ -201,52 +216,13 @@ qx.Class.define("qx.test.Class",
       }
     },
 
-    testSetting : function()
+    testEnvironment : function()
     {
-      qx.Class.define("qx.Setting1", { settings : { "qx.juhu" : "kinners" } });
+      qx.Class.define("qx.Setting1", { environment : { "qx.juhu" : "kinners" } });
 
-      this.assertEquals("kinners", qx.core.Setting.get("qx.juhu"));
+      this.assertEquals("kinners", qx.core.Environment.get("qx.juhu"));
 
       qx.Class.undefine("qx.Setting1");
-    },
-
-
-    testVariant : function()
-    {
-      qx.Class.define("qx.Variant1",
-      {
-        variants :
-        {
-          "qx.juhu" :
-          {
-            allowedValues : [ "kinners", "juhu" ],
-            defaultValue  : "kinners"
-          }
-        }
-      });
-
-      this.assertEquals("kinners", qx.core.Variant.get("qx.juhu"));
-
-      if (this.isDebugOn())
-      {
-        this.assertException(function()
-        {
-          qx.Class.define("qx.Variant2",
-          {
-            variants :
-            {
-              "foo.juhu" :
-              {
-                allowedValues : [ "kinners", "juhu" ],
-                defaultValue  : "kinners"
-              }
-            }
-          });
-        },
-        Error, "Forbidden variant");
-      };
-
-      qx.Class.undefine("qx.Variant1");
     },
 
 

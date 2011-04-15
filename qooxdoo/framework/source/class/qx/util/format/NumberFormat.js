@@ -55,14 +55,14 @@ qx.Class.define("qx.util.format.NumberFormat",
 
     /**
      * Returns an integer number format.
-     * 
+     *
      * @deprecated since 1.4
-     * 
+     *
      * @return {NumberFormat} an integer number format.
      */
     getIntegerInstance : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.log.Logger.deprecatedMethodWarning(
           arguments.callee, "Please create an instance of the number format instead."
         );
@@ -90,7 +90,7 @@ qx.Class.define("qx.util.format.NumberFormat",
      */
     getInstance : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.log.Logger.deprecatedMethodWarning(
           arguments.callee, "Please create an instance of the number format instead."
         );

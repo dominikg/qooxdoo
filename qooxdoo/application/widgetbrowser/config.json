@@ -86,7 +86,7 @@
 
     "build-resources":
     {
-
+      "let" : {"QXICONTHEME" : ["Oxygen", "Tango"]},
       "include" :
       [
         "qx.theme.Simple",
@@ -126,7 +126,7 @@
 
     "common" :
     {
-      "settings" :
+      "environment" :
       {
         "qx.nativeScrollBars" : true
       },

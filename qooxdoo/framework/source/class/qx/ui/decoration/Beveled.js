@@ -146,7 +146,7 @@ qx.Class.define("qx.ui.decoration.Beveled",
     // property apply
     _applyStyle : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this.__markup) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");
@@ -234,7 +234,7 @@ qx.Class.define("qx.ui.decoration.Beveled",
       }
 
       // Fix box model
-      if (qx.bom.client.Feature.CONTENT_BOX)
+      if (qx.core.Environment.get("css.boxmodel") == "content")
       {
         var outerWidth = width - 2;
         var outerHeight = height - 2;
@@ -279,7 +279,7 @@ qx.Class.define("qx.ui.decoration.Beveled",
 
     // interface implementation
     tint : function(element, bgcolor) {
-      this._tintBackgroundColor(element, bgcolor, element.childNodes[3].style);      
+      this._tintBackgroundColor(element, bgcolor, element.childNodes[3].style);
     }
   },
 

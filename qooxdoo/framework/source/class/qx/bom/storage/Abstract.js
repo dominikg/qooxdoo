@@ -22,6 +22,12 @@
 /**
  * EXPERIMENTAL - NOT READY FOR PRODUCTION
  *
+ *
+ * Persistent key-value data storage
+ *
+ * For more information see:
+ * http://www.w3.org/TR/webstorage/
+ *
  */
 qx.Class.define("qx.bom.storage.Abstract",
 {
@@ -41,7 +47,9 @@ qx.Class.define("qx.bom.storage.Abstract",
 
     this._storage = window[this._type + "Storage"];
     this._handleStorageEventBound = qx.lang.Function.bind(this._handleStorageEvent, this);
-    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+
+    if ((qx.core.Environment.get("engine.name") == "mshtml") &&
+        (parseInt(qx.core.Environment.get("browser.documentmode")) < 9)) {
       qx.bom.Event.addNativeListener(document, "storage", this._handleStorageEventBound);
     } else {
       qx.bom.Event.addNativeListener(window, "storage", this._handleStorageEventBound);
@@ -50,7 +58,7 @@ qx.Class.define("qx.bom.storage.Abstract",
 
   events:
   {
-    /** Fired when online status changed */
+    /** Fired when data storage is changed*/
     "storage": "qx.event.type.Data"
   },
 
@@ -63,6 +71,8 @@ qx.Class.define("qx.bom.storage.Abstract",
 
     /**
      * The length of storage
+     *
+     * @return {Number} the length
      */
     getLength: function()
     {
@@ -78,7 +88,7 @@ qx.Class.define("qx.bom.storage.Abstract",
      */
     setItem: function(key, value)
     {
-      this._storage.setItem(key, value);
+      this._storage.setItem(key, qx.lang.Json.stringify(value));
     },
 
 
@@ -86,11 +96,20 @@ qx.Class.define("qx.bom.storage.Abstract",
      * Get an item
      *
      * @param key {String} value of key
-     * @return {Object}
+     * @return {Object} the stored item
      */
     getItem: function(key)
     {
-      return this._storage.getItem(key);
+      var item = this._storage.getItem(key);
+
+      if (qx.lang.Type.isString(item)) {
+        item = qx.lang.Json.parse(item);
+      // special case for FF3
+      } else if (item && item.value && qx.lang.Type.isString(item.value)) {
+        item = qx.lang.Json.parse(item.value);
+      }
+
+      return item;
     },
 
 
@@ -110,7 +129,15 @@ qx.Class.define("qx.bom.storage.Abstract",
      */
     clear: function()
     {
-      this._storage.clear();
+      if (!this._storage.clear)
+      {
+        var storage = this._storage;
+        for (var i = storage.length - 1; i >= 0; i--) {
+          storage.removeItem(storage.key(i));
+        }
+      } else {
+        this._storage.clear();
+      }
     },
 
 
@@ -118,6 +145,7 @@ qx.Class.define("qx.bom.storage.Abstract",
      * Get the key based on index
      *
      * @param index {Number} index value
+     * @return {String} the key
      */
     getKey: function(index)
     {
@@ -157,17 +185,21 @@ qx.Class.define("qx.bom.storage.Abstract",
         url: e.url,
         storageArea: e.storageArea
       };
-
-      this.fireDataEvent("storage",data);
+      // force async events for all browsers (IE does that anyway)
+      qx.event.Timer.once(function() {
+        this.fireDataEvent("storage", data);
+      }, this, 0);
     }
   },
 
 
   destruct: function()
   {
+    this.clear();
     this._storage = null;
 
-    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+    if ((qx.core.Environment.get("engine.name") == "mshtml") &&
+        (parseInt(qx.core.Environment.get("browser.documentmode")) < 9)) {
       qx.bom.Event.removeNativeListener(document, "storage", this._handleStorageEventBound);
     } else {
       qx.bom.Event.removeNativeListener(window, "storage", this._handleStorageEventBound);

@@ -5,49 +5,64 @@
   <title>Tool Chain Test Matrix</title>
   <style type="text/css">
      body { margin: 0px; padding: 0px }
-	   table {
-	       margin: 10px;
-         width: 95%
-	   }
-     td { font-family: sans-serif }
-     th { font-family: sans-serif; vertical-align: top; text-align: left }
+     table {
+       margin: 10px;
+       width: 100%;
+     }
+     td { 
+        font-family: sans-serif;
+        text-align: left;
+        vertical-align: top; 
+     }
+     th { 
+        font-family: sans-serif; 
+        vertical-align: middle; 
+        text-align: left 
+     }
   </style>
+
+  <script  type="text/javascript" src="release-matrix-utils.js"></script>
+
 </head>
-<body>
+<body onload="autonumbering();">
 <em>$Rev$</em>
-<div align="center"><b>qooxdoo ...</b></div>
+<div align="center"><b>qooxdoo 1.4</b></div>
 <h3 valign="left">Tool Chain Tests</h3>
-<table border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
-      <th rowspan="2"><br>
-      <br>
-1</th>
-      <th rowspan="2"><br>
-      <br>
-WinXP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th rowspan="2" name="number">1</th>
+      <th rowspan="2">XP</th>
       <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
 vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
     </tr>
     <tr>
-      <td>source<sup>[a]</sup></td>
+      <td>source<br>
+      <sup>[a]</sup></td>
       <td>source-<br>
 all<sup>[b]</sup></td>
       <td style="vertical-align: top;">source-<br>
-hybrid<sup>[a]</sup> </td>
-      <td>build<sup>[c]</sup></td>
-      <td>api<sup>[d]</sup></td>
-      <td>test<sup>[e]</sup></td>
-      <td>lint<sup>[f]</sup></td>
-      <td>inspector<sup>[g]</sup></td>
+hybrid<sup><br>
+[a]</sup> </td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<br>
+      <sup>[d]</sup></td>
+      <td>test<br>
+      <sup>[e]</sup></td>
+      <td>lint<br>
+      <sup>[f]</sup></td>
+      <td>inspector<br>
+      <sup>[g]</sup></td>
       <td>simulation-<br>
 build<sup>[h]</sup></td>
       <td>simulation-<br>
 run<sup>[i]</sup></td>
-      <td>migration<sup>[l]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
     </tr>
     <tr>
-      <td>1.1</td>
+      <td name="number">1.1</td>
       <td>GUI skeleton</td>
       <td><br>
       </td>
@@ -73,7 +88,7 @@ run<sup>[i]</sup></td>
       </td>
     </tr>
     <tr>
-      <td>1.2</td>
+      <td name="number">1.2</td>
       <td>Inline skeleton</td>
       <td><br>
       </td>
@@ -98,7 +113,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>1.3</td>
+      <td name="number">1.3</td>
       <td>Native skeleton</td>
       <td><br>
       </td>
@@ -120,7 +135,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>1.4</td>
+      <td name="number">1.4</td>
       <td>BOM skeleton</td>
       <td>N/A</td>
       <td>N/A</td>
@@ -138,37 +153,42 @@ run<sup>[i]</sup></td>
     </tr>
   </tbody>
 </table>
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
-      <th rowspan="2"><br>
-      <br>
-2</th>
-      <th rowspan="2"><br>
-      <br>
-Vista&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th rowspan="2" name="number">2</th>
+      <th rowspan="2">Win7<br>
+      </th>
       <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
 vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
     </tr>
     <tr>
-      <td>source<sup>[a]</sup></td>
+      <td>source<sup><br>
+[a]</sup></td>
       <td>source-<br>
 all<sup>[b]</sup></td>
       <td style="vertical-align: top;">source-<br>
-hybrid<sup>[a]</sup> </td>
-      <td>build<sup>[c]</sup></td>
-      <td>api<sup>[d]</sup></td>
-      <td>test<sup>[e]</sup></td>
-      <td>lint<sup>[f]</sup></td>
-      <td>inspector<sup>[g]</sup></td>
+hybrid<sup><br>
+[a]</sup> </td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<sup><br>
+[d]</sup></td>
+      <td>test<sup><br>
+[e]</sup></td>
+      <td>lint<sup><br>
+[f]</sup></td>
+      <td>inspector<sup><br>
+[g]</sup></td>
       <td>simulation-<br>
 build<sup>[h]</sup></td>
       <td>simulation-<br>
 run<sup>[i]</sup></td>
-      <td>migration<sup>[l]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
     </tr>
     <tr>
-      <td>2.1</td>
+      <td name="number">2.1</td>
       <td>GUI skeleton</td>
       <td><br>
       </td>
@@ -194,7 +214,7 @@ run<sup>[i]</sup></td>
       </td>
     </tr>
     <tr>
-      <td>2.2</td>
+      <td name="number">2.2</td>
       <td>Inline skeleton</td>
       <td><br>
       </td>
@@ -219,7 +239,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>2.3</td>
+      <td name="number">2.3</td>
       <td>Native skeleton</td>
       <td><br>
       </td>
@@ -241,7 +261,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>2.4</td>
+      <td name="number">2.4</td>
       <td>BOM skeleton</td>
       <td>N/A</td>
       <td>N/A</td>
@@ -259,37 +279,41 @@ run<sup>[i]</sup></td>
     </tr>
   </tbody>
 </table>
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
-      <th rowspan="2"><br>
-      <br>
-3</th>
-      <th rowspan="2"><br>
-      <br>
-Cygwin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th rowspan="2" name="number">3</th>
+      <th rowspan="2">Cygwin</th>
       <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
 vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
     </tr>
     <tr>
-      <td>source<sup>[a]</sup></td>
+      <td>source<br>
+      <sup>[a]</sup></td>
       <td>source-<br>
 all<sup>[b]</sup></td>
       <td style="vertical-align: top;">source-<br>
-hybrid<sup>[a]</sup></td>
-      <td>build<sup>[c]</sup></td>
-      <td>api<sup>[d]</sup></td>
-      <td>test<sup>[e]</sup></td>
-      <td>lint<sup>[f]</sup></td>
-      <td>inspector<sup>[g]</sup></td>
+hybrid<sup><br>
+[a]</sup></td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<sup><br>
+[d]</sup></td>
+      <td>test<sup><br>
+[e]</sup></td>
+      <td>lint<sup><br>
+[f]</sup></td>
+      <td>inspector<sup><br>
+[g]</sup></td>
       <td>simulation-<br>
 build<sup>[h]</sup></td>
       <td>simulation-<br>
 run<sup>[i]</sup></td>
-      <td>migration<sup>[l]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
     </tr>
     <tr>
-      <td>3.1</td>
+      <td name="number">3.1</td>
       <td>GUI skeleton</td>
       <td><br>
       </td>
@@ -315,7 +339,7 @@ run<sup>[i]</sup></td>
       </td>
     </tr>
     <tr>
-      <td>3.2</td>
+      <td name="number">3.2</td>
       <td>Inline skeleton</td>
       <td><br>
       </td>
@@ -340,7 +364,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>3.3</td>
+      <td name="number">3.3</td>
       <td>Native skeleton</td>
       <td><br>
       </td>
@@ -362,7 +386,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>3.4</td>
+      <td name="number">3.4</td>
       <td>BOM skeleton</td>
       <td>N/A</td>
       <td>N/A</td>
@@ -380,37 +404,41 @@ run<sup>[i]</sup></td>
     </tr>
   </tbody>
 </table>
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
-      <th rowspan="2"><br>
-      <br>
-4</th>
-      <th rowspan="2"><br>
-      <br>
-MacOSX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th rowspan="2" name="number">4</th>
+      <th rowspan="2">OSX</th>
       <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
 vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
     </tr>
     <tr>
-      <td>source<sup>[a]</sup></td>
+      <td>source<br>
+      <sup>[a]</sup></td>
       <td>source-<br>
 all<sup>[b]</sup></td>
       <td style="vertical-align: top;">source-<br>
-hybrid<sup>[a]</sup></td>
-      <td>build<sup>[c]</sup></td>
-      <td>api<sup>[d]</sup></td>
-      <td>test<sup>[e]</sup></td>
-      <td>lint<sup>[f]</sup></td>
-      <td>inspector<sup>[g]</sup></td>
+hybrid<sup><br>
+[a]</sup></td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<sup><br>
+[d]</sup></td>
+      <td>test<sup><br>
+[e]</sup></td>
+      <td>lint<sup><br>
+[f]</sup></td>
+      <td>inspector<sup><br>
+[g]</sup></td>
       <td>simulation-<br>
 build<sup>[h]</sup></td>
       <td>simulation-<br>
 run<sup>[i]</sup></td>
-      <td>migration<sup>[l]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
     </tr>
     <tr>
-      <td>4.1</td>
+      <td name="number">4.1</td>
       <td>GUI skeleton</td>
       <td><br>
       </td>
@@ -436,7 +464,7 @@ run<sup>[i]</sup></td>
       </td>
     </tr>
     <tr>
-      <td>4.2</td>
+      <td name="number">4.2</td>
       <td>Inline skeleton</td>
       <td><br>
       </td>
@@ -461,7 +489,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>4.3</td>
+      <td name="number">4.3</td>
       <td>Native skeleton</td>
       <td><br>
       </td>
@@ -483,7 +511,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>4.4</td>
+      <td name="number">4.4</td>
       <td>BOM skeleton</td>
       <td>N/A</td>
       <td>N/A</td>
@@ -501,37 +529,41 @@ run<sup>[i]</sup></td>
     </tr>
   </tbody>
 </table>
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
-      <th rowspan="2"><br>
-      <br>
-5</th>
-      <th rowspan="2"><br>
-      <br>
-Linux&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th rowspan="2" name="number">5</th>
+      <th rowspan="2">Linux</th>
       <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
 vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
     </tr>
     <tr>
-      <td>source<sup>[a]</sup></td>
+      <td>source<br>
+      <sup>[a]</sup></td>
       <td>source-<br>
 all<sup>[b]</sup></td>
       <td style="vertical-align: top;">source-<br>
-hybrid<sup>[a]</sup></td>
-      <td>build<sup>[c]</sup></td>
-      <td>api<sup>[d]</sup></td>
-      <td>test<sup>[e]</sup></td>
-      <td>lint<sup>[f]</sup></td>
-      <td>inspector<sup>[g]</sup></td>
+hybrid<sup><br>
+[a]</sup></td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<sup><br>
+[d]</sup></td>
+      <td>test<sup><br>
+[e]</sup></td>
+      <td>lint<sup><br>
+[f]</sup></td>
+      <td>inspector<sup><br>
+[g]</sup></td>
       <td>simulation-<br>
 build<sup>[h]</sup></td>
       <td>simulation-<br>
 run<sup>[i]</sup></td>
-      <td>migration<sup>[l]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
     </tr>
     <tr>
-      <td>5.1</td>
+      <td name="number">5.1</td>
       <td>GUI skeleton</td>
       <td><br>
       </td>
@@ -557,7 +589,7 @@ run<sup>[i]</sup></td>
       </td>
     </tr>
     <tr>
-      <td>5.2</td>
+      <td name="number">5.2</td>
       <td>Inline skeleton</td>
       <td><br>
       </td>
@@ -582,7 +614,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>5.3</td>
+      <td name="number">5.3</td>
       <td>Native skeleton</td>
       <td><br>
       </td>
@@ -604,7 +636,7 @@ run<sup>[i]</sup></td>
       <td>N/A</td>
     </tr>
     <tr>
-      <td>5.4</td>
+      <td name="number">5.4</td>
       <td>BOM skeleton</td>
       <td>N/A</td>
       <td>N/A</td>
@@ -622,35 +654,39 @@ run<sup>[i]</sup></td>
     </tr>
   </tbody>
 </table>
-<table width="100%" border="1" cellpadding="6" cellspacing="0">
+<table border="1" cellpadding="2" cellspacing="0">
   <tbody>
     <tr>
-      <th rowspan="2"><br>
-      <br>
-6</th>
-      <th rowspan="2"><br>
-      <br>
-&lt;any&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+      <th rowspan="2" name="number">6</th>
+      <th rowspan="2">&lt;any&gt;<sup style="font-weight: normal;">[n]</sup> </th>
       <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
 vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
     </tr>
     <tr>
-      <td>source<sup>[a]</sup></td>
+      <td>source<br>
+      <sup>[a]</sup></td>
       <td>source-all<sup>[b]</sup></td>
       <td style="vertical-align: top;">source-<br>
-hybrid<sup>[a]</sup></td>
-      <td>build<sup>[c]</sup></td>
-      <td>api<sup>[d]</sup></td>
-      <td>test<sup>[e]</sup></td>
-      <td>lint<sup>[f]</sup></td>
-      <td>inspector<sup>[g]</sup></td>
+hybrid<sup><br>
+[a]</sup></td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<sup><br>
+[d]</sup></td>
+      <td>test<sup><br>
+[e]</sup></td>
+      <td>lint<sup><br>
+[f]</sup></td>
+      <td>inspector<sup><br>
+[g]</sup></td>
       <td>simulation-build<sup>[h]</sup></td>
       <td>simulation-run<sup>[i]</sup></td>
-      <td>migration<sup>[l]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
     </tr>
     <tr>
-      <td>6.1</td>
-      <td>Contribution demo skeleton<sup>[k]</sup></td>
+      <td name="number">6.1</td>
+      <td>Contrib demo<sup>[k]</sup> skeleton</td>
       <td><br>
       </td>
       <td><br>
@@ -672,6 +708,64 @@ hybrid<sup>[a]</sup></td>
       <td><br>
       </td>
       <td>N/A</td>
+    </tr>
+  </tbody>
+</table>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tbody>
+    <tr>
+      <th rowspan="2" name="number">7</th>
+      <th rowspan="2">Safari 5<sup style="font-weight: normal;">[m]</sup> </th>
+      <th colspan="11">Job&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>(Python
+vers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</small></th>
+    </tr>
+    <tr>
+      <td>source<br>
+      <sup>[a]</sup></td>
+      <td>source-all<sup>[b]</sup></td>
+      <td style="vertical-align: top;">source-<br>
+hybrid<sup><br>
+[a]</sup></td>
+      <td>build<sup><br>
+[c]</sup></td>
+      <td>api<sup><br>
+[d]</sup></td>
+      <td>test<sup><br>
+[e]</sup></td>
+      <td>lint<sup><br>
+[f]</sup></td>
+      <td>inspector<sup><br>
+[g]</sup></td>
+      <td>simulation-build<sup>[h]</sup></td>
+      <td>simulation-run<sup>[i]</sup></td>
+      <td>migration<sup><br>
+[l]</sup></td>
+    </tr>
+    <tr>
+      <td name="number">7.1</td>
+      <td>Mobile Skeleton</td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td><br>
+      </td>
+      <td>N/A
+      </td>
+      <td>N/A
+      </td>
+      <td>N/A
+      </td>
+      <td>N/A
+      </td>
     </tr>
   </tbody>
 </table>
@@ -706,22 +800,71 @@ concerning <em>simulator</em>-related classes. </dd>
   <dt>[h]</dt>
   <dd> The console output should contain no warnings. </dd>
   <dt>[i]</dt>
-  <dd> This job requires extensive additional installation (java,
-selenium rc, ...) and configuration efforts. See the appropriate manual
-page (e.g. <a
- href="../../../documentation/manual/build/html/pages/development/simulator.html">../../../documentation/manual/build/html/pages/development/simulator.html</a>).
-
-
+  <dd> How to set up the Simulator environment:
+    <ul>
+      <li>Download the following files and place them in an easily accessible folder, e.g. <em>/home/affe/workspace/simulator</em>:
+        <ul>
+          <li><a href="http://webtechfe-test01.schlund.de/%7Eqooxdoo/workspace/simulator/js.jar">Rhino</a></li>
+          <li><a href="http://webtechfe-test01.schlund.de/%7Eqooxdoo/workspace/simulator/selenium-java-client-driver.jar">Selenium Java Client</a></li>
+          <li><a href="http://webtechfe-test01.schlund.de/%7Eqooxdoo/workspace/simulator/selenium-server.jar">Selenium Server</a></li>
+        </ul>
+      </li>
+      <li>Open a shell and go to the directory where you downloaded the files, then run this command:
+        <pre>java -jar selenium-server.jar -userExtensions &lt;QOOXDOO_PATH&gt;/component/simulator/tool/user-extensions/user-extensions.js</pre>
+        <ul>
+          <li><em>QOOXDOO_PATH</em> must be replaced with the (relative or absolute) file system path of a qooxdoo SDK or trunk checkout.</li>
+          <li>The Selenium server should now run on localhost:4444. Do not close the shell window.</li>
+        </ul>
+      </li>
+      <li>Create a qooxdoo GUI skeleton application, e.g. <em>myapplication</em>, and generate the build version.</li>
+      <li>Make sure the application can be accessed over HTTP, e.g. by
+running <em>python -m CGIHTTPServer</em> </li>
+      <li>Edit the config.json file of the application.
+        <ul>
+          <li>Add the following job configuration:
+            <pre>    "simulation-run" :
+    {
+      "let" :
+      {
+        "SIMULATOR_CLASSPATH" : [ "/home/affe/workspace/simulator/selenium-java-client-driver.jar",
+                                  "/home/affe/workspace/simulator/js.jar" ]
+      },
+      
+      "environment" :
+      {
+        "simulator.selServer" : "localhost",
+        "simulator.selPort" : 4444,
+        "simulator.testBrowser" : "*firefox3",
+        "simulator.autHost" : "http://localhost",
+        "simulator.autPath" : "/home/affe/workspace/myapplication/build/index.html"
+      }
+    }
+          </pre>
+          </li>
+          <li>Use the file system path of the directory where you
+downloaded the files earlier for the two entries in <em>SIMULATOR_CLASSPATH</em>
+          </li>
+          <li>Replace the value of <em>simulator.autPath</em> with the
+web server path of your application</li>
+        </ul>
+      </li>
+      <li>Build and run the Simulator application
+        <ul>
+          <li>In your application skeleton, run 
+            <pre>generate.py simulation-build</pre> 
+            and note any warnings (see [h])</li>
+          <li>Provided there were no errors, run
+            <pre>generate.py simulation-run</pre>
+          </li>
+          <li>Two Firefox windows should open and the test should run.  The Generator's shell output should list two tests as passed.</li>
+        </ul>
+      </li>
+    </ul>
   </dd>
   <dt>[j]</dt>
   <dd> <em>exclude</em> warnings in the console output are ok. </dd>
   <dt>[k]</dt>
-  <dd> This is to test the default demo of a contribution skeleton.
-After creating the skeleton, change dir to <em>trunk/demo/default</em>.
-If
-you're not testing in a <em>qooxdoo-contrib</em> checkout, you need
-to adapt <em>QOOXDOO_PATH</em> in config.json. Then, run the normal
-tests. </dd>
+  <dd> This is to test the default demo of a contribution skeleton. After creating the skeleton, change dir to <em>trunk/demo/default</em>. If you're not testing in a <em>qooxdoo-contrib</em> checkout, you need to adapt <em>QOOXDOO_PATH</em> in config.json. Then, run the normal tests. </dd>
   <dt>[l]</dt>
   <dd>
     <ul>
@@ -755,6 +898,12 @@ contains the per-version, per-file entries, deprecation warnings and
 modification statements. After that, a <code>generate.py source</code>
 may or may not terminate normally, and the created application, if any,
 may or may not run in the browser. </dd>
+  <dt>[m]</dt>
+  <dd>Mobile skeleton currently only tested in Safari 5. Testing on a single platform is enough.<br>
+  </dd>
+  <dt>[n]</dt>
+  <dd>Testing on a single platform is enough.<br>
+  </dd>
 </dl>
 </body>
 </html>

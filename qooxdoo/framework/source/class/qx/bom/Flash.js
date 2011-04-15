@@ -101,7 +101,7 @@ qx.Class.define("qx.bom.Flash",
       }
 
       //Check parameters and check if element for flash is in DOM, before call creates swf.
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         qx.core.Assert.assertElement(element, "Invalid parameter 'element'.");
         qx.core.Assert.assertMap(attributes, "Invalid parameter 'attributes'.");
@@ -172,7 +172,7 @@ qx.Class.define("qx.bom.Flash",
      * @return {void}
      * @signature function(element, win)
      */
-    destroy : qx.core.Variant.select("qx.client",
+    destroy : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, win)
       {
@@ -195,7 +195,11 @@ qx.Class.define("qx.bom.Flash",
 
       "default" : function(element, win) {
         element = this.__getFlashObject(element);
-        element.parentNode.removeChild(element);
+
+        if (element.parentNode) {
+          element.parentNode.removeChild(element);
+        }
+
         delete this._flashObjects[element.id];
       }
     }),
@@ -229,7 +233,7 @@ qx.Class.define("qx.bom.Flash",
      * @signature function(element)
      * @param element {Element} Flash object element to destroy.
      */
-    __destroyObjectInIE : qx.core.Variant.select("qx.client",
+    __destroyObjectInIE : qx.core.Environment.select("engine.name",
     {
       "mshtml" : qx.event.GlobalError.observeMethod(function(element)
       {
@@ -240,7 +244,9 @@ qx.Class.define("qx.bom.Flash",
           }
         }
 
-        element.parentNode.removeChild(element);
+        if (element.parentNode) {
+          element.parentNode.removeChild(element);
+        }
         delete this._flashObjects[element.id];
       }),
 
@@ -263,7 +269,7 @@ qx.Class.define("qx.bom.Flash",
       window.__flash_savedUnloadHandler = function() {};
 
       // Remove listener again
-      window.detachEvent("onbeforeunload", qx.bom.Flash.__fixOutOfMemoryError);
+      qx.bom.Event.removeNativeListener(window, "beforeunload", qx.bom.Flash.__fixOutOfMemoryError);
     }),
 
 
@@ -276,7 +282,7 @@ qx.Class.define("qx.bom.Flash",
      * @param win {Window} Window to create the element for.
      * @signature function(element, attributes, params, win)
      */
-    __createSwf : qx.core.Variant.select("qx.client",
+    __createSwf : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, attributes, params, win)
       {
@@ -344,7 +350,7 @@ qx.Class.define("qx.bom.Flash",
 
   defer : function(statics)
   {
-    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+    if ((qx.core.Environment.get("engine.name") == "mshtml")) {
       qx.bom.Event.addNativeListener(window, "beforeunload", statics.__fixOutOfMemoryError);
     }
   }

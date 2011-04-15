@@ -62,8 +62,8 @@ qx.Class.define("qx.ui.form.TextField",
 
     // overridden
     _renderContentElement : function(innerHeight, element) {
-     if (qx.core.Variant.isSet("qx.client", "mshtml") &&
-         qx.bom.client.Engine.VERSION < 9)
+     if ((qx.core.Environment.get("engine.name") == "mshtml") &&
+         qx.core.Environment.get("engine.version") < 9)
      {
        element.setStyles({
          "line-height" : innerHeight + 'px'

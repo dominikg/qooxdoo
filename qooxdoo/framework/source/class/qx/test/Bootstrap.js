@@ -18,6 +18,17 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+#ignore(qx.test.ExtendSuper)
+#ignore(qx.test.ExtendSuper.prototype)
+#ignore(qx.test.Super.prototype)
+#ignore(qx.test.Super)
+#ignore(qx.test.ExtendNull)
+#ignore(qx.test.ExtendQxObject)
+#ignore(qx.test.ExtendError)
+#ignore(qx.test.Construct)
+************************************************************************ */
+
 qx.Class.define("qx.test.Bootstrap",
 {
   extend : qx.dev.unit.TestCase,
@@ -150,7 +161,9 @@ qx.Class.define("qx.test.Bootstrap",
       result = add(1, 2);
 
       // The assertEquals test fails in Safari 3 but is fixed in WebKit nightly
-      if (qx.bom.client.Browser.NAME == "safari" && qx.bom.client.Browser.VERSION < 4 ) {
+      if (qx.core.Environment.get("browser.version") == "safari" &&
+        qx.core.Environment.get("browser.version") < 4 )
+      {
         this.assertNotEquals(context, window, "This test fails if the issue is "
         + "fixed in Safari 3.");
       } else {

@@ -33,8 +33,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/html.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/html.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.embed.Html",
 {
@@ -151,7 +151,7 @@ qx.Class.define("qx.ui.embed.Html",
       elem.setAttribute("html", value||"");
 
       // Local style override problematic sections applied through
-      // a optional classname
+      // an optional classname
       elem.setStyles({
         "padding": "0px",
         "border": "none"
@@ -174,7 +174,7 @@ qx.Class.define("qx.ui.embed.Html",
        * We have to set the value to "text" in Webkit for the container and
        * content element
        */
-      if (qx.core.Variant.isSet("qx.client", "webkit"))
+      if ((qx.core.Environment.get("engine.name") == "webkit"))
       {
         this.getContainerElement().setStyle("userSelect", value ? "text" : "none");
         this.getContentElement().setStyle("userSelect", value ? "text" : "none");

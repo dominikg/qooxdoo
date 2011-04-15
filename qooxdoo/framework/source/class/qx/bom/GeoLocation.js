@@ -5,7 +5,7 @@
    http://qooxdoo.org
 
    Copyright:
-     2004-2011 1&1 Internet AG, Germany, http://www.1und1.de
+     2011 1&1 Internet AG, Germany, http://www.1und1.de
 
    License:
      LGPL: http://www.gnu.org/licenses/lgpl.html
@@ -15,6 +15,7 @@
    Authors:
      * Tino Butz (tbtz)
      * Adrian Olaru (adrianolaru)
+     * Andreas Ecker (ecker)
 
 ************************************************************************ */
 
@@ -22,8 +23,8 @@
 /**
  * EXPERIMENTAL - NOT READY FOR PRODUCTION
  *
- * GeoLocation provides access to geographical location information 
- * associated with the hosting device. 
+ * GeoLocation provides access to geographical location information
+ * associated with the hosting device.
  *
  * For more information see:
  * http://www.w3.org/TR/geolocation-API
@@ -34,41 +35,44 @@ qx.Class.define("qx.bom.GeoLocation",
   extend : qx.core.Object,
   type : "singleton",
 
-  statics :
+
+  construct: function() {
+    this._geolocation = navigator.geolocation;
+  },
+
+
+  events:
   {
+    /** Fired when the position is updated */
+    "position": "qx.event.type.GeoPosition",
+
+    /** Fired when an error occurs */
+    "error": "qx.event.type.Data"
+  },
+
+
+  members:
+  {
+    _watchId: null,
+    _geolocation: null,
+
 
     /**
-     * Create a handler
-     * 
-     * @param cb {Function} callback
-     * @return {Function} handler
-     */
-    _createHandler : function(cb)
-    {
-      return function(position) {
-        var position = new qx.event.type.GeoPosition(position);
-        cb.call(null, position);
-      };
-    },
-
-    
-    /**
-     * Retrieves the current postion and calls the given handler when successfull.
-     * When called several times only the last handler ist called.
-     * 
-     * @param handler {Function} the handler that should be called when the 
-     * position is retrieved. Parameter is an on object of GeoLocationPostion.
-     * @param errorHandler {Function} called when an error occurs.
+     * Retrieves the current position and calls the "position" event.
+     *
      * @param enableHighAccuracy {Function} provide the best possible results
-     * @param timeout {Function} maximum time in ms that is allowed to pass from 
+     * @param timeout {Function} maximum time in ms that is allowed to pass from
      * the call to getCurrentPosition() or watchPosition() until the corresponding
      * callback is invoked.
      * @param maximumAge {Function} cache the position for a specified time.
      */
-    getCurrentPosition : function(handler, errorHandler, enableHighAccuracy, timeout, maximumAge)
+    getCurrentPosition: function(enableHighAccuracy, timeout, maximumAge)
     {
-      var wrappedHandler = qx.bom.GeoLocation._createHandler(handler);
-      navigator.geolocation.getCurrentPosition(wrappedHandler, errorHandler, {
+      var successHandler = qx.lang.Function.bind(this._successHandler, this);
+      var errorHandler = qx.lang.Function.bind(this._errorHandler, this);
+      var wrappedHandler = qx.bom.GeoLocation._createHandler(successHandler);
+
+      this._geolocation.getCurrentPosition(wrappedHandler, errorHandler, {
         enableHighAccuracy: enableHighAccuracy,
         timeout: timeout,
         maximumAge: maximumAge
@@ -77,25 +81,23 @@ qx.Class.define("qx.bom.GeoLocation",
 
 
     /**
-     * Retrieves the current postion and calls the given handler when successfull.
-     * The watch operation then continue to monitor the position of the device 
-     * and invoke the appropriate callback every time this position changes. 
-     * The watch operation continue until the clearWatch  method is called 
-     * with the corresponding identifier. 
-     * 
-     * @param handler {Function} the handler that should be called when the position 
-     * is retrieved. Parameter is an on object of GeoLocationPostion.
-     * @param errorHandler {Function} called when an error occurs.
+     * Starts to watch the position. Calls the "position" event, when the position changed.
+     *
      * @param enableHighAccuracy {Function} provide the best possible results
-     * @param timeout {Function} maximum time in ms that is allowed to pass from 
+     * @param timeout {Function} maximum time in ms that is allowed to pass from
      * the call to getCurrentPosition() or watchPosition() until the corresponding
      * callback is invoked.
      * @param maximumAge {Function} cache the position for a specified time.
      */
-    watchPosition : function(handler, errorHandler, enableHighAccuracy, timeout, maximumAge)
+    startWatchPosition: function(enableHighAccuracy, timeout, maximumAge)
     {
-      var wrappedHandler = this._createHandler(handler);
-      return navigator.geolocation.watchPosition(wrappedHandler, errorHandler, {
+      this.stopWatchPosition();
+
+      var successHandler = qx.lang.Function.bind(this._successHandler, this);
+      var errorHandler = qx.lang.Function.bind(this._errorHandler, this);
+      var wrappedHandler = this._createHandler(successHandler);
+
+      this._watchId = this._geolocation.watchPosition(wrappedHandler, errorHandler, {
         enableHighAccuracy: enableHighAccuracy,
         timeout: timeout,
         maximumAge: maximumAge
@@ -105,26 +107,12 @@ qx.Class.define("qx.bom.GeoLocation",
 
     /**
      * Stops watching the position.
-     * @param watchId {Number} The id of the watch.
      */
-    clearWatch : function(watchId)
-    {
-      navigator.geolocation.clearWatch(watchId);
-    }
-  },
-  
-  events:
-  {
-    /** Fired when the position is updated */
-    "position": "qx.event.type.Data",
-
-    /** Fired when an error occurs */
-    "error": "qx.event.type.Data"
-  },
-  
-  members:
-  {
-    _watchId: null,
+    stopWatchPosition: function() {
+      if (this._watchId != undefined) {
+        this._geolocation.clearWatch(this._watchId);
+      }
+    },
 
 
     /**
@@ -135,7 +123,6 @@ qx.Class.define("qx.bom.GeoLocation",
     _successHandler: function(position) {
       this.fireDataEvent("position", position);
     },
-
 
 
     /**
@@ -149,46 +136,17 @@ qx.Class.define("qx.bom.GeoLocation",
 
 
     /**
-     * Retrieves the current postion and calls the "positon" event.
+     * Create a handler
      *
-     * @param enableHighAccuracy {Function} provide the best possible results
-     * @param timeout {Function} maximum time in ms that is allowed to pass from 
-     * the call to getCurrentPosition() or watchPosition() until the corresponding
-     * callback is invoked.
-     * @param maximumAge {Function} cache the position for a specified time.
+     * @param cb {Function} callback
+     * @return {Function} handler
      */
-    getCurrentPosition: function(enableHighAccuracy, timeout, maximumAge)
+    _createHandler : function(cb)
     {
-      var successHandler = qx.lang.Function.bind(this._successHandler, this);
-      var errorHandler = qx.lang.Function.bind(this._errorHandler, this);
-      qx.bom.GeoLocation.getCurrentPosition(successHandler, errorHandler, enableHighAccuracy, timeout, maximumAge);
-    },
-
-
-    /**
-     * Starts to watch the postion. Calls the "positon" event, when the position changed.
-     * 
-     * @param enableHighAccuracy {Function} provide the best possible results
-     * @param timeout {Function} maximum time in ms that is allowed to pass from 
-     * the call to getCurrentPosition() or watchPosition() until the corresponding
-     * callback is invoked.
-     * @param maximumAge {Function} cache the position for a specified time.
-     */
-    startWatchPosition: function(enableHighAccuracy, timeout, maximumAge)
-    {
-      this.stopWatchPosition();
-      var successHandler = qx.lang.Function.bind(this._successHandler, this);
-      var errorHandler = qx.lang.Function.bind(this._errorHandler, this);
-      this._watchId = qx.bom.GeoLocation.watchPosition(successHandler, errorHandler, enableHighAccuracy, timeout, maximumAge);
-    },
-
-
-    /**
-     * Stops watching the position.
-     */
-    stopWatchPosition: function()
-    {
-      qx.bom.GeoLocation.clearWatch(this._watchId);
+      return function(position) {
+        var position = new qx.event.type.GeoPosition(position);
+        cb.call(null, position);
+      };
     }
   },
 

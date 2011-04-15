@@ -14,23 +14,19 @@
 
 ************************************************************************ */
 
-/* ************************************************************************
-#ignore(simulator)
-************************************************************************ */
-
 /**
  * QxSelenium test case for the widget.Tree demo.
- * 
+ *
  * @lint ignoreUndefined(simulator)
  */
 qx.Class.define("demobrowser.simulation.demo.widget.Tree", {
 
   extend : demobrowser.simulation.demo.Abstract,
-  
+
   members :
   {
     locators : null,
-    
+
     setUp : function()
     {
       this.base(arguments);
@@ -40,17 +36,17 @@ qx.Class.define("demobrowser.simulation.demo.widget.Tree", {
         this.locators.textField = this.iframeRootLocator + "/qx.ui.container.Composite/qx.ui.groupbox.GroupBox/qx.ui.form.TextField"
       }
     },
-    
+
     testSingleSelection : function()
     {
       //get the label of the tree root's first child
       var firstItemLocator = this.locators.tree + "/child[0]/child[0]";
-      var firstItemLabel = String(simulator.QxSelenium.getInstance().qxObjectExecFunction(firstItemLocator, "getLabel"));
+      var firstItemLabel = String(this.getQxSelenium().getQxObjectFunction(firstItemLocator, "getLabel"));
       //click the root's first child
-      simulator.QxSelenium.getInstance().qxClick(firstItemLocator);
+      this.getQxSelenium().qxClick(firstItemLocator);
       this.getSimulation().wait(1000);
       //check the text field's value
-      var textFieldValue = String(simulator.QxSelenium.getInstance().qxObjectExecFunction(this.locators.textField, "getValue"));
+      var textFieldValue = String(this.getQxSelenium().getQxObjectFunction(this.locators.textField, "getValue"));
       this.assertEquals(firstItemLabel, textFieldValue);
     }
   }

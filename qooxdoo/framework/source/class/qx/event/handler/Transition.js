@@ -5,7 +5,7 @@
    http://qooxdoo.org
 
    Copyright:
-     2010 Deutsche Telekom AG, http://www.telekom.de
+     2004-2011 1&1 Internet AG, Germany, http://www.1und1.de
 
    License:
      LGPL: http://www.gnu.org/licenses/lgpl.html
@@ -13,16 +13,30 @@
      See the LICENSE file in the project's top-level directory for details.
 
    Authors:
-     * Sebastian Werner (wpbasti)
+     * Tino Butz (tbtz)
+
+   ======================================================================
+
+   This class contains code based on the following work:
+
+   * Unify Project
+
+     Homepage:
+       http://unify-project.org
+
+     Copyright:
+       2009-2010 Deutsche Telekom AG, Germany, http://telekom.com
+
+     License:
+       MIT: http://www.opensource.org/licenses/mit-license.php
 
 ************************************************************************ */
 
 /**
- * This class provides support for HTML5 transition events.
+ * EXPERIMENTAL - NOT READY FOR PRODUCTION
  *
- * Supported event types are: transitionEnd, animationStart, animationIteration and animationEnd.
- *
- * Currently only working on recent Webkit versions with transition support.
+ * This class provides support for HTML5 transition and animation events.
+ * Currently only WebKit and Firefox are supported.
  */
 qx.Class.define("qx.event.handler.Transition",
 {
@@ -47,12 +61,8 @@ qx.Class.define("qx.event.handler.Transition",
   {
     this.base(arguments);
 
-    // Define shorthands
-    this.__window = manager.getWindow();
-    this.__root = this.__window.document.documentElement;
-
-    // Wrap functions
-    this.__onEventWrapper = qx.lang.Function.listener(this.__onEvent, this);
+    this.__registeredEvents = {};
+    this.__onEventWrapper = qx.lang.Function.listener(this._onNative, this);
   },
 
 
@@ -72,14 +82,61 @@ qx.Class.define("qx.event.handler.Transition",
     /** {Map} Supported event types */
     SUPPORTED_TYPES :
     {
-      transitionEnd : 1
+      transitionEnd : 1,
+      animationEnd : 1,
+      animationStart : 1,
+      animationIteration : 1
     },
 
     /** {Integer} Which target check to use */
     TARGET_CHECK : qx.event.IEventHandler.TARGET_DOMNODE,
 
     /** {Integer} Whether the method "canHandleEvent" must be called */
-    IGNORE_CAN_HANDLE : true
+    IGNORE_CAN_HANDLE : true,
+
+    /** Mapping of supported event types to native event types */
+    TYPE_TO_NATIVE : qx.core.Environment.select("engine.name",
+    {
+      "webkit" :
+      {
+        transitionEnd : "webkitTransitionEnd",
+        animationEnd : "webkitAnimationEnd",
+        animationStart : "webkitAnimationStart",
+        animationIteration : "webkitAnimationIteration"
+      },
+
+      "gecko" :
+      {
+        transitionEnd : "mozTransitionEnd",
+        animationEnd : "mozAnimationEnd",
+        animationStart : "mozAnimationStart",
+        animationIteration : "mozAnimationIteration"
+      },
+
+      "default" : null
+    }),
+
+    /** Mapping of native event types to supported event types */
+    NATIVE_TO_TYPE : qx.core.Environment.select("engine.name",
+    {
+      "webkit" :
+      {
+        webkitTransitionEnd : "transitionEnd",
+        webkitAnimationEnd : "animationEnd",
+        webkitAnimationStart : "animationStart",
+        webkitAnimationIteration : "animationIteration"
+      },
+
+      "gecko" :
+      {
+        mozTransitionEnd : "transitionEnd",
+        mozAnimationEnd : "animationEnd",
+        mozAnimationStart : "animationStart",
+        mozAnimationIteration : "animationIteration"
+      },
+
+      "default" : null
+    })
   },
 
 
@@ -95,42 +152,7 @@ qx.Class.define("qx.event.handler.Transition",
   members:
   {
     __onEventWrapper : null,
-    __window : null,
-    __root : null,
-
-    __nativeTypes : qx.core.Variant.select("qx.client",
-    {
-      "webkit" :
-      {
-        transitionEnd : "webkitTransitionEnd"
-      },
-
-      "gecko" :
-      {
-        // needs to be completely lowercase as of Firefox 4.0 beta 4
-        transitionEnd : "transitionend"
-      },
-
-      "default" : null
-    }),
-
-    __publicTypes : qx.core.Variant.select("qx.client",
-    {
-      "webkit" :
-      {
-        webkitTransitionEnd : "transitionEnd"
-      },
-
-      "gecko" :
-      {
-        // needs to be completely lowercase as of Firefox 4.0 beta 4
-        transitionend : "transitionEnd"
-      },
-
-      "default" : null
-    }),
-
-
+    __registeredEvents : null,
 
 
     /*
@@ -149,10 +171,21 @@ qx.Class.define("qx.event.handler.Transition",
     /**
      * @signature function(target, type, capture)
      */
-    registerEvent: qx.core.Variant.select("qx.client",
+    registerEvent: qx.core.Environment.select("engine.name",
     {
-      "webkit|gecko" : function(target, type, capture) {
-        qx.bom.Event.addNativeListener(target, this.__nativeTypes[type], this.__onEventWrapper);
+      "webkit|gecko" : function(target, type, capture)
+      {
+        var hash = qx.core.ObjectRegistry.toHashCode(target) + type;
+
+        var nativeType = qx.event.handler.Transition.TYPE_TO_NATIVE[type];
+
+        this.__registeredEvents[hash] =
+        {
+          target:target,
+          type : nativeType
+        };
+
+        qx.bom.Event.addNativeListener(target, nativeType, this.__onEventWrapper);
       },
 
       "default" : function() {}
@@ -163,10 +196,23 @@ qx.Class.define("qx.event.handler.Transition",
     /**
      * @signature function(target, type, capture)
      */
-    unregisterEvent: qx.core.Variant.select("qx.client",
+    unregisterEvent: qx.core.Environment.select("engine.name",
     {
-      "webkit|gecko" : function(target, type, capture) {
-        qx.bom.Event.removeNativeListener(target, this.__nativeTypes[type], this.__onEventWrapper);
+      "webkit|gecko" : function(target, type, capture)
+      {
+        var events = this.__registeredEvents;
+
+        if (!events) {
+          return;
+        }
+
+        var hash = qx.core.ObjectRegistry.toHashCode(target) + type;
+
+        if (events[hash]) {
+          delete events[hash];
+        }
+
+        qx.bom.Event.removeNativeListener(target, qx.event.handler.Transition.TYPE_TO_NATIVE[type], this.__onEventWrapper);
       },
 
       "default" : function() {}
@@ -176,28 +222,48 @@ qx.Class.define("qx.event.handler.Transition",
 
     /*
     ---------------------------------------------------------------------------
-      NATIVE EVENT OBSERVERS
+      EVENT-HANDLER
     ---------------------------------------------------------------------------
     */
 
     /**
-     * Global handler for the touch event.
+     * Global handler for the transition event.
      *
      * @signature function(domEvent)
      * @param domEvent {Event} DOM event
      */
-    __onEvent : qx.event.GlobalError.observeMethod(function(nativeEvent) 
-    {
-      // Filter name to be non-browser specific
-      var property = nativeEvent.propertyName;
-      if (property.charAt(0) == "-") {
-        property = property.substring(property.indexOf("-", 1)+1);
-      }
-      
-      var args = [nativeEvent, nativeEvent.target, property];
-      qx.event.Registration.fireEvent(nativeEvent.target, this.__publicTypes[nativeEvent.type], qx.event.type.Transition, args);
+    _onNative : qx.event.GlobalError.observeMethod(function(nativeEvent) {
+      qx.event.Registration.fireEvent(nativeEvent.target, qx.event.handler.Transition.NATIVE_TO_TYPE[nativeEvent.type], qx.event.type.Event);
     })
   },
+
+
+
+
+
+  /*
+  *****************************************************************************
+     DESTRUCTOR
+  *****************************************************************************
+  */
+
+  destruct : function()
+  {
+    var event;
+    var events = this.__registeredEvents;
+
+    for (var id in events)
+    {
+      event = events[id];
+      if (event.target) {
+        qx.bom.Event.removeNativeListener(event.target, event.type, this.__onEventWrapper);
+      }
+    }
+
+    this.__registeredEvents = this.__onEventWrapper = null;
+  },
+
+
 
 
 

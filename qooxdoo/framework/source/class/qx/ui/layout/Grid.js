@@ -71,8 +71,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/layout/grid.html'>
- * Extended documentation</a> and links to demos of this layout in the qooxdoo wiki.
+ * <a href='http://manual.qooxdoo.org/1.4/pages/layout/grid.html'>
+ * Extended documentation</a> and links to demos of this layout in the qooxdoo manual.
  */
 qx.Class.define("qx.ui.layout.Grid",
 {
@@ -174,9 +174,9 @@ qx.Class.define("qx.ui.layout.Grid",
 
 
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value)
+      "true" : function(item, name, value)
       {
         var layoutProperties = {
           "row" : 1,
@@ -189,7 +189,7 @@ qx.Class.define("qx.ui.layout.Grid",
         this.assert(value >= 0, "Value must be positive");
       },
 
-      "off" : null
+      "false" : null
     }),
 
 
@@ -361,7 +361,7 @@ qx.Class.define("qx.ui.layout.Grid",
      */
     setColumnAlign : function(column, hAlign, vAlign)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         this.assertInteger(column, "Invalid parameter 'column'");
         this.assertInArray(hAlign, ["left", "center", "right"]);
@@ -413,7 +413,7 @@ qx.Class.define("qx.ui.layout.Grid",
      */
     setRowAlign : function(row, hAlign, vAlign)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         this.assertInteger(row, "Invalid parameter 'row'");
         this.assertInArray(hAlign, ["left", "center", "right"]);
@@ -886,10 +886,34 @@ qx.Class.define("qx.ui.layout.Grid",
           } else {
             var totalSpacing = vSpacing * (widgetProps.rowSpan - 1);
             var availableHeight = hint.height - totalSpacing;
-            // check how high each row has to be to fit the set height
-            var rowHeight = Math.floor(availableHeight / widgetProps.rowSpan);
+
+            // get the row height which every child would need to share the
+            // available hight equally
+            var avgRowHeight =
+              Math.floor(availableHeight / widgetProps.rowSpan);
+
+            // get the hight already used and the number of children which do
+            // not have at least that avg row height
+            var usedHeight = 0;
+            var rowsNeedAddition = 0;
             for (var k = 0; k < widgetProps.rowSpan; k++) {
-              rowHeights[widgetRow + k].height = rowHeight;
+              var currentHeight = rowHeights[widgetRow + k].height;
+              usedHeight += currentHeight;
+              if (currentHeight < avgRowHeight) {
+                rowsNeedAddition++;
+              }
+            }
+
+            // the difference of available and used needs to be shared among
+            // those not having the min size
+            var additionalRowHeight =
+              Math.floor((availableHeight - usedHeight) / rowsNeedAddition);
+
+            // add the extra height to the too small children
+            for (var k = 0; k < widgetProps.rowSpan; k++) {
+              if (rowHeights[widgetRow + k].height < avgRowHeight) {
+                rowHeights[widgetRow + k].height += additionalRowHeight;
+              }
             }
           }
         }

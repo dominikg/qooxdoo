@@ -252,7 +252,7 @@ qx.Class.define("qx.bom.Request",
       }
 
       // BUGFIX: Gecko - missing readystatechange calls in synchronous requests
-      if (qx.core.Variant.isSet("qx.client", "gecko"))
+      if ((qx.core.Environment.get("engine.name") == "gecko"))
       {
         if (!async)
         {
@@ -304,7 +304,7 @@ qx.Class.define("qx.bom.Request",
       this.__xmlhttp.send(data);
 
       // BUGFIX: Gecko - missing readystatechange calls in synchronous requests
-      if (qx.core.Variant.isSet("qx.client", "gecko"))
+      if ((qx.core.Environment.get("engine.name") == "gecko"))
       {
         if (!this.__async)
         {
@@ -390,7 +390,7 @@ qx.Class.define("qx.bom.Request",
      */
     __onNativeReadyStateChange : qx.event.GlobalError.observeMethod(function()
     {
-      if (qx.core.Variant.isSet("qx.client", "gecko"))
+      if ((qx.core.Environment.get("engine.name") == "gecko"))
       {
         if (!this.__async) {
           return;
@@ -577,7 +577,7 @@ qx.Class.define("qx.bom.Request",
      * @return {Object} native XMLHttpRequest object (IE uses ActiveX as default if enabled)
      * @signature function()
      */
-    __createNative : qx.core.Variant.select("qx.client",
+    __createNative : qx.core.Environment.select("engine.name",
     {
       "default" : function() {
         return new XMLHttpRequest;
@@ -657,7 +657,7 @@ qx.Class.define("qx.bom.Request",
     {
       var doc = this.__xmlhttp.responseXML;
 
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         // Try parsing responseText
         if (doc && !doc.documentElement && this.__xmlhttp.getResponseHeader("Content-Type").match(/[^\/]+\/[^\+]+\+xml/))
@@ -709,7 +709,7 @@ qx.Class.define("qx.bom.Request",
 
       // Kudos do jquery team for this code.
       // IE error sometimes returns 1223 when it should be 204 so treat it as success, see jquery bug #1450
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         if (this.status === 1223) {
           this.status = 204;

@@ -20,7 +20,6 @@
 
 /* ************************************************************************
 
-#require(qx.core.Setting)
 #require(qx.Interface)
 #require(qx.Mixin)
 
@@ -28,7 +27,11 @@
 #optional(qx.core.property.Multi)
 #optional(qx.core.property.Group)
 
-#use(qx.lang.Core)
+#require(qx.lang.Core)
+
+#require(qx.core.Setting)
+
+#use(qx.lang.Generics)
 
 ************************************************************************ */
 
@@ -138,10 +141,12 @@ qx.Bootstrap.define("qx.Class",
      *       <tr><th>properties</th><td>Map</td><td>Map of property definitions. For a description of the format of a property definition see
      *           {@link qx.core.property}.</td></tr>
      *       <tr><th>members</th><td>Map</td><td>Map of instance members of the class.</td></tr>
+     *       <tr><th>environment</th><td>Map</td><td>Map of environment settings for this class. For a description of the format of a setting see
+     *           {@link qx.core.Environment}.</td></tr>
      *       <tr><th>settings</th><td>Map</td><td>Map of settings for this class. For a description of the format of a setting see
-     *           {@link qx.core.Setting}.</td></tr>
+     *           {@link qx.core.Setting}. This is deprecated since 1.4.</td></tr>
      *       <tr><th>variants</th><td>Map</td><td>Map of settings for this class. For a description of the format of a setting see
-     *           {@link qx.core.Variant}</td></tr>
+     *           {@link qx.core.Variant} This is deprecated since 1.4.</td></tr>
      *       <tr><th>events</th><td>Map</td><td>
      *           Map of events the class fires. The keys are the names of the events and the values are the
      *           corresponding event type class names.
@@ -175,13 +180,10 @@ qx.Bootstrap.define("qx.Class",
       }
 
       // Validate incoming data
-      if (qx.core.Variant.isSet("qx.debug", "on"))
-      {
+      if (qx.core.Environment.get("qx.debug")) {
         try {
           this.__validateConfig(name, config);
-        }
-        catch(ex)
-        {
+        } catch(ex) {
           if (implicitType) {
             ex.message = 'Assumed static class because no "extend" key was found. ' + ex.message;
           }
@@ -220,9 +222,27 @@ qx.Bootstrap.define("qx.Class",
         }
       }
 
+      // Process environment
+      if (config.environment)
+      {
+        for (var key in config.environment) {
+          qx.core.Environment.add(key, config.environment[key]);
+        }
+
+        // @deprecated since 1.4 (also put the environment into the settings)
+        for (var key in config.environment) {
+          qx.core.Setting.defineDeprecated(key, config.environment[key]);
+        }
+      }
+
+      // @deprecated since 1.4 (settings are now environment)
       // Process settings
       if (config.settings)
       {
+        if (qx.core.Environment.get("qx.debug")) {
+          qx.Bootstrap.warn("The usage of settings in class '" + name +
+            "'is deprecated. Please use the 'environment' key instead");
+        }
         for (var key in config.settings) {
           qx.core.Setting.define(key, config.settings[key]);
         }
@@ -231,6 +251,10 @@ qx.Bootstrap.define("qx.Class",
       // Process variants
       if (config.variants)
       {
+        if (qx.core.Environment.get("qx.debug")) {
+          qx.Bootstrap.warn("The usage of variants in class '" + name +
+            "'is deprecated. Please use the 'environment' key instead");
+        }
         for (var key in config.variants) {
           qx.core.Variant.define(key, config.variants[key].allowedValues, config.variants[key].defaultValue);
         }
@@ -245,11 +269,11 @@ qx.Bootstrap.define("qx.Class",
       }
 
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.__validateAbstractInterfaces(clazz);
       }
 
-      
+
       // Process defer
       if (config.defer)
       {
@@ -267,17 +291,17 @@ qx.Bootstrap.define("qx.Class",
           }
         });
       }
-      
+
       return clazz;
     },
 
 
     /**
      * Removes a class from qooxdoo defined by {@link #define}
-     * 
+     *
      * @param name {String} Name of the class
      */
-    undefine : function(name) 
+    undefine : function(name)
     {
       // first, delete the class from the registry
       delete this.$$registry[name];
@@ -290,8 +314,8 @@ qx.Bootstrap.define("qx.Class",
       for (var i = 0; i < ns.length; i++) {
         objects.push(objects[i][ns[i]]);
       }
-      
-      // go through all objects and check for the constructor or empty namespaces 
+
+      // go through all objects and check for the constructor or empty namespaces
       for (var i = objects.length - 1; i >= 1; i--) {
         var last = objects[i];
         var parent = objects[i - 1];
@@ -302,8 +326,8 @@ qx.Bootstrap.define("qx.Class",
         }
       };
     },
-    
-    
+
+
     /**
      * Whether the given class exists
      *
@@ -344,7 +368,7 @@ qx.Bootstrap.define("qx.Class",
      */
     include : function(clazz, mixin)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!mixin) {
           throw new Error("The mixin to include into class '" + clazz.classname + "' is undefined/null!");
@@ -372,7 +396,7 @@ qx.Bootstrap.define("qx.Class",
      */
     patch : function(clazz, mixin)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!mixin) {
           throw new Error("The mixin to patch class '" + clazz.classname + "' is undefined/null!");
@@ -503,7 +527,7 @@ qx.Bootstrap.define("qx.Class",
 
 
     /**
-     * Whether a given class directly includes a interface.
+     * Whether a given class directly includes an interface.
      *
      * This function will only return "true" if the interface was defined
      * in the class declaration ({@link qx.Class#define}) using the "implement"
@@ -651,9 +675,9 @@ qx.Bootstrap.define("qx.Class",
 
 
     /** {Map} allowed keys in non-static class definition */
-    __allowedKeys : qx.core.Variant.select("qx.debug",
+    __allowedKeys : qx.core.Environment.select("qx.debug",
     {
-      "on":
+      "true":
       {
         "type"       : "string",    // String
         "extend"     : "function",  // Function
@@ -663,7 +687,8 @@ qx.Bootstrap.define("qx.Class",
         "statics"    : "object",    // Map
         "properties" : "object",    // Map
         "members"    : "object",    // Map
-        "settings"   : "object",    // Map
+        "settings"   : "object",    // Map @deprecated since 1.4
+        "environment"   : "object", // Map
         "variants"   : "object",    // Map
         "events"     : "object",    // Map
         "defer"      : "function",  // Function
@@ -675,15 +700,16 @@ qx.Bootstrap.define("qx.Class",
 
 
     /** {Map} allowed keys in static class definition */
-    __staticAllowedKeys : qx.core.Variant.select("qx.debug",
+    __staticAllowedKeys : qx.core.Environment.select("qx.debug",
     {
-      "on":
+      "true":
       {
-        "type"       : "string",    // String
-        "statics"    : "object",    // Map
-        "settings"   : "object",    // Map
-        "variants"   : "object",    // Map
-        "defer"      : "function"   // Function
+        "type"        : "string",    // String
+        "statics"     : "object",    // Map
+        "settings"    : "object",    // Map @deprecated since 1.4
+        "environment" : "object",    // Map
+        "variants"    : "object",    // Map
+        "defer"       : "function"   // Function
       },
 
       "default" : null
@@ -693,12 +719,13 @@ qx.Bootstrap.define("qx.Class",
     /**
      * Validates an incoming configuration and checks for proper keys and values
      *
+     * @signature function(name, config)
      * @param name {String} The name of the class
      * @param config {Map} Configuration map
      */
-    __validateConfig : qx.core.Variant.select("qx.debug",
+    __validateConfig : qx.core.Environment.select("qx.debug",
     {
-      "on": function(name, config)
+      "true": function(name, config)
       {
         // Validate type
         if (config.type && !(config.type === "static" || config.type === "abstract" || config.type === "singleton")) {
@@ -728,7 +755,7 @@ qx.Bootstrap.define("qx.Class",
         }
 
         // Validate maps
-        var maps = [ "statics", "properties", "members", "settings", "variants", "events" ];
+        var maps = [ "statics", "properties", "members", "environment", "settings", "variants", "events" ];
         for (var i=0, l=maps.length; i<l; i++)
         {
           var key = maps[i];
@@ -786,6 +813,19 @@ qx.Bootstrap.define("qx.Class",
           }
         }
 
+        // Validate environment
+        if (config.environment)
+        {
+          for (var key in config.environment)
+          {
+            if (key.substr(0, key.indexOf(".")) != name.substr(0, name.indexOf("."))) {
+              throw new Error('Forbidden environment setting "' + key +
+                '" found in "' + name + '". It is forbidden to define a ' +
+                'environment setting for an external namespace!');
+            }
+          }
+        }
+
         // Validate settings
         if (config.settings)
         {
@@ -816,11 +856,12 @@ qx.Bootstrap.define("qx.Class",
     /**
      * Validates the interfaces required by abstract base classes
      *
+     * @signature function(clazz)
      * @param clazz {Class} The configured class.
      */
-    __validateAbstractInterfaces : qx.core.Variant.select("qx.debug",
+    __validateAbstractInterfaces : qx.core.Environment.select("qx.debug",
     {
-      "on": function(clazz)
+      "true": function(clazz)
       {
         var superclass = clazz.superclass;
         while (superclass)
@@ -860,7 +901,7 @@ qx.Bootstrap.define("qx.Class",
     {
       var clazz;
 
-      if (!extend)
+      if (!extend && qx.core.Environment.get("qx.aspects") == false)
       {
         // Create empty/non-empty class
         clazz = statics || {};
@@ -868,7 +909,7 @@ qx.Bootstrap.define("qx.Class",
       }
       else
       {
-        clazz = {};
+        var clazz = {};
 
         if (extend)
         {
@@ -882,12 +923,12 @@ qx.Bootstrap.define("qx.Class",
           } else {
             clazz = construct;
           }
-          
+
           // Add singleton getInstance()
           if (type === "singleton") {
             clazz.getInstance = this.getInstance;
-          }          
-          
+          }
+
           qx.Bootstrap.setDisplayName(construct, name, "constructor");
         }
 
@@ -903,7 +944,19 @@ qx.Bootstrap.define("qx.Class",
             key = a[i];
             var staticValue = statics[key];
 
-            clazz[key] = staticValue;
+            if (qx.core.Environment.get("qx.aspects"))
+            {
+
+              if (staticValue instanceof Function) {
+                staticValue = qx.core.Aspect.wrap(name + "." + key, staticValue, "static");
+              }
+
+              clazz[key] = staticValue;
+            }
+            else
+            {
+              clazz[key] = staticValue;
+            }
           }
         }
       }
@@ -933,6 +986,10 @@ qx.Bootstrap.define("qx.Class",
         // Store destruct onto class
         if (destruct)
         {
+          if (qx.core.Environment.get("qx.aspects")) {
+            destruct = qx.core.Aspect.wrap(name, destruct, "destructor");
+          }
+
           clazz.$$destructor = destruct;
           qx.Bootstrap.setDisplayName(destruct, name, "destruct");
         }
@@ -965,7 +1022,7 @@ qx.Bootstrap.define("qx.Class",
      */
     __addEvents : function(clazz, events, patch)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (typeof events !== "object" || events instanceof Array) {
           throw new Error(clazz.classname + ": the events must be defined as map!");
@@ -1028,10 +1085,10 @@ qx.Bootstrap.define("qx.Class",
        {
          config = properties[name];
 
-         // Check incoming configuration
-         if (qx.core.Variant.isSet("qx.debug", "on")) {
-           qx.core.property.Debug.validateConfig(clazz, name, config, patch);
-         }
+        // Check incoming configuration
+        if (qx.core.Environment.get("qx.debug")) {
+          this.__validateProperty(clazz, name, config, patch);
+        }
 
          // Store name into configuration
          config.name = name;
@@ -1092,7 +1149,7 @@ qx.Bootstrap.define("qx.Class",
         key = a[i];
         member = members[key];
 
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           if (proto[key] !== undefined && key.charAt(0) == "_" && key.charAt(1) == "_") {
             throw new Error('Overwriting private member "' + key + '" of Class "' + clazz.classname + '" is not allowed!');
@@ -1165,7 +1222,7 @@ qx.Bootstrap.define("qx.Class",
      */
     __addInterface : function(clazz, iface)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!clazz || !iface) {
           throw new Error("Incomplete parameters!")
@@ -1276,7 +1333,7 @@ qx.Bootstrap.define("qx.Class",
      */
     __addMixin : function(clazz, mixin, patch)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!clazz || !mixin) {
           throw new Error("Incomplete parameters!")
@@ -1374,7 +1431,7 @@ qx.Bootstrap.define("qx.Class",
      */
     __needsConstructorWrapper : function(base, mixins)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         return true;
       }
       
@@ -1420,7 +1477,7 @@ qx.Bootstrap.define("qx.Class",
       {
         var clazz = wrapper;
 
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           // new keyword check
           if (!(this instanceof clazz)) {
@@ -1457,7 +1514,7 @@ qx.Bootstrap.define("qx.Class",
           }
         }
 
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           // Mark instance as initialized
           if (this.classname === name) {
             this.$$initialized = true;

@@ -57,8 +57,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/layout/basic.html'>
- * Extended documentation</a> and links to demos of this layout in the qooxdoo wiki.
+ * <a href='http://manual.qooxdoo.org/1.4/pages/layout/basic.html'>
+ * Extended documentation</a> and links to demos of this layout in the qooxdoo manual.
  */
 qx.Class.define("qx.ui.layout.Basic",
 {
@@ -81,15 +81,15 @@ qx.Class.define("qx.ui.layout.Basic",
     */
 
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value)
+      "true" : function(item, name, value)
       {
         this.assert(name == "left" || name == "top", "The property '"+name+"' is not supported by the Basic layout!");
         this.assertInteger(value);
       },
 
-      "off" : null
+      "false" : null
     }),
 
 

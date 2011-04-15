@@ -43,8 +43,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/themediframe.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/themediframe.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.embed.ThemedIframe",
 {
@@ -254,7 +254,7 @@ qx.Class.define("qx.ui.embed.ThemedIframe",
       }
 
       var scrollbar = this.getChildControl("scrollbar-y", true);
-      scrollbar.scrollBySteps(e.getWheelDelta());
+      scrollbar.scrollBySteps(parseInt(e.getWheelDelta()));
 
       e.stop();
     },
@@ -323,9 +323,13 @@ qx.Class.define("qx.ui.embed.ThemedIframe",
     {
       try
       {
+        var win = this._getIframeElement().getWindow();
         var doc = this._getIframeElement().getDocument();
-        doc.documentElement.style.overflow = "hidden";
-        doc.body.style.overflow = "hidden";
+        if (qx.bom.Document.isStandardMode(win)) {
+          doc.documentElement.style.overflow = "hidden";
+        } else {
+          doc.body.style.overflow = "hidden";
+        }
       } catch (e) {
         this._disableScollbars();
       }

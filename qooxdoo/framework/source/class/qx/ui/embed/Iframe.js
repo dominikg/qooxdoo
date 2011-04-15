@@ -37,8 +37,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/iframe.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/iframe.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.embed.Iframe",
 {
@@ -69,7 +69,7 @@ qx.Class.define("qx.ui.embed.Iframe",
     this.__blockerElement = this._createBlockerElement();
     this.getContainerElement().add(this.__blockerElement);
 
-    if (qx.core.Variant.isSet("qx.client", "gecko"))
+    if ((qx.core.Environment.get("engine.name") == "gecko"))
     {
       this.addListenerOnce("appear", function(e)
       {
@@ -185,22 +185,11 @@ qx.Class.define("qx.ui.embed.Iframe",
      */
     _createBlockerElement : function()
     {
-      var el = new qx.html.Element("div");
-
+      var el = new qx.html.Blocker();
       el.setStyles({
         "zIndex": 20,
-        "position": "absolute",
         "display": "none"
       });
-
-      // IE needs some extra love here to convince it to block events.
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
-      {
-        el.setStyles({
-          backgroundImage: "url(" + qx.util.ResourceManager.getInstance().toUri("qx/static/blank.gif") + ")",
-          backgroundRepeat: "repeat"
-        });
-      }
 
       return el;
     },
@@ -302,7 +291,7 @@ qx.Class.define("qx.ui.embed.Iframe",
 
 
     // property apply
-    _applyNativeHelp : qx.core.Variant.select("qx.client",
+    _applyNativeHelp : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(value, old)
       {

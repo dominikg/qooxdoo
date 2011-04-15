@@ -101,7 +101,7 @@ qx.Class.define("qx.html.Input",
 
         // qx.bom.Input#setWrap has the side-effect that the CSS property
         // overflow is set via DOM methods, causing queue and DOM to get
-        // out of sync. Mirror all overflow properties to handle the case 
+        // out of sync. Mirror all overflow properties to handle the case
         // when group and x/y property differ.
         this.setStyle("overflow", element.style.overflow, true);
         this.setStyle("overflowX", element.style.overflowX, true);
@@ -121,7 +121,7 @@ qx.Class.define("qx.html.Input",
      *
      * @param value {Boolean} true, if the inpout element should be enabled.
      */
-    setEnabled : qx.core.Variant.select("qx.client",
+    setEnabled : qx.core.Environment.select("engine.name",
     {
       "webkit" : function(value)
       {
@@ -155,7 +155,7 @@ qx.Class.define("qx.html.Input",
      *
      * @param value {Boolean} True, if the element should be selectable.
      */
-    setSelectable : qx.core.Variant.select("qx.client",
+    setSelectable : qx.core.Environment.select("engine.name",
     {
       "webkit" : function(value)
       {

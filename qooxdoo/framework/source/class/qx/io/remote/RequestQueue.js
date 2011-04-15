@@ -94,7 +94,7 @@ qx.Class.define("qx.io.remote.RequestQueue",
     maxConcurrentRequests :
     {
       check : "Integer",
-      init : qx.bom.client.Transport.getMaxConcurrentRequestCount()
+      init : qx.core.Environment.get("io.maxrequests")
     },
 
 
@@ -159,9 +159,9 @@ qx.Class.define("qx.io.remote.RequestQueue",
      */
     _debug : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.ioRemoteDebug"))
+        if (qx.core.Environment.get("qx.ioRemoteDebug"))
         {
           // Debug output
           var vText = this.__active.length + "/" + (this.__queue.length + this.__active.length);
@@ -278,9 +278,9 @@ qx.Class.define("qx.io.remote.RequestQueue",
      */
     _onsending : function(e)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.ioRemoteDebug"))
+        if (qx.core.Environment.get("qx.ioRemoteDebug"))
         {
           this.__activeCount++;
           e.getTarget()._counted = true;
@@ -314,9 +314,9 @@ qx.Class.define("qx.io.remote.RequestQueue",
      */
     _oncompleted : function(e)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.ioRemoteDebug"))
+        if (qx.core.Environment.get("qx.ioRemoteDebug"))
         {
           if (e.getTarget()._counted)
           {
@@ -331,10 +331,13 @@ qx.Class.define("qx.io.remote.RequestQueue",
       var request = e.getTarget().getRequest();
       var requestHandler = "_on" + e.getType();
 
+      // remove the request from the queue,
+      // keep local reference, see [BUG #4422]
+      this._remove(e.getTarget());
+
       // It's possible that the request handler can fail, possibly due to
       // being sent garbage data. We want to prevent that from crashing
-      // the program, but instead  display an error, and, importantly
-      // (regardless of error) remove the request from the queue.
+      // the program, but instead display an error.
       try
       {
         if (request[requestHandler])
@@ -361,10 +364,6 @@ qx.Class.define("qx.io.remote.RequestQueue",
         catch(ex)
         {
         }
-      }
-      finally
-      {
-        this._remove(e.getTarget());
       }
     },
 

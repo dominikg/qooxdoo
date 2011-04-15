@@ -61,7 +61,7 @@ qx.Class.define("qx.bom.element.Location",
 
 
     /**
-     * Queries a style property for the given element and parses it to a integer value
+     * Queries a style property for the given element and parses it to an integer value
      *
      * @param elem {Element} DOM element to query
      * @param style {String} Style property
@@ -92,7 +92,8 @@ qx.Class.define("qx.bom.element.Location",
       // http://edvakf.googlepages.com/clientrect.html
       // http://tc.labs.opera.com/apis/cssom/clientrects/
       // Until these are fixed we will not use this method in Opera.
-      if (elem.getBoundingClientRect && !qx.bom.client.Engine.OPERA)
+      if (elem.getBoundingClientRect &&
+        qx.core.Environment.get("engine.name") != "opera")
       {
         // Find window
         var win = qx.dom.Node.getWindow(elem);
@@ -138,7 +139,7 @@ qx.Class.define("qx.bom.element.Location",
      * @param elem {Element} DOM element to query
      * @return {Map} Map which contains the <code>left</code> and <code>top</code> offsets
      */
-    __computeBody : qx.core.Variant.select("qx.client",
+    __computeBody : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(elem)
       {
@@ -152,7 +153,7 @@ qx.Class.define("qx.bom.element.Location",
         left -= body.clientLeft + doc.documentElement.clientLeft;
         top -= body.clientTop + doc.documentElement.clientTop;
 
-        if (qx.bom.client.Feature.STANDARD_MODE)
+        if (!qx.core.Environment.get("browser.quirksmode"))
         {
           left += this.__num(body, "borderLeftWidth");
           top += this.__num(body, "borderTopWidth");
@@ -175,7 +176,7 @@ qx.Class.define("qx.bom.element.Location",
         var top = body.offsetTop;
 
         // only for safari < version 4.0
-        if (qx.bom.client.Engine.VERSION < 530.17)
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 530.17)
         {
           left += this.__num(body, "borderLeftWidth");
           top += this.__num(body, "borderTopWidth");
@@ -197,7 +198,7 @@ qx.Class.define("qx.bom.element.Location",
         var top = body.offsetTop;
 
         // add the body margin for firefox 3.0 and below
-        if (qx.bom.client.Engine.VERSION < 1.9) {
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 1.9) {
           left += this.__num(body, "marginLeft");
           top += this.__num(body, "marginTop");
         }
@@ -252,7 +253,7 @@ qx.Class.define("qx.bom.element.Location",
      * @param elem {Element} DOM element to query
      * @return {Map} Map which contains the <code>left</code> and <code>top</code> offsets
      */
-    __computeOffset : qx.core.Variant.select("qx.client",
+    __computeOffset : qx.core.Environment.select("engine.name",
     {
       "mshtml|webkit" : function(elem)
       {
@@ -493,7 +494,7 @@ qx.Class.define("qx.bom.element.Location",
      * Get the location of the body element relative to the document.
      * @param body {Element} The body element.
      */
-    __getBodyLocation : qx.core.Variant.select("qx.client",
+    __getBodyLocation : qx.core.Environment.select("engine.name",
     {
       "default" : function(body)
       {
@@ -506,8 +507,9 @@ qx.Class.define("qx.bom.element.Location",
       {
         var top = body.offsetTop;
         var left = body.offsetLeft;
-        if (!((qx.bom.client.Engine.VERSION < 8 || qx.bom.client.Engine.DOCUMENT_MODE < 8)&&
-          !qx.bom.client.Feature.QUIRKS_MODE))
+        if (!((parseFloat(qx.core.Environment.get("engine.version")) < 8 ||
+          qx.core.Environment.get("browser.documentmode") < 8) &&
+          !qx.core.Environment.get("browser.quirksmode")))
         {
           top += this.__num(body, "marginTop");
           left += this.__num(body, "marginLeft");

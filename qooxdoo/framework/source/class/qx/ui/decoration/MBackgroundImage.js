@@ -125,7 +125,7 @@ qx.Mixin.define("qx.ui.decoration.MBackgroundImage",
       }
       else
       {
-        if (qx.core.Variant.isSet("qx.client", "mshtml"))
+        if ((qx.core.Environment.get("engine.name") == "mshtml"))
         {
           /*
            * Internet Explorer as of version 6 for quirks and standards mode,
@@ -136,13 +136,14 @@ qx.Mixin.define("qx.ui.decoration.MBackgroundImage",
            * value independent of the minimum font size, an "overflow:hidden"
            * style is added.
            * */
-          if (qx.bom.client.Engine.VERSION < 7 || qx.bom.client.Feature.QUIRKS_MODE)
+          if (parseFloat(qx.core.Environment.get("engine.version")) < 7 ||
+            qx.core.Environment.get("browser.quirksmode"))
           {
             // Add additionally style
             styles.overflow = "hidden";
           }
         }
-        
+
         if (!content) {
           content = "";
         }
@@ -157,7 +158,7 @@ qx.Mixin.define("qx.ui.decoration.MBackgroundImage",
     // property apply
     _applyBackgroundImage : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this._isInitialized()) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");

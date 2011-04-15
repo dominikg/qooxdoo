@@ -91,7 +91,7 @@ qx.Class.define("qx.test.io.part.Package",
       }
 
       var urls = [
-        this.getUrl("qx/test/part/delay.php") + "?sleep=0.3&file=file1.js",
+        this.getUrl("qx/test/part/delay.php") + "?sleep=0.3",
         this.getUrl("qx/test/part/file2.js"),
         this.getUrl("qx/test/part/file3.js")
       ];
@@ -117,9 +117,10 @@ qx.Class.define("qx.test.io.part.Package",
       }
 
       // test don't work in IE, Safari 3 and Opera
-      if ( qx.bom.client.Engine.OPERA ||
-           qx.bom.client.Engine.MSHTML ||
-           (qx.bom.client.Engine.WEBKIT && qx.bom.client.Engine.VERSION < 531) )
+      if ( qx.core.Environment.get("engine.name") == "opera" ||
+           qx.core.Environment.get("engine.name") == "mshtml" ||
+           (qx.core.Environment.get("engine.name") == "webkit" &&
+           parseFloat(qx.core.Environment.get("engine.version")) < 531) )
        {
         return;
       }

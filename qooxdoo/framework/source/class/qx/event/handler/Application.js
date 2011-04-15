@@ -164,25 +164,11 @@ qx.Class.define("qx.event.handler.Application",
       // Wrapper qxloader needed to be compatible with old generator
       if (!this.__isReady && this.__domReady && qx.$$loader.scriptLoaded)
       {
-        // wrap the call in a try-catch because e.g. bom applications don't
-        // have an application and no qx.application setting
-        try {
-          // check if the application is already loaded. If not just don't fire
-          // the ready event [BUG #3793]
-          var app = qx.core.Setting.get("qx.application");
-          if (!qx.Class.getByName(app)) {
-            return;
-          }
-        } catch (e) {
-          // it's ok to ignore the error because if we don't find an application
-          // we can fire the event
-        }
-
         // If qooxdoo is loaded within a frame in IE, the document is ready before
         // the "ready" listener can be added. To avoid any startup issue check
         // for the availability of the "ready" listener before firing the event.
         // So at last the native "load" will trigger the "ready" event.
-        if (qx.core.Variant.isSet("qx.client", "mshtml"))
+        if ((qx.core.Environment.get("engine.name") == "mshtml"))
         {
           if (qx.event.Registration.hasListener(this._window, "ready"))
           {
@@ -238,12 +224,15 @@ qx.Class.define("qx.event.handler.Application",
       {
         this._onNativeLoadWrapped = qx.lang.Function.bind(this._onNativeLoad, this);
 
-        if (qx.core.Variant.isSet("qx.client", "gecko|opera|webkit"))
-        {
+        if (
+          qx.core.Environment.get("engine.name") == "gecko" ||
+          qx.core.Environment.get("engine.name") == "opera" ||
+          qx.core.Environment.get("engine.name") == "webkit"
+        ) {
           // Using native method supported by Mozilla, Webkits and Opera >= 9.0
           qx.bom.Event.addNativeListener(this._window, "DOMContentLoaded", this._onNativeLoadWrapped);
         }
-        else if (qx.core.Variant.isSet("qx.client", "mshtml"))
+        else if ((qx.core.Environment.get("engine.name") == "mshtml"))
         {
           var self = this;
 

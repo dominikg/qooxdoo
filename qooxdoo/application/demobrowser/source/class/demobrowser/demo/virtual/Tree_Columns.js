@@ -96,7 +96,7 @@ qx.Class.define("demobrowser.demo.virtual.Tree_Columns",
 
       // configure model for triState usage
       this.configureTriState(model);
-      
+
       // data binding
       tree.setModel(model);
       tree.setDelegate(this);
@@ -116,8 +116,8 @@ qx.Class.define("demobrowser.demo.virtual.Tree_Columns",
         }
       }
     },
-    
-    
+
+
     configureTriState : function(item)
     {
       // Until [BUG #4290] in not fixed we need do add a getModel method for
@@ -132,7 +132,7 @@ qx.Class.define("demobrowser.demo.virtual.Tree_Columns",
         for (var i = 0; i < children.getLength(); i++) {
           var child = children.getItem(i);
           this.configureTriState(child);
-          
+
           // bind parent with child
           item.bind("checked", child, "checked", {
             converter: function(value, child)
@@ -144,12 +144,12 @@ qx.Class.define("demobrowser.demo.virtual.Tree_Columns",
               return value;
             }
           });
-          
+
           // bind child with parent
           child.bind("checked", item, "checked", {
             converter: function(value, parent) {
               var children = parent.getChildren().toArray();
-              
+
               var isAllChecked = children.every(function(item) {
                 return item.getChecked();
               });
@@ -169,26 +169,10 @@ qx.Class.define("demobrowser.demo.virtual.Tree_Columns",
         }
       }
     },
-    
-    
+
+
     // delegate implementation
-    bindNode : function(controller, item, id) {
-      controller.bindDefaultProperties(item, id);
-      controller.bindProperty("size", "size", null, item, id);
-      controller.bindProperty("checked", "checked", null, item, id);
-      controller.bindPropertyReverse("checked", "checked", null, item, id);
-      controller.bindProperty("date", "date", null, item, id);
-      controller.bindProperty("mode", "mode", null, item, id);
-      controller.bindProperty("light", "leadIcon", {
-        converter : function(data) {
-          return data ? "icon/16/status/dialog-information.png" : "";
-        }
-      }, item, id);
-    },
-    
-    
-    // delegate implementation
-    bindLeaf : function(controller, item, id) {
+    bindItem : function(controller, item, id) {
       controller.bindDefaultProperties(item, id);
       controller.bindProperty("size", "size", null, item, id);
       controller.bindProperty("checked", "checked", null, item, id);
@@ -202,15 +186,9 @@ qx.Class.define("demobrowser.demo.virtual.Tree_Columns",
       }, item, id);
     },
 
-    
+
     // delegate implementation
-    createNode : function() {
-      return new demobrowser.demo.virtual.tree.TreeItem();
-    },
-    
-    
-    // delegate implementation
-    createLeaf : function() {
+    createItem : function() {
       return new demobrowser.demo.virtual.tree.TreeItem();
     }
   }

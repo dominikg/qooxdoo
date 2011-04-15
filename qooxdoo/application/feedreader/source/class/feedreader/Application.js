@@ -82,7 +82,7 @@ qx.Class.define("feedreader.Application",
       this.base(arguments);
 
       // Add log appenders
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         qx.log.appender.Native;
         qx.log.appender.Console;
@@ -91,7 +91,7 @@ qx.Class.define("feedreader.Application",
       qx.io.PartLoader.getInstance().addListener("partLoaded", function(e) {
         this.debug("part loaded: " + e.getData().getName());
       }, this);
-      
+
       // Load current locale part
       var currentLanguage = qx.locale.Manager.getInstance().getLanguage();
       var knownParts = qx.Part.getInstance().getParts();
@@ -107,18 +107,18 @@ qx.Class.define("feedreader.Application",
       } else {
         // if we cant find the default locale, print a warning and load the gui
         this.warn(
-          "Cannot load locale part for current language " + 
+          "Cannot load locale part for current language " +
           currentLanguage + ", falling back to English."
         );
         this.buildUpGui();
       }
     },
 
-    
+
     /**
      * Main routine which builds the whole GUI.
      */
-    buildUpGui : function() 
+    buildUpGui : function()
     {
       // Initialize commands
       this._initializeCommands();
@@ -127,7 +127,10 @@ qx.Class.define("feedreader.Application",
       this._createLayout();
 
       // Initialize the model
-      this._initializeModel();
+      var model = new feedreader.model.Model();
+      this.__feedFolder = model.getFeedFolder();
+      this.__staticFeedFolder = model.getStaticFeedFolder();
+      this.__userFeedFolder = model.getUserFeedFolder();
 
       // Initialize the bindings
       this._setUpBinding();
@@ -142,83 +145,9 @@ qx.Class.define("feedreader.Application",
       this.__treeController.getSelection().push(
         this.__staticFeedFolder.getFeeds().getItem(0)
       );
-      
+
       this.reload();
     },
-
-
-    /*
-    ---------------------------------------------------------------------------
-      MODEL RELATED
-    ---------------------------------------------------------------------------
-    */
-
-    /**
-     * Initialize the feed data model
-     */
-    _initializeModel : function()
-    {
-      // create the root folder
-      this.__feedFolder = new feedreader.model.FeedFolder("Feeds");
-
-      // Add static feeds
-      this.__staticFeedFolder =
-        new feedreader.model.FeedFolder(this.tr("Static Feeds"));
-      this.__feedFolder.getFeeds().push(this.__staticFeedFolder);
-      this.__staticFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "qooxdoo News", "http://feeds2.feedburner.com/qooxdoo/news/content", "static"
-        )
-      );
-      this.__staticFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "JScript Team Blog", "http://blogs.msdn.com/jscript/rss.xml", "static"
-        )
-      );
-      this.__staticFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "Daring Fireball", "http://daringfireball.net/index.xml", "static"
-        )
-      );
-      this.__staticFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "Surfin' Safari", "http://webkit.org/blog/feed/", "static"
-        )
-      );
-      this.__staticFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "Ajaxian","http://feeds2.feedburner.com/ajaxian", "static"
-        )
-      );
-
-      // Add user feeds
-      this.__userFeedFolder =
-        new feedreader.model.FeedFolder(this.tr("User Feeds"));
-      this.__feedFolder.getFeeds().push(this.__userFeedFolder);
-      this.__userFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "Heise", "http://www.heise.de/newsticker/heise-atom.xml", "user"
-        )
-      );
-      this.__userFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "IEBlog", "http://blogs.msdn.com/ie/rss.xml", "user"
-        )
-      );
-      this.__userFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "The Mozilla Blog", "http://blog.mozilla.com/feed/", "user"
-        )
-      );
-      this.__userFeedFolder.getFeeds().push(
-        new feedreader.model.Feed(
-          "Opera Desktop Blog", "http://my.opera.com/desktopteam/xml/rss/blog/", "user"
-        )
-      );
-    },
-
-
-
 
 
     /*
@@ -361,7 +290,7 @@ qx.Class.define("feedreader.Application",
         feed.getArticles().contains(feed.getSelectedArticle())
       ) {
         qx.event.Timer.once(function() {
-          this.__listController.getSelection().push(feed.getSelectedArticle());          
+          this.__listController.getSelection().push(feed.getSelectedArticle());
         }, this, 0);
       } else {
         this.__listView.getList().scrollToY(0);
@@ -535,7 +464,7 @@ qx.Class.define("feedreader.Application",
     showPreferences : function()
     {
       if (!this.__preferencesWindowLoaded) {
-        this.__toolBarView.signalLoading("settings", true);        
+        this.__toolBarView.signalLoading("settings", true);
       }
       qx.io.PartLoader.require(["settings"], function()
       {
@@ -553,9 +482,9 @@ qx.Class.define("feedreader.Application",
         // open the window
         this.__prefWindow.center();
         this.__prefWindow.open();
-        
+
         // signal the end of the loading
-        this.__toolBarView.signalLoading("settings", false);        
+        this.__toolBarView.signalLoading("settings", false);
       }, this);
     },
 
@@ -592,7 +521,7 @@ qx.Class.define("feedreader.Application",
         // open the window
         this.__addFeedWindow.center();
         this.__addFeedWindow.open();
-        
+
         // signal the end of the loading
         this.__toolBarView.signalLoading("addfeed", false);
       }, this);

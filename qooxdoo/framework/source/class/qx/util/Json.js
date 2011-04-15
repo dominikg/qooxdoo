@@ -89,8 +89,8 @@ qx.Class.define("qx.util.Json",
       "object"    : "__convertObject",
       "undefined" : "__convertUndefined"
     },
-    
-    
+
+
     /**
      * Single instance of number format for the JSON serialization.
      */
@@ -317,8 +317,8 @@ qx.Class.define("qx.util.Json",
       if (!qx.util.Json.CONVERT_DATES) {
         // use the native toJSON if available but not on IE [BUG #4674]
         if (
-          incoming.toJSON && !qx.bom.client.Engine.OPERA 
-          && !qx.bom.client.Engine.MSHTML
+          incoming.toJSON && qx.core.Environment.get("engine.name") != "opera"
+          && qx.core.Environment.get("engine.name") != "mshtml"
         ) {
           return '"' + incoming.toJSON() + '"';
         }
@@ -339,13 +339,13 @@ qx.Class.define("qx.util.Json",
 
       // if its set to true
       } else {
-        var dateParams = 
-          incoming.getUTCFullYear() + "," + 
-          incoming.getUTCMonth() + "," + 
-          incoming.getUTCDate() + "," + 
-          incoming.getUTCHours() + "," + 
-          incoming.getUTCMinutes() + "," + 
-          incoming.getUTCSeconds() + "," + 
+        var dateParams =
+          incoming.getUTCFullYear() + "," +
+          incoming.getUTCMonth() + "," +
+          incoming.getUTCDate() + "," +
+          incoming.getUTCHours() + "," +
+          incoming.getUTCMinutes() + "," +
+          incoming.getUTCSeconds() + "," +
           incoming.getUTCMilliseconds();
         return "new Date(Date.UTC(" + dateParams + "))";
       }
@@ -449,7 +449,7 @@ qx.Class.define("qx.util.Json",
      */
     __convertUndefined : function(incoming, key)
     {
-      if (qx.core.Setting.get("qx.jsonEncodeUndefined")) {
+      if (qx.core.Environment.get("qx.jsonEncodeUndefined")) {
         return "null";
       }
     },
@@ -488,7 +488,7 @@ qx.Class.define("qx.util.Json",
       }
 
       // Debugging support
-      if (qx.core.Setting.get("qx.jsonDebugging")) {
+      if (qx.core.Environment.get("qx.jsonDebugging")) {
         qx.log.Logger.debug(this, "JSON request: " + result);
       }
 
@@ -515,7 +515,7 @@ qx.Class.define("qx.util.Json",
         validate = true;
       }
 
-      if (qx.core.Setting.get("qx.jsonDebugging")) {
+      if (qx.core.Environment.get("qx.jsonDebugging")) {
         qx.log.Logger.debug(this, "JSON response: " + text);
       }
 
@@ -535,7 +535,7 @@ qx.Class.define("qx.util.Json",
   },
 
 
-  settings :
+  environment :
   {
     "qx.jsonEncodeUndefined" : true,
     "qx.jsonDebugging"       : false

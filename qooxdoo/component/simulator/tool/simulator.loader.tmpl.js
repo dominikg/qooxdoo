@@ -1,5 +1,9 @@
 (function(){
 
+if(typeof print == "function") {
+  print("Loading Simulator...");
+}
+
 if (!this.window) window = this;
 
 if (!window.navigator) window.navigator = {
@@ -9,11 +13,15 @@ if (!window.navigator) window.navigator = {
   language: "en-US"
 };
 
+if (!navigator.platform) navigator.platform = environment["os.name"];
+
 if (!window.qx) window.qx = {};
-  
-if (!this.qxsettings) qxsettings = {};
-var settings = %{Settings};
-for (var k in settings) qxsettings[k] = settings[k];
+
+if (!window.qxvariants) qxvariants = {};
+
+if (!qx.$$environment) qx.$$environment = {};
+var envinfo = %{EnvSettings};
+for (var k in envinfo) qx.$$environment[k] = envinfo[k];
 
 qx.$$packageData = {};
 qx.$$loader = {};

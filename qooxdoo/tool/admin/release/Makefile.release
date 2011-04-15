@@ -24,6 +24,9 @@
 # VARIABLES
 ################################################################################
 
+# Ubuntu's /bin/sh struggles with 'time' (bug#4398)
+SHELL = /bin/bash
+
 FRAMEWORK_VERSION := $(shell cat version.txt)
 FRAMEWORK_SVNINFO := $(shell python tool/admin/bin/svninfo.py .)
 
@@ -54,7 +57,7 @@ CMD_SYNC_OFFLINE = $(CMD_NICE) rsync --recursive --delete --inplace --links --sa
 RELEASE_BUILD = release/temp/build/qooxdoo-$(FRAMEWORK_VERSION)-build
 RELEASE_SDK = release/temp/sdk/qooxdoo-$(FRAMEWORK_VERSION)-sdk
 
-APPLICATIONS = feedreader portal playground showcase demobrowser widgetbrowser
+APPLICATIONS = feedreader portal mobileshowcase playground showcase widgetbrowser demobrowser
 COMPONENTS = apiviewer testrunner inspector
 FRAMEWORK_TARGETS = api test qxoo-build qxoo-noopt
 
@@ -66,7 +69,7 @@ FRAMEWORK_TARGETS = api test qxoo-build qxoo-noopt
 release: release-sdk
 
 release-sdk: distclean release-sdk-sans-clean
-release-sdk-sans-clean: release-sdk-info apiviewer showcase release-sdk-svn-collect release-sdk-archive
+release-sdk-sans-clean: release-sdk-info apiviewer showcase build-docs release-sdk-svn-collect release-sdk-archive
 
 release-sdk-info:
 	@echo
@@ -161,7 +164,7 @@ exec-showcase-build:
 info-inspector:
 	@echo
 	@echo "****************************************************************************"
-	@echo "  GENERATING INSPECTOR"
+	@echo "  GENERATING INSPECTOR COMPONENT"
 	@echo "****************************************************************************"
 
 
@@ -169,6 +172,24 @@ inspector: info-inspector exec-inspector-build
 
 exec-inspector-build:
 	@time ( cd component/inspector && $(CMD_GENERATOR) build ) || exit 1
+
+
+
+################################################################################
+# TESTRUNNER TARGETS
+################################################################################
+
+info-testrunner:
+	@echo
+	@echo "****************************************************************************"
+	@echo "  GENERATING TESTRUNNER COMPONENT"
+	@echo "****************************************************************************"
+
+
+testrunner: info-testrunner exec-testrunner-build
+
+exec-testrunner-build:
+	@time ( cd component/testrunner && $(CMD_GENERATOR) build ) || exit 1
 
 
 
@@ -235,7 +256,13 @@ distclean:
 
 build: build-apps build-components
 build-apps:
-	@time for APPLICATION in $(APPLICATIONS); do ( cd application/$$APPLICATION && $(CMD_GENERATOR) build ) || exit 1; done
+	@time for APPLICATION in $(APPLICATIONS); do \
+		if [ "$$APPLICATION" = "feedreader" ]; then \
+			( cd application/$$APPLICATION && $(CMD_GENERATOR) build,build-mobile ) || exit 1; \
+		else \
+			( cd application/$$APPLICATION && $(CMD_GENERATOR) build ) || exit 1; \
+		fi; \
+	done
 
 build-components:
 	@time for APPLICATION in $(COMPONENTS); do ( cd component/$$APPLICATION && $(CMD_GENERATOR) build ) || exit 1; done
@@ -246,6 +273,13 @@ build-framework:
 source: source-apps source-components
 source-apps:
 	@time for APPLICATION in $(APPLICATIONS); do ( cd application/$$APPLICATION && $(CMD_GENERATOR) source ) || exit 1; done
+	@time for APPLICATION in $(APPLICATIONS); do \
+		if [ "$$APPLICATION" = "feedreader" ]; then \
+			( cd application/$$APPLICATION && $(CMD_GENERATOR) source,source-mobile ) || exit 1; \
+		else \
+			( cd application/$$APPLICATION && $(CMD_GENERATOR) source ) || exit 1; \
+		fi; \
+	done
 
 source-components:
 	@time for APPLICATION in $(COMPONENTS); do ( cd component/$$APPLICATION && $(CMD_GENERATOR) source ) || exit 1; done
@@ -282,7 +316,7 @@ check-docs-pdf:
 # PUBLISH TARGETS
 ################################################################################
 
-publish-build: build-apps inspector build-framework build-docs
+publish-build: build-apps inspector testrunner build-framework build-docs
 
 publish-check: check-banner check-apps check-components check-framework check-docs
 	@echo "    - Looks good"
@@ -295,11 +329,11 @@ check-apps:
 
 check-components:
 	@for TARGET in $(COMPONENTS); do \
-     if [ "$$TARGET" = "inspector" ]; then \
-       F="component/$$TARGET/build/script/$$TARGET.js"; \
-       [ -s $$F ] || ( echo "Missing $$F; run 'make publish-build' first!"; exit 1 ); \
-     fi; \
-  done
+		if [ "$$TARGET" = "inspector" ]; then \
+			F="component/$$TARGET/build/script/$$TARGET.js"; \
+			[ -s $$F ] || ( echo "Missing $$F; run 'make publish-build' first!"; exit 1 ); \
+		fi; \
+	done
 
 check-framework:
 	@for TARGET in $(FRAMEWORK_TARGETS); do \
@@ -325,8 +359,12 @@ publish-index:
 publish-apps:
 	@echo "  * Syncing applications..."
 	@for APPLICATION in $(APPLICATIONS); do \
-	  echo "    - $$APPLICATION..."; \
-	  $(CMD_SYNC_ONLINE) application/$$APPLICATION/build/* $(STAGING_HOST):/var/www/qooxdoo/demo/$(FRAMEWORK_VERSION)/$$APPLICATION || exit 1; \
+		echo "    - $$APPLICATION..."; \
+		$(CMD_SYNC_ONLINE) application/$$APPLICATION/build/* $(STAGING_HOST):/var/www/qooxdoo/demo/$(FRAMEWORK_VERSION)/$$APPLICATION || exit 1; \
+		if [ "$$APPLICATION" = "feedreader" ]; then \
+			echo "    - $$APPLICATION-mobile..."; \
+			$(CMD_SYNC_ONLINE) application/$$APPLICATION/build-mobile/* $(STAGING_HOST):/var/www/qooxdoo/demo/$(FRAMEWORK_VERSION)/$$APPLICATION-mobile || exit 1; \
+		fi; \
 	done
 	@echo "  * Syncing components..."
 	@for APPLICATION in $(COMPONENTS); do \

@@ -97,21 +97,40 @@ qx.Class.define("qx.dom.Node",
      * @param node {Node|Document|Window} node to inspect
      * @return {Window|null} the <code>defaultView</code> of the given node
      */
-    getWindow : function(node)
+    getWindow : qx.core.Environment.select("engine.name",
     {
-      // is a window already
-      if (node.nodeType == null) {
-        return node;
-      }
+      "mshtml" : function(node)
+      {
+        // is a window already
+        if (node.nodeType == null) {
+          return node;
+        }
 
-      // jump to document
-      if (node.nodeType !== this.DOCUMENT) {
-        node = node.ownerDocument;
-      }
+        // jump to document
+        if (node.nodeType !== this.DOCUMENT) {
+          node = node.ownerDocument;
+        }
 
-      // jump to window
-      return node.defaultView || node.parentWindow || null;
-    },
+        // jump to window
+        return node.parentWindow;
+      },
+
+      "default" : function(node)
+      {
+        // is a window already
+        if (node.nodeType == null) {
+          return node;
+        }
+
+        // jump to document
+        if (node.nodeType !== this.DOCUMENT) {
+          node = node.ownerDocument;
+        }
+
+        // jump to window
+        return node.defaultView;
+      }
+    }),
 
 
     /**
@@ -252,7 +271,8 @@ qx.Class.define("qx.dom.Node",
 
 
     /**
-     * Returns the text content of an node where the node may be of node type NODE_ELEMENT, NODE_ATTRIBUTE or NODE_TEXT
+     * Returns the text content of an node where the node may be of node type
+     * NODE_ELEMENT, NODE_ATTRIBUTE, NODE_TEXT or NODE_CDATA
      *
      * @param node {Node} the node from where the search should start.
      *     If the node has subnodes the text contents are recursively retreived and joined.
@@ -277,12 +297,9 @@ qx.Class.define("qx.dom.Node",
           return a.join("");
 
         case 2: // NODE_ATTRIBUTE
-          return node.nodeValue;
-          break;
-
         case 3: // NODE_TEXT
+        case 4: // CDATA
           return node.nodeValue;
-          break;
       }
 
       return null;

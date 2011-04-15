@@ -14,6 +14,10 @@ if (!window.qxvariants) qxvariants = {};
 var variants = %{Variants};
 for (var k in variants) qxvariants[k] = variants[k];
 
+if (!qx.$$environment) qx.$$environment = {};
+var envinfo = %{EnvSettings};
+for (var k in envinfo) qx.$$environment[k] = envinfo[k];
+
 if (!qx.$$libraries) qx.$$libraries = {};
 var libinfo = %{Libinfo};
 for (var k in libinfo) qx.$$libraries[k] = libinfo[k];

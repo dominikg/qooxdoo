@@ -76,7 +76,13 @@ qx.Mixin.define("qx.ui.form.MModelSelection",
 
       // only change the selection if you are sure that its correct [BUG #3748]
       if (modelSelection.length === data.length) {
-        this.setModelSelection(modelSelection);
+        try {
+          this.setModelSelection(modelSelection);
+        } catch (e) {
+          throw new Error(
+            "Could not set the model selection. Maybe your models are not unique?"
+          );
+        }
       }
     },
 
@@ -151,7 +157,7 @@ qx.Mixin.define("qx.ui.form.MModelSelection",
         return;
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.assertArray(modelSelection, "Please use an array as parameter.");
       }
 

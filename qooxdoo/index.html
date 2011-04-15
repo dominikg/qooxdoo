@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head profile="http://dublincore.org/documents/dcq-html">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -122,7 +122,7 @@ code{
   </style>
 
   <script type="text/javascript">
-  var qxversion = "1.4";
+  var qxversion = "1.5";
 
   /**
    * Replace occurrences of $(qxversion) with the value of var qxversion.
@@ -145,13 +145,13 @@ code{
 </head>
 <body onload="myOnLoad();">
   <div class="head">
-    <h1>qooxdoo - Open Source RIA Framework</h1>
+    <h1>qooxdoo - Universal JavaScript Framework</h1>
   </div>
 
   <div class="main">
     <p>
-      Welcome to qooxdoo! It is easy to create your own rich internet applications. For detailed information please
-      see the external documentation to
+      Welcome to qooxdoo! It is easy to create your own impressive and versatile applications. For detailed information on 
+      how to create a typical rich internet application (RIA) please see the external documentation to
       <span class="local"><a href="documentation/manual/build/html/pages/getting_started.html">get started</a> <i>(needs generation)</i>.</span>
       <span class="publish"><a href="documentation/manual/pages/getting_started.html">get started</a>.</span>
     </p>
@@ -160,21 +160,17 @@ code{
       Use the <code>tool/bin/create-application.py</code> script to setup a new application.
       This will create a minimal directory structure of an application, which is ready to
       be built and run. Within the newly created application folder run the command<br/>
-      <code>generate.py source-all</code> to build a development version of your app.
+      <code>generate.py source-all</code> to generate a development version of your app.
       Open <code>source/index.html</code> in your browser and see your first application in action. You can
       then go on and extend it into an application of your liking by changing the
       <code>Application.js</code> class file below the <code>source/class/</code> folder. The command
-      <code>generate.py build</code> builds an optimized  and compressed version of your application, 
+      <code>generate.py build</code> generates an optimized and compressed version of your application, 
       located at <code>build/index.html</code>.
     </p>
     <p>
       Open the included <a href="framework/api/index.html">API viewer</a> to display and search the entire API reference of the framework.
     </p>
     <p>Also have a look at the <a href="readme.txt">readme.txt</a> and <a href="license.txt">license.txt</a>.</p>
-    <p>Here is the complete 
-      <span class="local"><a href="documentation/manual/build/html/index.html">manual</a><i> (needs generation)</i>.</span>
-      <span class="publish"><a href="documentation/manual/index.html">manual</a>.</span>
-    </p>
   </div>
 
   <div class="block">
@@ -208,16 +204,24 @@ code{
         <a href="application/playground/build/index.html">Build</a> <i>(both need generation)</i>
       </li>
       <li>
-        <h3>Feed Reader <span>(<a name="verslink" href="http://demo.qooxdoo.org/$(qxversion)/feedreader">Online</a>)</span></h3>
-        <p>A typical rich internet application (RIA) for displaying RSS feeds.</p>
-      	<a href="application/feedreader/source/index.html">Source</a> |
+        <h3>Feed Reader <span>(Online: <a name="verslink" href="http://demo.qooxdoo.org/$(qxversion)/feedreader">RIA</a> | <a name="verslink" href="http://demo.qooxdoo.org/$(qxversion)/feedreader-mobile">mobile</a>)</span></h3>
+        <p>A hybrid application for displaying RSS feeds, available as a RIA (all browsers) and a mobile application (Smartphones: Android 1.6+, iOS; Desktop: Safari 5, Chrome 10+).</p>
+        RIA: <a href="application/feedreader/source/index.html">Source</a> |
         <a href="application/feedreader/build/index.html">Build</a> <i>(both need generation)</i>
+        mobile: <a href="application/feedreader/source/index-mobile.html">Source</a> |
+        <a href="application/feedreader/build-mobile/index.html">Build</a> <i>(both need generation)</i>
       </li>
       <li>
         <h3>Portal <span>(<a name="verslink" href="http://demo.qooxdoo.org/$(qxversion)/portal">Online</a>)</span></h3>
         <p>A low-level, DOM-oriented application without any high-level qooxdoo widgets.</p>
-      	<a href="application/portal/source/index.html">Source</a> |
+        <a href="application/portal/source/index.html">Source</a> |
         <a href="application/portal/build/index.html">Build</a> <i>(both need generation)</i>
+      </li>
+      <li>
+        <h3>Mobile Showcase <span>(<a name="verslink" href="http://demo.qooxdoo.org/$(qxversion)/mobileshowcase">Online</a>)</span></h3>
+        <p>An experimental showcase for mobile widgets (Smartphones: Android 1.6+, iOS; Desktop: Safari 5, Chrome 10+).</p>
+        <a href="application/mobileshowcase/source/index.html">Source</a> |
+        <a href="application/mobileshowcase/build/index.html">Build</a> <i>(both need generation)</i>
       </li>
     </ul>
   </div>
@@ -243,6 +247,12 @@ code{
         <h3>Inspector <span>(<a name="verslink" href="http://demo.qooxdoo.org/$(qxversion)/inspector">Online</a>)</span></h3>
         <p>A debugging tool to inspect a qooxdoo application, featuring an interactive console, an object and widget finder, and a property editor.</p>
         <a href="component/inspector/build/index.html">Inspector</a> <i>(needs generation)</i>
+      </li>
+      <li>
+        <h3>Manual <span>(<a name="verslink" href="http://manual.qooxdoo.org/$(qxversion)/">Online</a>)</span></h3>
+        <p>The qooxdoo manual, including user guide and reference sections.</p>
+        <span class="local"><a href="documentation/manual/build/html/index.html">Manual</a> <i>(needs generation)</i></span>
+        <span class="publish"><a href="documentation/manual/index.html">Manual</a> <i>(ready to use)</i></span>
       </li>
     </ul>
   </div>

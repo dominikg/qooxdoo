@@ -29,7 +29,7 @@
 /**
  * EXPERIMENTAL - NOT READY FOR PRODUCTION
  *
- * This class provides a unified touch event handler.
+ * This class provides an unified touch event handler.
  */
 qx.Class.define("qx.event.handler.Touch",
 {
@@ -114,13 +114,13 @@ qx.Class.define("qx.event.handler.Touch",
      *      the performed tap is less or equal the value of this constant, a tap
      *      event is fired.
      */
-    TAP_MAX_DISTANCE : 10,
+    TAP_MAX_DISTANCE : qx.core.Environment.get("os.name") != "android" ? 10 : 40,
 
     /** {Integer} The minimum distance of a swipe. Only if the x or y distance
      *      of the performed swipe is greater as or equal the value of this
      *      constant, a swipe event is fired.
      */
-    SWIPE_MIN_DISTANCE : 11,
+    SWIPE_MIN_DISTANCE : qx.core.Environment.get("os.name") != "android" ? 11 : 41,
 
     /** {Integer} The minimum velocity of a swipe. Only if the velocity of the
      *      performed swipe is greater as or equal the value of this constant, a
@@ -194,7 +194,7 @@ qx.Class.define("qx.event.handler.Touch",
     {
       var target = qx.bom.Event.getTarget(domEvent);
       // Text node. Fix Safari Bug, see http://www.quirksmode.org/js/events_properties.html
-      if (qx.core.Variant.isSet("qx.client", "webkit"))
+      if ((qx.core.Environment.get("engine.name") == "webkit"))
       {
         if (target && target.nodeType == 3) {
           target = target.parentNode;
@@ -369,9 +369,9 @@ qx.Class.define("qx.event.handler.Touch",
      * @signature function(domEvent)
      * @param domEvent {Event} DOM event
      */
-    __normalizeMouseEvent : qx.core.Variant.select("qx.mobile.emulatetouch",
+    __normalizeMouseEvent : qx.core.Environment.select("qx.mobile.emulatetouch",
     {
-      "on" : function(domEvent)
+      "true" : function(domEvent)
       {
         var type = domEvent.type;
         var eventMapping = qx.event.handler.Touch.MOUSE_TO_TOUCH_MAPPING;
@@ -407,11 +407,11 @@ qx.Class.define("qx.event.handler.Touch",
      * @param domEvent {Event} DOM event
      * @return {Boolean} Whether the left mouse button is pressed
      */
-    __isLeftMouseButtonPressed : qx.core.Variant.select("qx.mobile.emulatetouch",
+    __isLeftMouseButtonPressed : qx.core.Environment.select("qx.mobile.emulatetouch",
     {
-      "on" : function(domEvent)
+      "true" : function(domEvent)
       {
-        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+        if ((qx.core.Environment.get("engine.name") == "mshtml")) {
           var buttonIndex = 1;
         } else {
           var buttonIndex = 0;
@@ -432,9 +432,9 @@ qx.Class.define("qx.event.handler.Touch",
      * @param domEvent {Event} DOM event
      * @return {Object} The Touch mock object
      */
-    __createTouchObject : qx.core.Variant.select("qx.mobile.emulatetouch",
+    __createTouchObject : qx.core.Environment.select("qx.mobile.emulatetouch",
     {
-      "on" : function(domEvent)
+      "true" : function(domEvent)
       {
         var target = this.__getTarget(domEvent);
         return {
@@ -478,11 +478,11 @@ qx.Class.define("qx.event.handler.Touch",
     /**
      * Initializes the native mouse event listeners.
      */
-    _initMouseObserver : qx.core.Variant.select("qx.mobile.emulatetouch",
+    _initMouseObserver : qx.core.Environment.select("qx.mobile.emulatetouch",
     {
-      "on" : function()
+      "true" : function()
       {
-        if (!qx.bom.client.Feature.TOUCH)
+        if (!qx.core.Environment.get("event.touch"))
         {
           this.__onMouseEventWrapper = qx.lang.Function.listener(this._onMouseEvent, this);
 
@@ -520,11 +520,11 @@ qx.Class.define("qx.event.handler.Touch",
     /**
      * Disconnects the native mouse event listeners.
      */
-    _stopMouseObserver : qx.core.Variant.select("qx.mobile.emulatetouch",
+    _stopMouseObserver : qx.core.Environment.select("qx.mobile.emulatetouch",
     {
-      "on" : function()
+      "true" : function()
       {
-        if (!qx.bom.client.Feature.TOUCH)
+        if (!qx.core.Environment.get("event.touch"))
         {
           var Event = qx.bom.Event;
 
@@ -561,11 +561,11 @@ qx.Class.define("qx.event.handler.Touch",
      * @signature function(domEvent)
      * @param domEvent {Event} The mouse event from the browser.
      */
-    _onMouseEvent : qx.core.Variant.select("qx.mobile.emulatetouch",
+    _onMouseEvent : qx.core.Environment.select("qx.mobile.emulatetouch",
     {
-      "on" : qx.event.GlobalError.observeMethod(function(domEvent)
+      "true" : qx.event.GlobalError.observeMethod(function(domEvent)
       {
-        if (!qx.bom.client.Feature.TOUCH)
+        if (!qx.core.Environment.get("event.touch"))
         {
           if (domEvent.type == "mousemove" && !this.__isInTouch) {
             return;
@@ -624,8 +624,8 @@ qx.Class.define("qx.event.handler.Touch",
     // Prevent scrolling on the document to avoid scrolling at all
     // TODO: Seems like Android does not prevent scrolling on touchmove
     //       Perhaps we should use "touchstart" here?
-    if (qx.bom.client.Feature.TOUCH) {
-      if (qx.core.Variant.isSet("qx.mobile.nativescroll", "off"))
+    if (qx.core.Environment.get("event.touch")) {
+      if (qx.core.Environment.get("qx.mobile.nativescroll") == false)
       {
         document.addEventListener("touchmove", function(e) {
           e.preventDefault();

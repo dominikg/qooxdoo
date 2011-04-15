@@ -16,11 +16,6 @@
       "path" : "${QOOXDOO_PATH}/component/testrunner/testrunner.json",
       "as"   : "testrunner"
     },
-
-    {
-      "path" : "${QOOXDOO_PATH}/component/testrunner2/testrunner.json",
-      "as"   : "testrunner2"
-    },
     
     {
       "path" : "${QOOXDOO_PATH}/component/inspector/inspector.json",
@@ -139,12 +134,14 @@
     {
       "desc"    : "create a test runner app for unit tests of the current library",
 
-      "extend"  : ["${TESTRUNNER_TYPE}::build"],
+      "extend"  : ["testrunner::build"],
 
       "let" :
       {
-        "TESTRUNNER_TYPE" : "testrunner",
-        "TESTRUNNER_ROOT" : "${QOOXDOO_PATH}/component/${TESTRUNNER_TYPE}",
+        "TESTRUNNER_ORIGIN" : "iframe",
+        "TESTRUNNER_VIEW" : "testrunner.view.widget.Widget",
+        "TESTRUNNER_MAIN_CLASS" : "testrunner.GuiApplication",
+        "TESTRUNNER_ROOT" : "${QOOXDOO_PATH}/component/testrunner",
         "TEST_INCLUDE"    : "${APPLICATION}.test.*",
         "QXTHEME"         : "qx.theme.Modern",
         "BUILD_PATH"      : "${ROOT}/test"
@@ -161,7 +158,7 @@
         "TESTS_SCRIPT" : "tests-inline.js"
       },
       
-      "include" : ["${TESTRUNNER_TYPE}.TestLoaderInline"]
+      "include" : ["testrunner.TestLoaderInline"]
     },
 
 
@@ -174,7 +171,7 @@
         "TESTS_SCRIPT" : "tests-native.js"
       },
       
-      "include" : ["${TESTRUNNER_TYPE}.TestLoaderNative"]
+      "include" : ["testrunner.TestLoaderNative"]
     },
 
 
@@ -182,12 +179,14 @@
     {
       "desc"    : "create a test runner app for unit tests (source version) of the current library",
 
-      "extend" : ["${TESTRUNNER_TYPE}::build-with-tests-source"],
+      "extend" : ["testrunner::build-with-tests-source"],
 
       "let" :
       {
-        "TESTRUNNER_TYPE" : "testrunner",
-        "TESTRUNNER_ROOT" : "${QOOXDOO_PATH}/component/${TESTRUNNER_TYPE}",
+        "TESTRUNNER_ORIGIN" : "iframe",
+        "TESTRUNNER_VIEW" : "testrunner.view.widget.Widget",
+        "TESTRUNNER_MAIN_CLASS" : "testrunner.GuiApplication",
+        "TESTRUNNER_ROOT" : "${QOOXDOO_PATH}/component/testrunner",
         "TEST_INCLUDE"    : "${APPLICATION}.test.*",
         "QXTHEME"         : "qx.theme.Modern",
         "BUILD_PATH"      : "${ROOT}/test"

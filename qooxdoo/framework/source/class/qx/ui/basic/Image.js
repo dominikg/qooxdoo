@@ -39,8 +39,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/image.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/image.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.basic.Image",
 {
@@ -157,12 +157,18 @@ qx.Class.define("qx.ui.basic.Image",
   {
     /**
      * Fired if the image source can not be loaded.
+     *
+     * *Attention*: This event is only used for images which are loaded externally
+     * (aka unmanaged images).
      */
     loadingFailed : "qx.event.type.Event",
 
 
     /**
      * Fired if the image has been loaded.
+     *
+     * *Attention*: This event is only used for images which are loaded externally
+     * (aka unmanaged images).
      */
     loaded : "qx.event.type.Event"
   },
@@ -246,7 +252,7 @@ qx.Class.define("qx.ui.basic.Image",
 
     /**
      * Remembers the mode to keep track which contentElement is currently in use.
-     * @param mode {String} internal mode (scaled|nonScaled)
+     * @param mode {String} internal mode (alphaScaled|scaled|nonScaled)
      */
     __setMode : function(mode) {
       this.__mode = mode;
@@ -269,7 +275,9 @@ qx.Class.define("qx.ui.basic.Image",
           isPng = qx.lang.String.endsWith(source, ".png");
         }
 
-        if (this.getScale()) {
+        if (this.getScale() && isPng && qx.bom.element.Decoration.isAlphaImageLoaderEnabled()) {
+          this.__mode = "alphaScaled";
+        } else if (this.getScale()) {
           this.__mode = "scaled";
         } else {
           this.__mode = "nonScaled";
@@ -290,7 +298,12 @@ qx.Class.define("qx.ui.basic.Image",
     {
       var scale;
       var tagName;
-      if (mode == "nonScaled")
+      if (mode == "alphaScaled")
+      {
+        scale = true;
+        tagName = "div";
+      }
+      else if (mode == "nonScaled")
       {
         scale = false;
         tagName = "div";
@@ -331,7 +344,7 @@ qx.Class.define("qx.ui.basic.Image",
 
     /**
      * Applies the source to the clipped image instance or preload
-     * a image to detect sizes and apply it afterwards.
+     * an image to detect sizes and apply it afterwards.
      *
      * @return {void}
      */
@@ -347,6 +360,12 @@ qx.Class.define("qx.ui.basic.Image",
 
       this.__checkForContentElementSwitch(source);
 
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
+      {
+        var repeat = this.getScale() ? "scale" : "no-repeat";
+        this.getContentElement().tagNameHint = qx.bom.element.Decoration.getTagName(repeat, source);
+      }
+
       // Detect if the image registry knows this image
       if (qx.util.ResourceManager.getInstance().has(source)) {
         this.__setManagedImage(this.getContentElement(), source);
@@ -360,21 +379,49 @@ qx.Class.define("qx.ui.basic.Image",
 
     /**
      * Checks if the current content element is capable to display the image
-     * with the current settings (scaling)
+     * with the current settings (scaling, alpha PNG)
      *
      * @param source {String} source of the image
      * @return {void}
      */
-    __checkForContentElementSwitch : function(source)
+    __checkForContentElementSwitch : qx.core.Environment.select("engine.name",
     {
-      if (this.getScale() && this.__getMode() != "scaled") {
-        this.__setMode("scaled");
-      } else if (!this.getScale() && this.__getMode("nonScaled")) {
-        this.__setMode("nonScaled");
-      }
+      "mshtml" : function(source)
+      {
+        var alphaImageLoader = qx.bom.element.Decoration.isAlphaImageLoaderEnabled();
+        var isPng = qx.lang.String.endsWith(source, ".png");
 
-      this.__checkForContentElementReplacement(this.__getSuitableContentElement());
-    },
+        if (alphaImageLoader && isPng)
+        {
+          if (this.getScale() && this.__getMode() != "alphaScaled") {
+            this.__setMode("alphaScaled");
+          } else if (!this.getScale() && this.__getMode() != "nonScaled") {
+            this.__setMode("nonScaled");
+          }
+        }
+        else
+        {
+          if (this.getScale() && this.__getMode() != "scaled") {
+            this.__setMode("scaled");
+          } else if (!this.getScale() && this.__getMode() != "nonScaled") {
+            this.__setMode("nonScaled");
+          }
+        }
+
+        this.__checkForContentElementReplacement(this.__getSuitableContentElement());
+      },
+
+      "default" : function(source)
+      {
+        if (this.getScale() && this.__getMode() != "scaled") {
+          this.__setMode("scaled");
+        } else if (!this.getScale() && this.__getMode("nonScaled")) {
+          this.__setMode("nonScaled");
+        }
+
+        this.__checkForContentElementReplacement(this.__getSuitableContentElement());
+      }
+    }),
 
 
     /**
@@ -493,11 +540,32 @@ qx.Class.define("qx.ui.basic.Image",
     {
       var ImageLoader = qx.io.ImageLoader;
 
+      if (qx.core.Environment.get("qx.debug"))
+      {
+        // loading external images via HTTP/HTTPS is a common usecase
+        if (!qx.lang.String.startsWith(source.toLowerCase(), "http"))
+        {
+          var self = this.self(arguments);
+
+          if (!self.__warned) {
+            self.__warned = {};
+          }
+
+          if (!self.__warned[source])
+          {
+            this.debug("try to load an unmanaged relative image: " + source);
+            self.__warned[source] = true;
+          }
+        }
+      }
+
       // only try to load the image if it not already failed
       if(!ImageLoader.isFailed(source)) {
         ImageLoader.load(source, this.__loaderCallback, this);
-      } else if (el != null) {
-        el.resetSource();
+      } else {
+        if (el != null) {
+          el.resetSource();
+        }
       }
     },
 

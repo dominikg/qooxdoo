@@ -77,8 +77,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/layout/canvas.html'>
- * Extended documentation</a> and links to demos of this layout in the qooxdoo wiki.
+ * <a href='http://manual.qooxdoo.org/1.4/pages/layout/canvas.html'>
+ * Extended documentation</a> and links to demos of this layout in the qooxdoo manual.
  */
 qx.Class.define("qx.ui.layout.Canvas",
 {
@@ -102,9 +102,9 @@ qx.Class.define("qx.ui.layout.Canvas",
     */
 
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value)
+      "true" : function(item, name, value)
       {
         var layoutProperties =
         {
@@ -138,7 +138,7 @@ qx.Class.define("qx.ui.layout.Canvas",
         }
       },
 
-      "off" : null
+      "false" : null
     }),
 
 

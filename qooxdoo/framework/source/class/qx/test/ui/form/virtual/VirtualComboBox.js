@@ -26,7 +26,7 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
 
     setUp : function()
     {
-      this.base(arguments); 
+      this.base(arguments);
       this.__comboBox = new qx.ui.form.VirtualComboBox();
       this.getRoot().add(this.__comboBox);
 
@@ -51,7 +51,7 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
 
       return model;
     },
-    
+
     __createRichModel : function()
     {
       var model = new qx.data.Array();
@@ -62,7 +62,7 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
 
       return model;
     },
-    
+
     __createNestedModel : function()
     {
       var rawData = [
@@ -94,8 +94,9 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
       this.flush();
       // Preselection may not change the actual value
       this.assertNotEquals("item 1", this.__comboBox.getValue());
+      this.assertEquals("i", this.__comboBox.getValue());
     },
-    
+
     testSelectFirstMatch : function()
     {
       this.__comboBox.setModel(this.__createSimpleModel());
@@ -105,8 +106,9 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
       this.flush();
       var preselected = this.__comboBox.getChildControl("dropdown")._preselected;
       this.assertEquals("item 4", preselected);
+      this.assertEquals("item 4", this.__comboBox.getValue());
     },
-    
+
     testSelectFirstMatchWithSortedModel : function()
     {
       this.__comboBox.setModel(this.__createSimpleModel());
@@ -123,8 +125,20 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
       this.flush();
       var preselected = this.__comboBox.getChildControl("dropdown")._preselected;
       this.assertEquals("item 49", preselected);
+      this.assertEquals("item 4", this.__comboBox.getValue());
+
+      // The virtual list uses a timeout to asynchronously flush the layout
+      // queue and scroll the (pre)selected item into view. tearDown is called
+      // before this timer's callback so the list container tries to scroll a
+      // disposed widget which causes an exception. To get around this, we use
+      // a timeout to delay the tearDown call.
+      var that = this;
+      window.setTimeout(function() {
+        that.resume();
+      }, 100);
+      this.wait(200);
     },
-    
+
     testSelectFirstMatchWithFilteredModel : function()
     {
       this.__comboBox.setModel(this.__createSimpleModel());
@@ -143,8 +157,9 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
       // item 22 is not in the list, nothing should be preselected
       var preselected = this.__comboBox.getChildControl("dropdown")._preselected;
       this.assertNull(preselected);
+      this.assertEquals("item 22", this.__comboBox.getValue());
     },
-    
+
     testSelectFirstMatchWithFormatter : function()
     {
       this.__comboBox.setModel(this.__createRichModel());
@@ -168,8 +183,9 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
       this.flush();
       var preselected = this.__comboBox.getChildControl("dropdown")._preselected;
       this.assertEquals("<b>item 4</b>", preselected);
+      this.assertEquals("item 4", this.__comboBox.getValue());
     },
-    
+
     testSelectFirstMatchByLabelPath : function()
     {
       this.__comboBox.setLabelPath("lastname");
@@ -180,6 +196,7 @@ qx.Class.define("qx.test.ui.form.virtual.VirtualComboBox",
       this.flush();
       var preselected = this.__comboBox.getChildControl("dropdown")._preselected.getLastname();
       this.assertEquals("Sisko", preselected);
+      this.assertEquals("Si", this.__comboBox.getValue());
     }
   }
 

@@ -17,6 +17,10 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+#ignore(qx.test.ui.core.Test)
+************************************************************************ */
+
 qx.Class.define("qx.test.ui.core.Appearance",
 {
   extend : qx.test.ui.LayoutTestCase,
@@ -145,7 +149,7 @@ qx.Theme.define("qx.test.ui.core.Theme", {
         };
       }
     },
-    
+
     "test2/text2" : {
       style : function(states)
       {

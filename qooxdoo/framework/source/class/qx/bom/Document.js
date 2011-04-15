@@ -79,11 +79,11 @@ qx.Class.define("qx.bom.Document",
      * @param win {Window?window} The window to query
      * @return {Boolean} true when containing document is in quirks mode
      */
-    isQuirksMode : qx.core.Variant.select("qx.client",
+    isQuirksMode : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(win)
       {
-        if(qx.bom.client.Engine.VERSION >= 8) {
+        if(qx.core.Environment.get("engine.version") >= 8) {
           return (win||window).document.documentMode === 5;
         } else {
           return (win||window).document.compatMode !== "CSS1Compat";
@@ -142,7 +142,7 @@ qx.Class.define("qx.bom.Document",
      * @return {Integer} The width of the actual document (which includes the body and its margin).
      *
      * NOTE: Opera 9.5x and 9.6x have wrong value for the scrollWidth property,
-     * if a element use negative value for top and left to be outside the viewport!
+     * if an element use negative value for top and left to be outside the viewport!
      * See: http://bugzilla.qooxdoo.org/show_bug.cgi?id=2869
      */
     getWidth : function(win)
@@ -177,7 +177,7 @@ qx.Class.define("qx.bom.Document",
      * @return {Integer} The height of the actual document (which includes the body and its margin).
      *
      * NOTE: Opera 9.5x and 9.6x have wrong value for the scrollWidth property,
-     * if a element use negative value for top and left to be outside the viewport!
+     * if an element use negative value for top and left to be outside the viewport!
      * See: http://bugzilla.qooxdoo.org/show_bug.cgi?id=2869
      */
     getHeight : function(win)

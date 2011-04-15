@@ -15,7 +15,7 @@
     "APPLICATION"  : "playground",
     "QOOXDOO_PATH" : "../..",
     "QXTHEME"      : "qx.theme.Modern",
-    "LOCALES"      : [ "en", "de","ro"],
+    "LOCALES"      : [ "en", "de", "ro", "sv"],
     "ROOT"         : "."
   },
   
@@ -34,23 +34,20 @@
       [
         "qx.test.*",
         "qx.dev.unit.*",
-        "playground.test.*"
+        "playground.test.*",
+        "qx.ui.mobile.*"
       ],
 
-      "variants" :
+      "environment" :
       {
-        "=qx.debug" : ["on"]
+        "qx.debug" : true,
+        "qx.nativeScrollBars" : true
       }
     },
 
     "build-script" :
     {
-      "extend" : [ "playground-compile" ],
-
-      "settings" :
-      {
-        "qx.nativeScrollBars" : true
-      }
+      "extend" : [ "playground-compile" ]
     },
 
 
@@ -62,12 +59,7 @@
     
     "source" :
     {
-      "extend" : [ "playground-compile" ],
-
-      "settings" :
-      {
-        "qx.nativeScrollBars" : true
-      }
+      "extend" : [ "playground-compile" ]
     }    
   }
 }

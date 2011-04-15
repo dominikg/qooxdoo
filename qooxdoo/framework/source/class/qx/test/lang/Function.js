@@ -17,6 +17,10 @@
 
 ************************************************************************ */
 
+/* ************************************************************************
+#ignore(qx.test.Name)
+************************************************************************ */
+
 qx.Class.define("qx.test.lang.Function",
 {
   extend : qx.dev.unit.TestCase,
@@ -43,7 +47,8 @@ qx.Class.define("qx.test.lang.Function",
 
       function f1(caller) {
 
-        if(qx.bom.client.Engine.OPERA && qx.bom.client.Engine.VERSION < 9.6)
+        if(qx.core.Environment.get("engine.name") == "opera" &&
+          parseFloat(qx.core.Environment.get("engine.version")) < 9.6)
         {
           qx.log.Logger.warn("This test is skipped in Opera < 9.6.");
           return ;
@@ -76,7 +81,10 @@ qx.Class.define("qx.test.lang.Function",
       result = add(1, 2);
 
       // The assertEquals test fails in Safari 3 but is fixed in WebKit nightly
-      if (qx.bom.client.Browser.NAME == "safari" && qx.bom.client.Browser.VERSION < 4 ) {
+      if (
+        qx.core.Environment.get("browser.name") == "safari" &&
+        qx.core.Environment.get("browser.version") < 4
+      ) {
         this.assertNotEquals(context, window, "This test fails if the issue is "
         + "fixed in Safari 3.");
       } else {

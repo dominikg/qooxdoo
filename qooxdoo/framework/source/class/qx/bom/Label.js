@@ -95,7 +95,8 @@ qx.Class.define("qx.bom.Label",
       {
         style.whiteSpace = "nowrap";
 
-        if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL)
+        if (!qx.core.Environment.get("css.textoverflow") &&
+          qx.core.Environment.get("html.xul"))
         {
           var inner = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "label");
 
@@ -131,7 +132,8 @@ qx.Class.define("qx.bom.Label",
       {
         styles.whiteSpace = "normal";
       }
-      else if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL)
+      else if (!qx.core.Environment.get("css.textoverflow") &&
+        qx.core.Environment.get("html.xul"))
       {
         styles.display = "block";
       }
@@ -142,7 +144,7 @@ qx.Class.define("qx.bom.Label",
         styles.textOverflow = "ellipsis";
 
         // Opera as of 9.2.x only supports -o-text-overflow
-        if (qx.core.Variant.isSet("qx.client", "opera")) {
+        if ((qx.core.Environment.get("engine.name") == "opera")) {
           styles.OTextOverflow = "ellipsis";
         }
       }
@@ -180,7 +182,8 @@ qx.Class.define("qx.bom.Label",
         var el = win.document.createElement("div");
         el.useHtml = true;
       }
-      else if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL)
+      else if (!qx.core.Environment.get("css.textoverflow") &&
+        qx.core.Environment.get("html.xul"))
       {
         // Gecko as of Firefox 2.x and 3.0 does not support ellipsis
         // for text overflow. We use this feature from XUL instead.
@@ -234,7 +237,9 @@ qx.Class.define("qx.bom.Label",
 
       if (element.useHtml) {
         element.innerHTML = value;
-      } else if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL) {
+      } else if (!qx.core.Environment.get("css.textoverflow") &&
+        qx.core.Environment.get("html.xul"))
+      {
         element.firstChild.setAttribute("value", value);
       } else {
         qx.bom.element.Attribute.set(element, "text", value);
@@ -252,7 +257,9 @@ qx.Class.define("qx.bom.Label",
     {
       if (element.useHtml) {
         return element.innerHTML;
-      } else if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL) {
+      } else if (!qx.core.Environment.get("css.textoverflow") &&
+        qx.core.Environment.get("html.xul"))
+      {
         return element.firstChild.getAttribute("value") || "";
       } else {
         return qx.bom.element.Attribute.get(element, "text");
@@ -292,7 +299,9 @@ qx.Class.define("qx.bom.Label",
     {
       var element = this._textElement || this.__prepareText();
 
-      if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL) {
+      if (!qx.core.Environment.get("css.textoverflow") &&
+        qx.core.Environment.get("html.xul"))
+      {
         element.firstChild.setAttribute("value", text);
       } else {
         qx.bom.element.Attribute.set(element, "text", text);
@@ -324,20 +333,19 @@ qx.Class.define("qx.bom.Label",
 
       // detect size
       var size = qx.bom.element.Dimension.getSize(element);
-      if (qx.core.Variant.isSet("qx.client", "gecko"))
-      {
-        // Under Mac at least with Firefox 3.0 alpha 6 and earlier
-        // there was an issue that the text size calculation returns
-        // a size which is a bit too small and results into ellipsis
-        // even under the measured size.
-        // Linux shows the same bug (FF 3.0.6)
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=450422
-        if (!qx.bom.client.Platform.WIN) {
-          size.width++;
-        }
+
+      // Under Mac at least with Firefox 3.0 alpha 6 and earlier
+      // there was an issue that the text size calculation returns
+      // a size which is a bit too small and results into ellipsis
+      // even under the measured size.
+      // Linux shows the same bug (FF 3.0.6)
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=450422
+      // Also FF4 with Windows7 shows the same issue see bug #4961
+      if ((qx.core.Environment.get("engine.name") == "gecko")) {
+        size.width++;
       }
       // IE9 has problems with the text size calculation for details have a look at bug #4038
-      if (qx.core.Variant.isSet("qx.client", "mshtml") && qx.bom.client.Engine.VERSION >= 9) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml") && parseFloat(qx.core.Environment.get("engine.version")) >= 9) {
         size.width++;
       }
       return size;

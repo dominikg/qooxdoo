@@ -60,7 +60,7 @@ qx.Class.define("qx.ui.menu.Manager",
 
     // only use the blur event to hide windows on non touch devices [BUG #4033]
     // When the menu is locaed on top of an iFrame, the select will fail
-    if (!qx.bom.client.Feature.TOUCH) {
+    if (!qx.core.Environment.get("event.touch")) {
       // Hide all when the window is blurred
       qx.event.Registration.addListener(window, "blur", this.hideAll, this);
     }
@@ -194,7 +194,7 @@ qx.Class.define("qx.ui.menu.Manager",
      */
     add : function(obj)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!(obj instanceof qx.ui.menu.Menu)) {
           throw new Error("Object is no menu: " + obj);
@@ -214,7 +214,7 @@ qx.Class.define("qx.ui.menu.Manager",
      */
     remove : function(obj)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (!(obj instanceof qx.ui.menu.Menu)) {
           throw new Error("Object is no menu: " + obj);
@@ -423,7 +423,7 @@ qx.Class.define("qx.ui.menu.Manager",
       target = qx.ui.core.Widget.getWidgetByElement(target, true);
 
       // If the target is 'null' the click appears on a DOM element witch is not
-      // a widget. This happens normally with a inline application, when the user
+      // a widget. This happens normally with an inline application, when the user
       // clicks not in the inline application. In this case all all currently
       // open menus should be closed.
       if (target == null) {

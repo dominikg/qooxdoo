@@ -20,18 +20,30 @@
 qx.Class.define("qx.test.event.GlobalError",
 {
   extend : qx.dev.unit.TestCase,
+  include : qx.dev.unit.MRequirements,
+
 
   members :
   {
+    hasGlobalErrorHandling : function() {
+      return !!qx.core.Environment.get("qx.globalErrorHandling");
+    },
+
+
+    hasNoGlobalErrorHandling : function() {
+      return !this.hasGlobalErrorHandling();
+    },
+
+
     setUp : function()
     {
-      qx.core.Setting.set("qx.globalErrorHandling", "on");
       this.errorHandler = qx.event.GlobalError;
 
       this.called = false;
       this.calledParams = [];
       this.errorHandler.setErrorHandler(this.onError, this);
     },
+
 
     tearDown : function ()
     {
@@ -50,14 +62,10 @@ qx.Class.define("qx.test.event.GlobalError",
     },
 
 
-    testSetting : function()
-    {
-      this.assertEquals("on", qx.core.Setting.get("qx.globalErrorHandling"));
-    },
-
-
     testObserveMethod : function()
     {
+      this.require(["GlobalErrorHandling"]);
+
       var fail = function() {
         throw new Error("fail");
       }
@@ -69,9 +77,9 @@ qx.Class.define("qx.test.event.GlobalError",
     },
 
 
-    testDontWarpIfSettingIsOff : function()
+    testDontWrapIfSettingIsOff : function()
     {
-      qx.core.Setting.set("qx.globalErrorHandling", "off");
+      this.require(["NoGlobalErrorHandling"]);
 
       var fcn = function() {};
       var wrapped = this.errorHandler.observeMethod(fcn);
@@ -82,7 +90,7 @@ qx.Class.define("qx.test.event.GlobalError",
 
     testWrappedParameterAndReturnValue : function()
     {
-      var args = null;
+      this.require(["GlobalErrorHandling"]);
 
       var fcn = function(a,b,c) {
         var args = [a, b, c];
@@ -99,6 +107,8 @@ qx.Class.define("qx.test.event.GlobalError",
 
     testObserveMethodButNoHandler : function()
     {
+      this.require(["GlobalErrorHandling"]);
+
       var fail = function() {
         throw new Error("fail");
       }
@@ -115,6 +125,8 @@ qx.Class.define("qx.test.event.GlobalError",
 
     testHandlerContext : function()
     {
+      this.require(["GlobalErrorHandling"]);
+
       var fail = function() {
         throw new Error("fail");
       }
@@ -134,6 +146,8 @@ qx.Class.define("qx.test.event.GlobalError",
 
     testHandleError : function()
     {
+      this.require(["GlobalErrorHandling"]);
+
       var error = new Error("New Error");
       this.errorHandler.handleError(error);
 
@@ -144,6 +158,8 @@ qx.Class.define("qx.test.event.GlobalError",
 
     testOnWindowError : function()
     {
+      this.require(["GlobalErrorHandling"]);
+
       // reset the handler
       this.errorHandler.setErrorHandler(null);
 
@@ -157,7 +173,7 @@ qx.Class.define("qx.test.event.GlobalError",
         this.assertString(ex.getUri());
         this.assertInteger(ex.getLineNumber());
 
-        this.debug(ex.toString() + " at " + ex.getUri() + ":" + ex.getLineNumber());
+        // this.debug(ex.toString() + " at " + ex.getUri() + ":" + ex.getLineNumber());
       }, this); }
 
       this.errorHandler.setErrorHandler(handler, this);
@@ -178,7 +194,10 @@ qx.Class.define("qx.test.event.GlobalError",
 
         self.resume(function()
         {
-          if (qx.core.Variant.isSet("qx.client", "opera|webkit")) {
+          if (
+            qx.core.Environment.get("engine.name") == "opera" ||
+            qx.core.Environment.get("engine.name") == "webkit"
+          ) {
             this.warn("window.onerror is not supported by Opera and Webkit");
           } else {
             this.fail("window.onerror should be supported! Note: this test fails in IE if the debugger is active!");
@@ -192,6 +211,8 @@ qx.Class.define("qx.test.event.GlobalError",
 
     testOnWindowErrorWrapped : function()
     {
+      this.require(["GlobalErrorHandling"]);
+
       // reset error handler on startup
       this.errorHandler.setErrorHandler(null);
 
@@ -226,7 +247,7 @@ qx.Class.define("qx.test.event.GlobalError",
         this.assertEquals(originalUri, ex.getUri());
         this.assertEquals(originalLineNumber, ex.getLineNumber());
 
-        this.debug(ex.toString() + " at " + ex.getUri() + ":" + ex.getLineNumber());
+        // this.debug(ex.toString() + " at " + ex.getUri() + ":" + ex.getLineNumber());
       }, this); }
 
       this.errorHandler.setErrorHandler(handler, this);
@@ -247,7 +268,10 @@ qx.Class.define("qx.test.event.GlobalError",
 
         self.resume(function()
         {
-          if (qx.core.Variant.isSet("qx.client", "opera|webkit")) {
+          if (
+            qx.core.Environment.get("engine.name") == "opera" ||
+            qx.core.Environment.get("engine.name") == "webkit"
+          ) {
             this.warn("window.onerror is not supported by Opera and Webkit");
           } else {
             this.fail("window.onerror should be supported! Note: this test fails in IE if the debugger is active!");
@@ -257,18 +281,5 @@ qx.Class.define("qx.test.event.GlobalError",
 
       this.wait(500);
     }
-
-
-    // timer setTimeout/setInterval - OK
-    // addNativeListener - OK
-    // attachEvent - OK
-    // mouse - OK
-    // key - OK
-    // focus - OK
-    // scroll - OK
-    // rpc/io - OK
-    // load - OK
-    // animation - OK
-    // iframe - OK
   }
 });

@@ -22,6 +22,8 @@
  * If no version could be detected the version is set to "0" as default.
  * Be aware of that behaviour if using the {@link #has} method with a minimum
  * version as second parameter.
+ *
+ * @deprecated since 1.4: please use qx.core.Environment instead.
  */
 qx.Class.define("qx.bom.client.Multimedia",
 {
@@ -75,12 +77,18 @@ qx.Class.define("qx.bom.client.Multimedia",
     /**
      * Detects if the given plugin is available.
      *
+     * @deprecated since 1.4: please use qx.core.Environment.get instead.
+     *
      * @param id {String} Feature-ID. One of quicktime, wmv, divx or silverlight
      * @param version {Float?0} Optional version minimum check
      * @return {Boolean} Returns <code>true</code> when the given plugin is available.
      */
     has : function(id, version)
     {
+      qx.log.Logger.deprecatedMethodWarning(
+        arguments.callee, "Please use qx.core.Environment.get insead."
+      );
+
       // check if the given id is available - otherwise return false
       if (this.__db[id])
       {
@@ -106,7 +114,7 @@ qx.Class.define("qx.bom.client.Multimedia",
      * @return {void}
      * @signature function()
      */
-    __init : qx.core.Variant.select("qx.client",
+    __init : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function()
       {
@@ -193,7 +201,7 @@ qx.Class.define("qx.bom.client.Multimedia",
               entry.installed = true;
 
               if (verreg.test(plugin.name) || verreg.test(plugin.description)) {
-                entry.version = parseFloat(RegExp.$1, 10);
+                entry.version = parseFloat(RegExp.$1);
               } else {
                 entry.version = 0;
               }

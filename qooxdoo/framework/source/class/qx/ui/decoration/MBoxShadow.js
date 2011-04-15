@@ -17,17 +17,18 @@
 
 ************************************************************************ */
 /**
- * Mixin for the box shadow CSS property. 
- * 
+ * Mixin for the box shadow CSS property.
+ * This mixin is usually used by {@link qx.ui.decoration.DynamicDecorator}.
+ *
  * Keep in mind that this is not supported by all browsers:
- * 
+ *
  * * Firefox 3,5+
  * * IE9+
  * * Safari 3.0+
  * * Opera 10.5+
  * * Chrome 4.0+
  */
-qx.Mixin.define("qx.ui.decoration.MBoxShadow", 
+qx.Mixin.define("qx.ui.decoration.MBoxShadow",
 {
   properties : {
     /** Horizontal length of the shadow. */
@@ -37,7 +38,7 @@ qx.Mixin.define("qx.ui.decoration.MBoxShadow",
       check : "Integer",
       apply : "_applyBoxShadow"
     },
-    
+
     /** Vertical length of the shadow. */
     shadowVerticalLength :
     {
@@ -45,7 +46,7 @@ qx.Mixin.define("qx.ui.decoration.MBoxShadow",
       check : "Integer",
       apply : "_applyBoxShadow"
     },
-    
+
     /** The blur radius of the shadow. */
     shadowBlurRadius :
     {
@@ -53,7 +54,7 @@ qx.Mixin.define("qx.ui.decoration.MBoxShadow",
       check : "Integer",
       apply : "_applyBoxShadow"
     },
-    
+
     /** The color of the shadow. */
     shadowColor :
     {
@@ -61,22 +62,24 @@ qx.Mixin.define("qx.ui.decoration.MBoxShadow",
       check : "Color",
       apply : "_applyBoxShadow"
     },
-    
-    
+
+
     /** Property group to set the shadow length. */
     shadowLength :
     {
-      group : ["shadowHorizontalLength", "shadowVerticalLength"]
-    }    
+      group : ["shadowHorizontalLength", "shadowVerticalLength"],
+      shorthand: true
+    }
   },
-  
-  
+
+
   members :
   {
     /**
-     * Takes a styles map and adds the box shadow styles in place to the 
-     * given map.
-     * 
+     * Takes a styles map and adds the box shadow styles in place to the
+     * given map. This is the needed behavior for
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param styles {Map} A map to add the styles.
      */
     _styleBoxShadow : function(styles) {
@@ -94,12 +97,12 @@ qx.Mixin.define("qx.ui.decoration.MBoxShadow",
         styles["box-shadow"] = value;
       }
     },
-    
-    
+
+
     // property apply
     _applyBoxShadow : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this._isInitialized()) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");

@@ -19,7 +19,7 @@
 
 /**
  * EXPERIMENTAL!
- * 
+ *
  * The provider implements the {@link qx.ui.virtual.core.IWidgetCellProvider}
  * API, which can be used as delegate for the widget cell rendering and it
  * provides a API to bind the model with the rendered item.
@@ -37,7 +37,7 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
 
   include : [qx.ui.tree.core.MWidgetController],
 
-  
+
   /**
    * @param tree {qx.ui.tree.VirtualTree} tree to provide.
    */
@@ -52,71 +52,45 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
   },
 
 
-  properties :
-  {
-    /**
-     * The name of the property, where the children are stored in the model.
-     * Instead of the {@link #labelPath} must the child property a direct
-     * property form the model instance.
-     */
-    childProperty :
-    {
-      check: "String",
-      nullable: true
-    }
-  },
-
-
   members :
   {
     /** {qx.ui.tree.VirtualTree} tree to provide. */
     _tree : null,
 
 
-    /** {qx.ui.virtual.cell.WidgetCell} the used node renderer. */
-    _nodeRenderer : null,
+    /** {qx.ui.virtual.cell.WidgetCell} the used item renderer. */
+    _renderer : null,
 
 
-    /** {qx.ui.virtual.cell.WidgetCell} the used node renderer. */
-    _leafRenderer : null,
-
-    
     /*
     ---------------------------------------------------------------------------
       PUBLIC API
     ---------------------------------------------------------------------------
     */
-    
+
 
     // interface implementation
     getCellWidget : function(row, column)
     {
       var item = this._tree.getLookupTable().getItem(row);
 
-      var widget = null;
-      if (this._tree.isNode(item))
-      {
-        var hasChildren = this._tree.hasChildren(item);
-        widget = this._nodeRenderer.getCellWidget();
-        widget.setOpen(hasChildren && this._tree.isNodeOpen(item));
-        widget.setUserData("cell.type", "node");
-        widget.setUserData("cell.children", hasChildren);
-        widget.addListener("changeOpen", this.__onOpenChanged, this);
-        this._bindNode(widget, row);
+      var hasChildren = false;
+      if (this._tree.isNode(item)) {
+        hasChildren = this._tree.hasChildren(item);
       }
-      else
-      {
-        widget = this._leafRenderer.getCellWidget();
-        widget.setUserData("cell.type", "leaf");
-        this._bindLeaf(widget, row);
-      }
-      
+
+      var widget = this._renderer.getCellWidget();
+      widget.setOpen(hasChildren && this._tree.isNodeOpen(item));
+      widget.setUserData("cell.children", hasChildren);
+      widget.addListener("changeOpen", this.__onOpenChanged, this);
+      this._bindItem(widget, row);
+
       if(this._tree.getSelection().contains(item)) {
         this._styleSelectabled(widget);
       } else {
         this._styleUnselectabled(widget);
       }
-      
+
       widget.setUserData("cell.level", this._tree.getLevel(row));
       qx.ui.core.queue.Widget.add(widget);
 
@@ -127,17 +101,9 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
     // interface implementation
     poolCellWidget : function(widget)
     {
-      var type = widget.getUserData("cell.type");
+      widget.removeListener("changeOpen", this.__onOpenChanged, this);
       this._removeBindingsFrom(widget);
-
-      if (type === "node")
-      {
-        widget.removeListener("changeOpen", this.__onOpenChanged, this);
-        this._nodeRenderer.pool(widget);
-      }
-      else {
-        this._leafRenderer.pool(widget);
-      }
+      this._renderer.pool(widget);
     },
 
 
@@ -148,45 +114,25 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
 
 
     // Interface implementation
-    createNodeRenderer : function()
+    createRenderer : function()
     {
-      var createWidget = qx.util.Delegate.getMethod(this.getDelegate(), "createNode");
+      var createItem = qx.util.Delegate.getMethod(this.getDelegate(), "createItem");
 
-      if (createWidget == null) {
-        createWidget = function() {
-          return new qx.ui.tree.VirtualTreeFolder();
+      if (createItem == null) {
+        createItem = function() {
+          return new qx.ui.tree.VirtualTreeItem();
         }
       }
 
       var renderer = new qx.ui.virtual.cell.WidgetCell();
       renderer.setDelegate({
-        createWidget : createWidget
+        createWidget : createItem
       });
 
       return renderer;
     },
 
 
-    // Interface implementation
-    createLeafRenderer : function()
-    {
-      var createWidget = qx.util.Delegate.getMethod(this.getDelegate(), "createLeaf");
-
-      if (createWidget == null) {
-        createWidget = function() {
-          return new qx.ui.tree.VirtualTreeFile();
-        }
-      }
-
-      var renderer = new qx.ui.virtual.cell.WidgetCell();
-      renderer.setDelegate({
-        createWidget : createWidget
-      });
-
-      return renderer;
-    },
-
-    
     // interface implementation
     styleSelectabled : function(row)
     {
@@ -213,8 +159,8 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
         return true;
       }
     },
-    
-    
+
+
     /*
     ---------------------------------------------------------------------------
       INTERNAL API
@@ -232,12 +178,7 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
         return;
       }
 
-      var type = widget.getUserData("cell.type");
-      if (type === "node") {
-        this._nodeRenderer.updateStates(widget, {selected: 1});
-      } else {
-        this._leafRenderer.updateStates(widget, {selected: 1});
-      }
+      this._renderer.updateStates(widget, {selected: 1});
     },
 
 
@@ -251,54 +192,33 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
         return;
       }
 
-      var type = widget.getUserData("cell.type");
-      if (type === "node") {
-        this._nodeRenderer.updateStates(widget, {});
-      } else {
-        this._leafRenderer.updateStates(widget, {});
-      }
+      this._renderer.updateStates(widget, {});
     },
-    
-    
+
+
     /*
     ---------------------------------------------------------------------------
       EVENT HANDLERS
     ---------------------------------------------------------------------------
     */
-    
-    
+
+
     /**
-     * Event handler for the created node widget event.
+     * Event handler for the created item's.
      *
      * @param event {qx.event.type.Data} fired event.
      */
-    _onNodeCreated : function(event)
+    _onItemCreated : function(event)
     {
-      var configureNode = qx.util.Delegate.getMethod(this.getDelegate(), "configureNode");
-      
-      if (configureNode != null) {
-        var node = event.getData();
-        configureNode(node);
-      }
-    },
-    
-    
-    /**
-     * Event handler for the created leaf widget event.
-     *
-     * @param event {qx.event.type.Data} fired event.
-     */
-    _onLeafCreated : function(event)
-    {
-      var configureLeaf = qx.util.Delegate.getMethod(this.getDelegate(), "configureLeaf");
-      
-      if (configureLeaf != null) {
+      var configureItem = qx.util.Delegate.getMethod(this.getDelegate(), "configureItem");
+
+      if (configureItem != null) {
         var leaf = event.getData();
-        configureLeaf(leaf);
+        configureItem(leaf);
       }
     },
-    
-    
+
+
     /**
      * Event handler for the change delegate event.
      *
@@ -306,22 +226,19 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
      */
     _onChangeDelegate : function(event)
     {
-      if (this._nodeRenderer != null && this._leafRenderer != null) {
-        this._nodeRenderer.dispose();
-        this._leafRenderer.dispose();
+      if (this._renderer != null) {
+        this._renderer.dispose();
         this.removeBindings();
       }
-      
-      this._nodeRenderer = this.createNodeRenderer();
-      this._leafRenderer = this.createLeafRenderer();
-      this._nodeRenderer.addListener("created", this._onNodeCreated, this);
-      this._leafRenderer.addListener("created", this._onLeafCreated, this);
+
+      this._renderer = this.createRenderer();
+      this._renderer.addListener("created", this._onItemCreated, this);
     },
-    
-    
+
+
     /**
      * Handler when a node changes opened or closed state.
-     * 
+     *
      * @param event {qx.event.type.Data} The data event.
      */
     __onOpenChanged : function(event)
@@ -342,8 +259,7 @@ qx.Class.define("qx.ui.tree.provider.WidgetProvider",
   destruct : function()
   {
     this.removeBindings();
-    this._nodeRenderer.dispose();
-    this._leafRenderer.dispose();
-    this._tree = this._nodeRenderer = this._leafRenderer = null;
+    this._renderer.dispose();
+    this._tree = this._renderer = null;
   }
 });

@@ -34,7 +34,7 @@ qx.Class.define("inspector.objects.Controller",
   {
     this.base(arguments);
 
-    if (qx.core.Variant.isSet("qx.debug", "on"))
+    if (qx.core.Environment.get("qx.debug"))
     {
       qx.core.Assert.assertInterface(
         model,
@@ -163,7 +163,7 @@ qx.Class.define("inspector.objects.Controller",
         // model, which try to select a wrong object
         this.__ignoreInpectObject = false;
         this.__view.selectObject(this.__model.getInspected());
-      }, 0, this, null, 200);
+      }, 0, this, null, 500);
     },
 
     /**

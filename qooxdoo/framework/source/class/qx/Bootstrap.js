@@ -163,6 +163,7 @@ qx.Bootstrap = {
  *
  * Does support:
  *
+ * * Construct
  * * Statics
  * * Members
  * * Extend
@@ -180,6 +181,21 @@ qx.Bootstrap.define("qx.Bootstrap",
     /** Timestamp of qooxdoo based application startup */
     LOADSTART : qx.$$start || new Date(),
 
+    /**
+     * Mapping for early use of the qx.debug environment setting.
+     * @lint ignoreUndefined(qxvariants)
+     */
+     DEBUG : (function() {
+       // make sure to reflect all changes here to the environment class!
+       var debug = true;
+       if (qx.$$environment && qx.$$environment["qx.debug"] === false) {
+         debug = false;
+       }
+       if (window.qxvariants && window.qxvariants["qx.debug"] == "off") {
+         debug = false;
+       }
+       return debug;
+     })(),
 
     /**
      * Creates a namespace and assigns the given object to it.
@@ -490,7 +506,7 @@ qx.Bootstrap.define("qx.Bootstrap",
      * Convert the first character of the string to upper case.
      *
      * @param str {String} the string
-     * @return {String} the string with a upper case first character
+     * @return {String} the string with an upper case first character
      */
     firstUp : function(str) 
     {
@@ -558,7 +574,7 @@ qx.Bootstrap.define("qx.Bootstrap",
     {
       // Added "value !== null" because IE throws an exception "Object expected"
       // by executing "value instanceof Array" if value is a DOM element that
-      // doesn't exist. It seems that there is a internal different between a
+      // doesn't exist. It seems that there is an internal different between a
       // JavaScript null and a null returned from calling DOM.
       // e.q. by document.getElementById("ReturnedNull").
       return (
@@ -581,7 +597,7 @@ qx.Bootstrap.define("qx.Bootstrap",
     {
       // Added "value !== null" because IE throws an exception "Object expected"
       // by executing "value instanceof Array" if value is a DOM element that
-      // doesn't exist. It seems that there is a internal different between a
+      // doesn't exist. It seems that there is an internal different between a
       // JavaScript null and a null returned from calling DOM.
       // e.q. by document.getElementById("ReturnedNull").
       return (

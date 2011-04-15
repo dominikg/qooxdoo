@@ -25,10 +25,10 @@
  * Supported themes are: colors, decorations, fonts, icons, appearances.
  * The additional meta theme allows for grouping of the individual
  * themes.
- * 
- * For more details, take a look at the 
+ *
+ * For more details, take a look at the
  * <a href='http://manual.qooxdoo.org/1.4/pages/gui_toolkit/ui_theming.html' target='_blank'>
- * documentation of the theme system in the qooxdoo wiki.</a>
+ * documentation of the theme system in the qooxdoo manual.</a>
  */
 qx.Bootstrap.define("qx.Theme",
 {
@@ -62,11 +62,11 @@ qx.Bootstrap.define("qx.Theme",
      *   meta : {}
      * });
      * </pre>
-     * 
-     * For more details, take a look at the 
+     *
+     * For more details, take a look at the
      * <a href='http://manual.qooxdoo.org/1.4/pages/gui_toolkit/ui_theming.html' target='_blank'>
-     * documentation of the theme system in the qooxdoo wiki.</a>
-     * 
+     * documentation of the theme system in the qooxdoo manual.</a>
+     *
      * @param name {String} name of the mixin
      * @param config {Map} config structure
      * @return {void}
@@ -81,7 +81,7 @@ qx.Bootstrap.define("qx.Theme",
       config.patch = this.__normalizeArray(config.patch);
 
       // Validate incoming data
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         this.__validateConfig(name, config);
       }
 
@@ -291,7 +291,7 @@ qx.Bootstrap.define("qx.Theme",
         // Convert base flag to class reference (needed for mixin support)
         if (target[id].base)
         {
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
             if (!config.extend) {
               throw new Error("Found base flag in entry '" + id + "' of theme '" + config.name + "'. Base flags are not allowed for themes without a valid super theme!");
@@ -319,9 +319,9 @@ qx.Bootstrap.define("qx.Theme",
 
 
     /** {Map} allowed keys in theme definition */
-    __allowedKeys : qx.core.Variant.select("qx.debug",
+    __allowedKeys : qx.core.Environment.select("qx.debug",
     {
-      "on":
+      "true":
       {
         "title"       : "string", // String
         "aliases"     : "object", // Map
@@ -343,9 +343,9 @@ qx.Bootstrap.define("qx.Theme",
     }),
 
     /** {Map} allowed keys inside a meta theme block */
-    __metaKeys :qx.core.Variant.select("qx.debug",
+    __metaKeys :qx.core.Environment.select("qx.debug",
     {
-      "on":
+      "true":
       {
         "color" : "object",
         "border" : "object",
@@ -368,9 +368,9 @@ qx.Bootstrap.define("qx.Theme",
      * @return {void}
      * @throws An error if the given config is not valid (e.g. wrong key or wrong key value)
      */
-    __validateConfig : qx.core.Variant.select("qx.debug",
+    __validateConfig : qx.core.Environment.select("qx.debug",
     {
-      "on": function(name, config)
+      "true": function(name, config)
       {
         var allowed = this.__allowedKeys;
         for (var key in config)

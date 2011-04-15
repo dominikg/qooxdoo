@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: qooxdoo framework\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-01-15 10:00+0100\n"
-"PO-Revision-Date: 2010-04-26 11:01+0100\n"
+"PO-Revision-Date: 2011-03-15 14:57+0100\n"
 "Last-Translator: Henric Johansson <henric DOT johansson AT mindset DOT se>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,7 @@ msgstr "BS"
 
 #: qx/locale/Key.js:81
 msgid "key_short_Tab"
-msgstr "Tabb"
+msgstr "Tab"
 
 #: qx/locale/Key.js:82
 msgid "key_short_Space"
@@ -253,6 +253,11 @@ msgstr ""
 msgid "test two"
 msgstr ""
 
+#: qx/test/util/Serializer.js:489 qx/test/util/Serializer.js:494
+#: qx/test/util/Serializer.js:501
+msgid "test affe"
+msgstr ""
+
 #: qx/ui/control/ColorPopup.js:147
 msgid "Automatic"
 msgstr "Automatiskt"
@@ -263,7 +268,7 @@ msgstr "Öppna färgväljare"
 
 #: qx/ui/control/ColorPopup.js:180
 msgid "OK"
-msgstr "OK"
+msgstr "Ok"
 
 #: qx/ui/control/ColorPopup.js:185
 msgid "Cancel"
@@ -273,47 +278,47 @@ msgstr "Avbryt"
 msgid "Color Selector"
 msgstr "Färgväljare"
 
-#: qx/ui/control/ColorSelector.js:258
+#: qx/ui/control/ColorSelector.js:256
 msgid "Visual"
 msgstr "Visuell"
 
-#: qx/ui/control/ColorSelector.js:318
+#: qx/ui/control/ColorSelector.js:316
 msgid "Presets"
 msgstr "Förinställningar"
 
-#: qx/ui/control/ColorSelector.js:349
+#: qx/ui/control/ColorSelector.js:347
 msgid "Details"
 msgstr "Detaljer"
 
-#: qx/ui/control/ColorSelector.js:360 qx/ui/control/ColorPopup.js:162
+#: qx/ui/control/ColorSelector.js:358 qx/ui/control/ColorPopup.js:162
 msgid "Preview (Old/New)"
 msgstr "Förhandsgranska (Gammal/Ny)"
 
-#: qx/ui/control/ColorSelector.js:378
+#: qx/ui/control/ColorSelector.js:376
 msgid "Hex"
 msgstr "Hex"
 
-#: qx/ui/control/ColorSelector.js:400
+#: qx/ui/control/ColorSelector.js:398
 msgid "RGB"
 msgstr "RGB"
 
-#: qx/ui/control/ColorSelector.js:432
+#: qx/ui/control/ColorSelector.js:430
 msgid "HSB"
 msgstr "HSB"
 
-#: qx/ui/control/DateChooser.js:243
+#: qx/ui/control/DateChooser.js:253
 msgid "Last year"
 msgstr "Föregående år"
 
-#: qx/ui/control/DateChooser.js:255
+#: qx/ui/control/DateChooser.js:265
 msgid "Last month"
 msgstr "Föregående månad"
 
-#: qx/ui/control/DateChooser.js:267
+#: qx/ui/control/DateChooser.js:277
 msgid "Next month"
 msgstr "Nästa månad"
 
-#: qx/ui/control/DateChooser.js:279
+#: qx/ui/control/DateChooser.js:289
 msgid "Next year"
 msgstr "Nästa år"
 
@@ -321,13 +326,13 @@ msgstr "Nästa år"
 msgid "This field is required"
 msgstr "Det här fältet måste fyllas i"
 
-#: qx/ui/table/Table.js:1907
+#: qx/ui/table/Table.js:1953
 msgid "one row"
 msgid_plural "%1 rows"
 msgstr[0] "En rad"
 msgstr[1] "%1 rader"
 
-#: qx/ui/table/Table.js:1909
+#: qx/ui/table/Table.js:1955
 msgid "one of one row"
 msgid_plural "%1 of %2 rows"
 msgstr[0] "en av en rad"
@@ -351,7 +356,7 @@ msgstr "%1 är inte en sträng."
 
 #: qx/util/Validate.js:203
 msgid "%1 is not an url."
-msgstr "%1 är inte en url"
+msgstr "%1 är inte en webbplatsadress (URL)"
 
 #: qx/util/Validate.js:244
 msgid "%1 is not a color! %2"

@@ -110,7 +110,7 @@
  *  information, see the file 'user-extensions.js.sample' in the Selenium Core 
  *  distribution.
  *
- * Changed to work with selenium 0.8.3
+ * Changed to work with selenium 1.0.3
  *
  * Based on the orginal Selenium user extension for qooxdoo (version: 0.3)
  * by Robert Zimmermann
@@ -453,7 +453,6 @@ Selenium.prototype.doGetViewport = function(locator, eventParams)
  * Clicks on a qooxdoo-element.
  * mousedown, mouseup will be fired instead of only click
  * additionaly to doQxClick the x-/y-coordinates of located element will be determined.
- * TODO: implement it like doFooAt, where additional coordinates will be added to the element-coords
  * 
  * eventParams example: button=left|right|middle, clientX=300, shiftKey=true
  *             for a full list of properties see "function Selenium.prototype.qx.triggerMouseEventQx"
@@ -467,8 +466,18 @@ Selenium.prototype.doGetViewport = function(locator, eventParams)
 Selenium.prototype.doQxClickAt = function(locator, eventParams)
 {
   var element = this.page().findElement(locator);
-  var coordsXY = getClientXY(element);
-  LOG.debug("computed coords: X=" + coordsXY[0] + " Y=" + coordsXY[1]);
+  var qx = this.getQxGlobalObject();
+  if (!qx.bom || !qx.bom.element || !qx.bom.element.Dimension) {
+    throw new SeleniumError("qx.bom.Element is needed for qxClickAt but not present in the AUT!");
+  }
+  var pos = qx.bom.element.Location.get(element);
+  var coordsXY = [pos["left"], pos["top"]];
+  LOG.debug("qxClickAt element coords: X=" + coordsXY[0] + " Y=" + coordsXY[1]);
+  var elemWidth = qx.bom.element.Dimension.getWidth(element);
+  var elemHeight = qx.bom.element.Dimension.getHeight(element);
+  coordsXY[0] = coordsXY[0] + Math.floor(elemWidth / 2);
+  coordsXY[1] = coordsXY[1] + Math.floor(elemHeight / 2);
+  LOG.debug("qxClickAt final coords: X=" + coordsXY[0] + " Y=" + coordsXY[1]);
 
   // TODO: very dirty no checking, maybe refactoring needed to get doQxClick and doQxClickAt to work smoothly together.
   var newEventParamString = eventParams + ",clientX=" + coordsXY[0] + ",clientY=" + coordsXY[1];
@@ -853,7 +862,6 @@ Selenium.prototype.getQxObjectHash = function(locator, script)
   if (!qxObject) {
     throw new SeleniumError("No qooxdoo object found for locator: " + locator);
   }
-  LOG.error("qxObject: " + qxObject.classname);
   var qx = this.getQxGlobalObject();
   
   if (script) {
@@ -866,6 +874,43 @@ Selenium.prototype.getQxObjectHash = function(locator, script)
   return qx.core.ObjectRegistry.toHashCode(qxObject);
 };
 
+
+/**
+ * Returns the Widget that the given DOM element is a part of.
+ * 
+ * @param element {DOMElement} DOM Element
+ * @return {qx.ui.core.Widget|qx.ui.mobile.core.Widget} The corresponding widget
+ */
+PageBot.prototype.getQxWidgetByElement = function(element)
+{
+  var qx = this.getQxGlobalObject();
+  var widget = null;
+  
+  if (qx.ui && qx.ui.core && qx.ui.core.Widget) {
+    try {
+      widget = qx.ui.core.Widget.getWidgetByElement(element);
+    }
+    catch(ex) {}
+  }
+  
+  if (element.id && qx.ui && qx.ui.mobile && qx.ui.mobile.core.Widget) {
+    try {
+      widget = qx.ui.mobile.core.Widget.getWidgetById(element.id);
+    }
+    catch(ex) {}
+  }
+  
+  if (widget) {
+    LOG.debug("getQxWidgetByElement found widget " + widget.classname);
+  }
+  
+  return widget;
+};
+
+Selenium.prototype.getQxWidgetByElement = function(element)
+{
+  return this.page().getQxWidgetByElement(element);
+};
 
 /**
  * Uses the standard locators to find a qooxdoo widget and returns it.
@@ -892,7 +937,7 @@ Selenium.prototype.getQxWidgetByLocator = function(locator)
   }
 
   // this.page().findElement() returns the html element.
-  var qxObject = qx.ui.core.Widget.getWidgetByElement( element );
+  var qxObject = this.getQxWidgetByElement(element);
   if (qxObject) {
     return qxObject;
   }
@@ -1172,7 +1217,7 @@ Selenium.prototype.__getTableClipperElement = function(locator, qxTable)
     } catch(ex) {
       throw new SeleniumError("Couldn't find table clipper widget: " + ex);
     }
-    element = qxResultObject.getContentElement().getDomElement();
+    element = this._getDomElementFromWidget(qxResultObject);
   }
   return element;
 };
@@ -1197,7 +1242,7 @@ Selenium.prototype.__getTableHeaderCellElement = function(column, locator, qxTab
       LOG.error("Couldn't find header cell widget: " + ex);
       return null;
     }
-    element = qxResultObject.getContentElement().getDomElement();
+    element = this._getDomElementFromWidget(qxResultObject);
   }
   return element;
 };
@@ -1223,7 +1268,7 @@ Selenium.prototype.__getTableFocusIndicatorElement = function(locator, qxTable)
     } catch(ex) {
       throw new SeleniumError("Couldn't find table focus indicator: " + ex);
     }
-    element = qxResultObject.getContentElement().getDomElement();
+    element = this._getDomElementFromWidget(qxResultObject);
   }
   return element;
 };
@@ -1260,9 +1305,11 @@ Selenium.prototype.__getUpdatedFirstVisibleRow = function(column, row, qxTable)
  * @throws SeleniumError if the target column is invisible
  */
 Selenium.prototype.__getCellCoordinates = function(column, row, qxTable, clipperElement) {
-  // Get the coordinates of the table:
-  var coordsXY = getClientXY(clipperElement);
-  LOG.debug("computed coords: X=" + coordsXY[0] + " Y=" + coordsXY[1]);
+  // Get the coordinates of the table's Clipper:
+  var qx = this.getQxGlobalObject();
+  var pos = qx.bom.element.Location.get(clipperElement);
+  LOG.debug("computed coords: X=" + pos["left"] + " Y=" + pos["top"]);
+  var coordsXY = [pos["left"], pos["top"]];
   // Add in table height plus row height to get to the right row:
   //LOG.debug("Table Header Height = " + qxTable.getHeaderCellHeight() );
   //LOG.debug("Table Row Height = " + qxTable.getRowHeight() );
@@ -1379,19 +1426,21 @@ Selenium.prototype.doQxTableClick = function(locator, eventParams)
     + ",clientY=" + coordsXY[1];
   LOG.debug("newEventParamString=" + newEventParamString);
 
-  // Always do a standard click to focus the cell
-  this.clickElementQx(element, newEventParamString);
-
-  // If requested, also do a context menu request:
+  // If requested, execute a right click/context menu event :
   if (doContextMenu) {
     LOG.debug("Right clicking table cell with params: " + newEventParamString);
     this.clickElementQx(element, newEventParamString + ",button=right");
   }
 
-  // If requested, also do a double-click request:
-  if (doDoubleClick) {
+  // If requested, execute a double-click:
+  else if (doDoubleClick) {
     LOG.debug("Double clicking table cell with params: " + newEventParamString);
     this.clickElementQx(element, newEventParamString + ",double=true");
+  }
+  
+  // Otherwise execute a single click
+  else {
+    this.clickElementQx(element, newEventParamString);
   }
 
 };
@@ -1447,9 +1496,10 @@ Selenium.prototype.doQxTableHeaderClick = function(locator, eventParams)
     throw new SeleniumError("Could not find the header cell with the index " + col);
   }
   
-  var coords = getClientXY(element);
-  var headerCellX = coords[0];
-  var headerCellY = coords[1];
+  var qx = this.getQxGlobalObject();
+  var pos = qx.bom.element.Location.get(element);
+  var headerCellX = pos["left"];
+  var headerCellY = pos["top"];
   
   var headerCellHeight = qxObject.getHeaderCellHeight();
   
@@ -1648,7 +1698,7 @@ Selenium.prototype.doQxTypeKeys = function(locator, value)
 /**
  * Investigates a DOM element. If the element is a text field or text area, it
  * is returned. If not, the element's corresponding qooxdoo widget is checked 
- * and the first text field/text area child node is returned.  
+ * and the first text field/text area child node is returned.
  * 
  * @param {DOMElement} element The DOM element to start with
  * @return {DOMElement} The found input or textarea element
@@ -1663,8 +1713,11 @@ Selenium.prototype.getInputElement = function(element)
     return element;
   }
   // Otherwise get the qooxdoo widget the element belongs to
-  var qx = this.getQxGlobalObject();
-  var qxWidget = qx.ui.core.Widget.getWidgetByElement(element);
+  var qxWidget = this.getQxWidgetByElement(element);
+  
+  if (!qxWidget) {
+    throw new SeleniumError("getInputElement: The given element is not part of a qooxdoo widget!");
+  }
   
   if (qxWidget.getIframeObject) {
     var iframe = qxWidget.getIframeObject();
@@ -1676,13 +1729,25 @@ Selenium.prototype.getInputElement = function(element)
   }
   
   // Get the DOM input element
-  element = qxWidget.getContentElement().getDomElement();
+  element = this._getDomElementFromWidget(qxWidget);
   if (this._isVisibleTextInput(element))
   {
     return element;
   }
   
-  throw new SeleniumError("No input/text area child found in widget " + qxWidget.classname);
+  LOG.debug("getInputElement: Searching child controls of " + qxWidget.classname);
+  var childControls = qxWidget._getChildren();
+  
+  for (var i=0,l=childControls.length; i<l; i++) {
+    var child = childControls[i];
+    element = this._getDomElementFromWidget(child);
+    if (element && this._isVisibleTextInput(element))
+    {
+      return element;
+    }
+  }
+  
+  throw new SeleniumError("getInputElement: No input/text area child found in widget " + qxWidget.classname);
 };
 
 
@@ -1695,9 +1760,41 @@ Selenium.prototype.getInputElement = function(element)
  */
 Selenium.prototype._isVisibleTextInput = function(element)
 {
+  var tagName = element.tagName.toLowerCase();
+  var type = element.type ? element.type.toLowerCase() : "";
   return (element.style.display !== "none" && element.style.visibility !== "hidden") 
-      && (element.tagName.toLowerCase() == "textarea" ||
-      (element.tagName.toLowerCase() == "input" && element.type.toLowerCase() == "text"));
+      && (tagName == "textarea" ||
+      (tagName == "input" && (type == "text" || type == "password"))
+      || (element.tagName.toLowerCase() == "input" && element.type.toLowerCase() == "password"));
+};
+
+/**
+ * Returns a widget's DOM content element. Used for compatibility with qx.ui, 
+ * where the content element is a qx.html.Element which has a DOM element, and
+ * qx.mobile, where the content element is the DOM element.
+ * 
+ * @param qxObject {qx.ui.core.Widget|qx.ui.core.mobile.Widget} a widget
+ * @return {Element|null} The DOM Element or null
+ */
+PageBot.prototype._getDomElementFromWidget = function(qxObject)
+{
+  var cElement = qxObject.getContentElement();
+  if (cElement.nodeType && cElement.nodeType === 1) {
+    return cElement;
+  }
+  var domElement = cElement.getDomElement();
+  if (domElement && domElement.nodeType && domElement.nodeType === 1) {
+    return domElement;
+  }
+  return null;
+};
+
+/** 
+ * Makes PageBot._getDomElementFromWidget accessible from Selenium.
+ */
+Selenium.prototype._getDomElementFromWidget = function(qxObject) 
+{
+  return this.page()._getDomElementFromWidget(qxObject);
 };
 
 /** 
@@ -1784,7 +1881,7 @@ PageBot.prototype.locateElementByQx = function(qxLocator, inDocument, inWindow)
   var qxObject = this._findQxObjectInWindow(qxLocator, inWindow);
 
   if (qxObject) {
-    return qxObject.getContentElement().getDomElement();
+    return this._getDomElementFromWidget(qxObject);
   }
 };
 
@@ -1833,7 +1930,7 @@ PageBot.prototype.locateElementByQxp = function(qxLocator, inDocument, inWindow)
     return null;
   }
 
-  var qxElement = qxObject.getContentElement().getDomElement();
+  var qxElement = this._getDomElementFromWidget(qxObject);
   
   var resultElement;
   if (this.locateElementByXPath){
@@ -1877,7 +1974,7 @@ PageBot.prototype.locateElementByQxh = function(qxLocator, inDocument, inWindow)
   var qxObject = this._findQxObjectInWindowQxh(qxLocator, inWindow);
 
   if (qxObject) {
-    return qxObject.getContentElement().getDomElement();
+    return this._getDomElementFromWidget(qxObject);
   } else {
     return null;
   }
@@ -1914,7 +2011,7 @@ PageBot.prototype.locateElementByQxhv = function(qxLocator, inDocument, inWindow
   var qxObject = this._findQxObjectInWindowQxh(qxLocator, inWindow);
 
   if (qxObject) {
-    return qxObject.getContentElement().getDomElement();
+    return this._getDomElementFromWidget(qxObject);
   } else {
     return null;
   }
@@ -1966,13 +2063,9 @@ PageBot.prototype.locateElementByQxidv = function(qxLocator, inDocument, inWindo
     if (element.wrappedJSObject) {
       element = element.wrappedJSObject;
     }
-    try {
-      var qxWidget = qx.ui.core.Widget.getWidgetByElement(element);
-      if (qxWidget.isSeeable()) {
-        return element;
-      }
-    } catch(ex) {
-      continue;
+    var qxWidget = this.getQxWidgetByElement(element);
+    if (qxWidget && qxWidget.isSeeable()) {
+      return element;
     }
     
   }
@@ -2028,11 +2121,11 @@ PageBot.prototype.locateElementByQxhybrid = function(qxLocator, inDocument, inWi
         this.qx.findOnlyVisible = false;
       }
       try {
-        var rootWidget = qx.ui.core.Widget.getWidgetByElement(domElem);
+        var rootWidget = this.getQxWidgetByElement(domElem);
         var subLocator = nextPart.substr(nextPart.indexOf("=") + 1);
         var qxhParts = subLocator.split('/');
         var widget = this._searchQxObjectByQxHierarchy(rootWidget, qxhParts);
-        domElem = widget.getContentElement().getDomElement();
+        domElem = this._getDomElementFromWidget(widget);
         if (domElem.wrappedJSObject) {
           domElem = domElem.wrappedJSObject;
         }
@@ -2195,11 +2288,11 @@ PageBot.prototype._getLocatorAndRoot = function(locator, inWindow)
     
     // Get the inline root widget
     try {
-      appRoot = this.getQxGlobalObject().ui.core.Widget.getWidgetByElement(domElem);
+      appRoot = this.getQxWidgetByElement(domElem);
       // If the inline root instance is configured to to respect the dom 
       // element's original dimensions, an additional div is created: 
       if (!appRoot) {
-        appRoot = this.getQxGlobalObject().ui.core.Widget.getWidgetByElement(domElem.firstChild);
+        appRoot = this.getQxWidgetByElement(domElem.firstChild);
       }
       
     } catch(ex) {
@@ -2260,7 +2353,8 @@ PageBot.prototype._findQxObjectInWindow = function(qxLocator, inWindow)
 
   if (qxResultObject)
   {
-    LOG.debug("qxResultObject=" + qxResultObject + ", element=" + qxResultObject.getContentElement().getDomElement());
+    var element = this._getDomElementFromWidget(qxResultObject);
+    LOG.debug("qxResultObject=" + qxResultObject + ", element=" + element);
     return qxResultObject;
   }
   else
@@ -3148,9 +3242,10 @@ Selenium.prototype.doQxDragAndDrop = function(locator, movementsString, targetLo
   * @param targetLocator locator (optional) locator for the drop target. Neccessary for dragAndDropToObject to work in qooxdoo 0.8
   */
   var element = this.page().findElement(locator);  
-  var clientStartXY = getClientXY(element);
-  var clientStartX = clientStartXY[0];
-  var clientStartY = clientStartXY[1];
+  var qx = this.getQxGlobalObject();
+  var pos = qx.bom.element.Location.get(element);
+  var clientStartX = pos["left"];
+  var clientStartY = pos["top"];
   
   var movements = movementsString.split(/,/);
   var movementX = Number(movements[0]);
@@ -3235,7 +3330,7 @@ PageBot.prototype.locateElementByQxscript = function(qxFunction, inDocument, inW
   }
   
   if (qxObject) {
-    return qxObject.getContentElement().getDomElement();
+    return this._getDomElementFromWidget(qxObject);
   } else {
     return null;
   }

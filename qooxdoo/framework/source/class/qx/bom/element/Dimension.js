@@ -47,7 +47,7 @@ qx.Class.define("qx.bom.element.Dimension",
      * @param element {Element} element to query
      * @return {Integer} width of the element
      */
-    getWidth : qx.core.Variant.select("qx.client",
+    getWidth : qx.core.Environment.select("engine.name",
     {
       "gecko" : function(element)
       {
@@ -84,7 +84,7 @@ qx.Class.define("qx.bom.element.Dimension",
      * @param element {Element} element to query
      * @return {Integer} height of the element
      */
-    getHeight : qx.core.Variant.select("qx.client",
+    getHeight : qx.core.Environment.select("engine.name",
     {
       "gecko" : function(element)
       {
@@ -154,7 +154,7 @@ qx.Class.define("qx.bom.element.Dimension",
       {
         var contentWidth = element.clientWidth;
 
-        if (qx.core.Variant.isSet("qx.client", "opera")) {
+        if ((qx.core.Environment.get("engine.name") == "opera")) {
           contentWidth = contentWidth - paddingLeft - paddingRight;
         }
         else
@@ -180,8 +180,10 @@ qx.Class.define("qx.bom.element.Dimension",
           var width = element.scrollWidth - paddingLeft;
 
           // IE renders the paddingRight as well with scrollbars on
-          var Engine = qx.bom.client.Engine;
-          if (Engine.NAME === "mshtml" && Engine.VERSION == 6) {
+          if (
+            qx.core.Environment.get("engine.name") == "mshtml" &&
+            qx.core.Environment.get("engine.version") >= 6
+          ) {
             width -= paddingRight;
           }
 
@@ -231,8 +233,9 @@ qx.Class.define("qx.bom.element.Dimension",
           var height = element.scrollHeight - paddingTop;
 
           // IE renders the paddingBottom as well with scrollbars on
-          var Engine = qx.bom.client.Engine;
-          if (Engine.NAME === "mshtml" && Engine.VERSION == 6) {
+          if (qx.core.Environment.get("engine.name") == "mshtml" &&
+             qx.core.Environment.get("engine.version") == 6)
+          {
             height -= paddingBottom;
           }
 

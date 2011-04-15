@@ -20,7 +20,7 @@
 
 /**
  * Layout used for the menu buttons which may contain four elements. A icon,
- * a label, a shortcut text and a arrow (for a sub menu)
+ * a label, a shortcut text and an arrow (for a sub menu)
  *
  * @internal
  */
@@ -39,13 +39,13 @@ qx.Class.define("qx.ui.menu.ButtonLayout",
   members :
   {
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value) {
+      "true" : function(item, name, value) {
         this.assert(name=="column", "The property '"+name+"' is not supported by the MenuButton layout!");
       },
 
-      "off" : null
+      "false" : null
     }),
 
 

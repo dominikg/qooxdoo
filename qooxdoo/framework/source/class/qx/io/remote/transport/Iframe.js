@@ -57,7 +57,7 @@ qx.Class.define("qx.io.remote.transport.Iframe",
 
     // This is to prevent the "mixed secure and insecure content" warning in IE with https
     var vFrameSource;
-    if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+    if ((qx.core.Environment.get("engine.name") == "mshtml")) {
       vFrameSource = "javascript:void(0)";
     }
 
@@ -282,7 +282,7 @@ qx.Class.define("qx.io.remote.transport.Iframe",
       // Timing-issue in Opera
       // Do not switch state to complete in case load event fires before content
       // of iframe was updated
-      if (qx.bom.client.Engine.NAME == "opera" && this.getIframeHtmlContent() == "") {
+      if (qx.core.Environment.get("engine.name") == "opera" && this.getIframeHtmlContent() == "") {
         return;
       }
 
@@ -509,9 +509,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
     {
       if (this.getState() !== "completed")
       {
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
-          if (qx.core.Setting.get("qx.ioRemoteDebug")) {
+          if (qx.core.Environment.get("qx.ioRemoteDebug")) {
             this.warn("Transfer not complete, ignoring content!");
           }
         }
@@ -519,9 +519,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
         return null;
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.ioRemoteDebug")) {
+        if (qx.core.Environment.get("qx.ioRemoteDebug")) {
           this.debug("Returning content for responseType: " + this.getResponseType());
         }
       }
@@ -531,9 +531,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
       switch(this.getResponseType())
       {
         case "text/plain":
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
-            if (qx.core.Setting.get("qx.ioRemoteDebugData"))
+            if (qx.core.Environment.get("qx.ioRemoteDebugData"))
             {
               this.debug("Response: " + this._responseContent);
             }
@@ -543,9 +543,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
 
         case "text/html":
           vText = this.getIframeHtmlContent();
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
-            if (qx.core.Setting.get("qx.ioRemoteDebugData"))
+            if (qx.core.Environment.get("qx.ioRemoteDebugData"))
             {
               this.debug("Response: " + this._responseContent);
             }
@@ -555,9 +555,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
 
         case "application/json":
           vText = this.getIframeHtmlContent();
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
-            if (qx.core.Setting.get("qx.ioRemoteDebugData"))
+            if (qx.core.Environment.get("qx.ioRemoteDebugData"))
             {
               this.debug("Response: " + this._responseContent);
             }
@@ -571,9 +571,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
 
         case "text/javascript":
           vText = this.getIframeHtmlContent();
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
-            if (qx.core.Setting.get("qx.ioRemoteDebugData"))
+            if (qx.core.Environment.get("qx.ioRemoteDebugData"))
             {
               this.debug("Response: " + this._responseContent);
             }
@@ -587,9 +587,9 @@ qx.Class.define("qx.io.remote.transport.Iframe",
 
         case "application/xml":
           vText = this.getIframeDocument();
-          if (qx.core.Variant.isSet("qx.debug", "on"))
+          if (qx.core.Environment.get("qx.debug"))
           {
-            if (qx.core.Setting.get("qx.ioRemoteDebugData"))
+            if (qx.core.Environment.get("qx.ioRemoteDebugData"))
             {
               this.debug("Response: " + this._responseContent);
             }
@@ -636,7 +636,7 @@ qx.Class.define("qx.io.remote.transport.Iframe",
 
       // Reset source to a blank image for gecko
       // Otherwise it will switch into a load-without-end behaviour
-      if (qx.core.Variant.isSet("qx.client", "gecko")) {
+      if ((qx.core.Environment.get("engine.name") == "gecko")) {
         this.__frame.src = qx.util.ResourceManager.getInstance().toUri("qx/static/blank.gif");
       }
 

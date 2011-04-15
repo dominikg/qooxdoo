@@ -18,16 +18,17 @@
 ************************************************************************ */
 /**
  * Mixin for the border radius CSS property.
- * 
+ * This mixin is usually used by {@link qx.ui.decoration.DynamicDecorator}.
+ *
  * Keep in mind that this is not supported by all browsers:
- * 
+ *
  * * Firefox 3,5+
  * * IE9+
  * * Safari 3.0+
  * * Opera 10.5+
  * * Chrome 4.0+
  */
-qx.Mixin.define("qx.ui.decoration.MBorderRadius", 
+qx.Mixin.define("qx.ui.decoration.MBorderRadius",
 {
   properties : {
     /** top left corner radius */
@@ -61,29 +62,31 @@ qx.Mixin.define("qx.ui.decoration.MBorderRadius",
       check : "Integer",
       apply : "_applyBorderRadius"
     },
-    
+
     /** Property group to set the corner radius of all sides */
     radius :
     {
       group : [ "radiusTopLeft", "radiusTopRight", "radiusBottomRight", "radiusBottomLeft" ],
-      shorthand : true
+      mode : "shorthand"
     }
   },
-  
-  
+
+
   members :
   {
     /**
-     * Takes a styles map and adds the broder radius styles in place to the 
-     * given map.
-     * 
+     * Takes a styles map and adds the broder radius styles in place to the
+     * given map. This is the needed behavior for
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param styles {Map} A map to add the styles.
      */
-    _styleBorderRadius : function(styles) 
+    _styleBorderRadius : function(styles)
     {
+      // Fixing the background bleed in Webkits
       // http://tumble.sneak.co.nz/post/928998513/fixing-the-background-bleed
       styles["-webkit-background-clip"] = "padding-box";
-      
+
       // radius handling
       var radius = this.getRadiusTopLeft();
       if (radius > 0) {
@@ -91,21 +94,21 @@ qx.Mixin.define("qx.ui.decoration.MBorderRadius",
         styles["-webkit-border-top-left-radius"] = radius + "px";
         styles["border-top-left-radius"] = radius + "px";
       }
-      
+
       radius = this.getRadiusTopRight();
       if (radius > 0) {
         styles["-moz-border-radius-topright"] = radius + "px";
         styles["-webkit-border-top-right-radius"] = radius + "px";
         styles["border-top-right-radius"] = radius + "px";
       }
-      
+
       radius = this.getRadiusBottomLeft();
       if (radius > 0) {
         styles["-moz-border-radius-bottomleft"] = radius + "px";
         styles["-webkit-border-bottom-left-radius"] = radius + "px";
         styles["border-bottom-left-radius"] = radius + "px";
       }
-      
+
       radius = this.getRadiusBottomRight();
       if (radius > 0) {
         styles["-moz-border-radius-bottomright"] = radius + "px";
@@ -117,7 +120,7 @@ qx.Mixin.define("qx.ui.decoration.MBorderRadius",
     // property apply
     _applyBorderRadius : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this._isInitialized()) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");

@@ -19,7 +19,7 @@
 #
 ################################################################################
 
-import sys, os, time, codecs, unicodedata
+import sys, os, time, codecs, unicodedata, re
 sys.path.append( os.path.join('..', '..', 'bin') )
 
 ##
@@ -340,11 +340,19 @@ class QxTest:
       if target[0] == target[0].capitalize():
         cmd += " " + buildConf['targets'][target]
         self.log("Building " + target + "\n  " + cmd)
+        reg = re.compile("-g\ (.*?)\ -n")
+        match = reg.search(cmd)
+        if match:
+          job = match.group(1)
+        else:
+          job = cmd
         self.buildStatus[target] = {
           "SVNRevision" : False,
           "BuildError"  : False,
+          "BuildWarning" : False,
           "BuildStarted" : time.strftime(self.timeFormat),
-          "BuildFinished" : False
+          "BuildFinished" : False,
+          "BuildJob" : job
         }
         if (self.sim):
           status = 0
@@ -363,11 +371,18 @@ class QxTest:
               
               """Get the last line of batbuild.py's STDERR output which contains
               the actual error message. """
-              import re
               nre = re.compile('[\n\r](.*)$')
               m = nre.search(err)
               if m:
                 self.buildStatus[target]["BuildError"] = m.group(1)
+            elif err != "":
+              self.log("Warning while building " + target + ", see build log file for details.")
+              err = err.rstrip('\n')
+              err = err.rstrip('\r')
+              buildLogFile.write(target + "\n" + cmd + "\n" + err)
+              buildLogFile.write("\n========================================================\n\n")
+              self.buildStatus[target]["BuildFinished"] = time.strftime(self.timeFormat)
+              self.buildStatus[target]["BuildWarning"] = err
             else:
               self.log(target + " build finished without errors.")
               self.buildStatus[target]["BuildFinished"] = time.strftime(self.timeFormat)
@@ -441,7 +456,10 @@ class QxTest:
       self.log("Updating Simulator checkout.")
       ret,out,err = invokePiped("svn up " + self.testConf["simulatorSvn"])
       if (out):
-        self.log(out)
+        try:
+          self.log(out)
+        except Exception, e:
+          print(repr(e))
       if (err):
         self.log(err)
 
@@ -1057,8 +1075,6 @@ class QxTest:
   #
   # @param aut {str} The name of the tested application
   def sendReport(self, aut, reportfile):    
-    import re
-    
     self.log("Preparing to send " + aut + " report: " + reportfile)
     if ( not(os.path.exists(reportfile)) ):
       self.log("ERROR: Report file not found, quitting.")

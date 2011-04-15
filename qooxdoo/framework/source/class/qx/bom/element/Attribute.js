@@ -88,7 +88,7 @@ qx.Class.define("qx.bom.element.Attribute",
         "class"     : "className",
         "for"       : "htmlFor",
         html        : "innerHTML",
-        text        : qx.core.Variant.isSet("qx.client", "mshtml") ? "innerText" : "textContent",
+        text        : (qx.core.Environment.get("engine.name") == "mshtml") ? "innerText" : "textContent",
         colspan     : "colSpan",
         rowspan     : "rowSpan",
         valign      : "vAlign",
@@ -175,7 +175,7 @@ qx.Class.define("qx.bom.element.Attribute",
         textContent : "",
         htmlFor : "",
         tabIndex : 0,
-        maxLength: qx.core.Variant.select("qx.client", {
+        maxLength: qx.core.Environment.select("engine.name", {
           "mshtml" : 2147483647,
           "webkit": 524288,
           "default": -1
@@ -237,7 +237,7 @@ qx.Class.define("qx.bom.element.Attribute",
      * @return {var} The value of the attribute
      * @signature function(element, name)
      */
-    get : qx.core.Variant.select("qx.client",
+    get : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, name)
       {

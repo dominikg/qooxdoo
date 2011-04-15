@@ -207,7 +207,7 @@ qx.Class.define("qx.ui.decoration.BoxDiv",
         element.childNodes[1].style.height = innerHeight + "px";
       }
 
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         // Internet Explorer as of version 6 or version 7 in quirks mode
         // have rounding issues when working with odd dimensions:
@@ -215,8 +215,9 @@ qx.Class.define("qx.ui.decoration.BoxDiv",
         // one pixel negative offset which results into some ugly
         // render effects.
         if (
-          qx.bom.client.Engine.VERSION < 7 ||
-          (qx.bom.client.Feature.QUIRKS_MODE && qx.bom.client.Engine.VERSION < 8)
+          parseFloat(qx.core.Environment.get("engine.version")) < 7 ||
+          (qx.core.Environment.get("browser.quirksmode") &&
+           parseFloat(qx.core.Environment.get("engine.version")) < 8)
         ) {
           if (this._isHorizontal) {
             element.childNodes[2].style.marginRight = (width%2 == 1) ? "-1px" : "0";
@@ -244,7 +245,7 @@ qx.Class.define("qx.ui.decoration.BoxDiv",
     // property apply
     _applyBaseImage : function(value, old)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this.__markup) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");

@@ -45,13 +45,13 @@ qx.Class.define("qx.locale.Key",
      */
     getKeyName : function(size, keyIdentifier, locale)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert.assertInArray(size, ["short", "full"]);
       }
 
       var key = "key_" + size + "_" + keyIdentifier;
       // Control is alsways named control on a mac and not Strg in German e.g.
-      if (qx.bom.client.Platform.MAC && keyIdentifier == "Control") {
+      if (qx.core.Environment.get("os.name") == "osx" && keyIdentifier == "Control") {
         key += "_Mac";
       }
       var localizedKey = qx.locale.Manager.getInstance().translate(key, [], locale);

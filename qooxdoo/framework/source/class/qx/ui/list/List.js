@@ -293,6 +293,14 @@ qx.Class.define("qx.ui.list.List",
     __defaultGroupUsed : false,
 
 
+    /**
+     * Trigger a rebuild from the internal data structure.
+     */
+    refresh : function() {
+      this.__buildUpLookupTable();
+    },
+
+
     // overridden
     _createChildControlImpl : function(id, hash)
     {
@@ -703,7 +711,7 @@ qx.Class.define("qx.ui.list.List",
 
 
     /**
-     * Returns a unique group name for the passed group.
+     * Returns an unique group name for the passed group.
      *
      * @param group {String|Object} Group to find unique group name.
      * @return {String} Unique group name.

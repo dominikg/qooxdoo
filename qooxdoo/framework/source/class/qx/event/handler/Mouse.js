@@ -27,7 +27,7 @@
 ************************************************************************ */
 
 /**
- * This class provides a unified mouse event handler for Internet Explorer,
+ * This class provides an unified mouse event handler for Internet Explorer,
  * Firefox, Opera and Safari
  */
 qx.Class.define("qx.event.handler.Mouse",
@@ -138,14 +138,14 @@ qx.Class.define("qx.event.handler.Mouse",
     // should react on mouse events. As of version 3.0 it also requires to keep the
     // listeners as long as the event should work. In 2.0 it was enough to attach the
     // listener once.
-    registerEvent : qx.bom.client.System.IPHONE || qx.bom.client.System.IPAD ?
+    registerEvent : qx.core.Environment.get("os.name") === "ios" ?
       function(target, type, capture) {
         target["on" + type] = qx.lang.Function.returnNull;
       } : qx.lang.Function.returnNull,
 
 
     // interface implementation
-    unregisterEvent : qx.bom.client.System.IPHONE || qx.bom.client.System.IPAD ?
+    unregisterEvent : qx.core.Environment.get("os.name") === "ios" ?
       function(target, type, capture) {
         target["on" + type] = undefined;
       } : qx.lang.Function.returnNull,
@@ -374,8 +374,10 @@ qx.Class.define("qx.event.handler.Mouse",
 
       // Safari (and maybe gecko) takes text nodes as targets for events
       // See: http://www.quirksmode.org/js/events_properties.html
-      if (qx.core.Variant.isSet("qx.client", "gecko|webkit"))
-      {
+      if (
+        qx.core.Environment.get("engine.name") == "gecko" ||
+        qx.core.Environment.get("engine.name") == "webkit"
+      ) {
         if (target && target.nodeType == 3) {
           target = target.parentNode;
         }
@@ -439,12 +441,12 @@ qx.Class.define("qx.event.handler.Mouse",
      *
      * @signature function(domEvent, type, target)
      */
-    __rightClickFixPre : qx.core.Variant.select("qx.client",
+    __rightClickFixPre : qx.core.Environment.select("engine.name",
     {
       "webkit" : function(domEvent, type, target)
       {
         // The webkit bug has been fixed in Safari 4
-        if (qx.bom.client.Engine.VERSION < 530)
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 530)
         {
           if (type == "contextmenu") {
             this.__fireEvent(domEvent, "mouseup", target);
@@ -473,7 +475,7 @@ qx.Class.define("qx.event.handler.Mouse",
      *
      * @signature function(domEvent, type, target)
      */
-    __rightClickFixPost : qx.core.Variant.select("qx.client",
+    __rightClickFixPost : qx.core.Environment.select("engine.name",
     {
       "opera" : function(domEvent, type, target)
       {
@@ -507,7 +509,7 @@ qx.Class.define("qx.event.handler.Mouse",
      *
      * @signature function(domEvent, type, target)
      */
-    __doubleClickFixPre : qx.core.Variant.select("qx.client",
+    __doubleClickFixPre : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(domEvent, type, target)
       {
@@ -541,7 +543,7 @@ qx.Class.define("qx.event.handler.Mouse",
      *
      * @signature function(domEvent, type, target)
      */
-    __differentTargetClickFixPost : qx.core.Variant.select("qx.client",
+    __differentTargetClickFixPost : qx.core.Environment.select("engine.name",
     {
       "mshtml" : null,
 

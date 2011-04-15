@@ -32,7 +32,7 @@ qx.Class.define("qx.lang.Object",
      */
     empty : function(map)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
       }
 
@@ -52,10 +52,10 @@ qx.Class.define("qx.lang.Object",
      * @param map {Object} the map to check
      * @return {Boolean} whether the map has any keys
      */
-    isEmpty : (qx.bom.client.Feature.ECMA_OBJECT_COUNT) ?
+    isEmpty : (qx.core.Environment.get("ecmascript.objectcount")) ?
       function(map)
       {
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
         }
         return map.__count__ === 0;
@@ -63,7 +63,7 @@ qx.Class.define("qx.lang.Object",
       :
       function(map)
       {
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
         }
 
@@ -83,10 +83,10 @@ qx.Class.define("qx.lang.Object",
      * @param minLength {Integer} minimum number of objects in the map
      * @return {Boolean} whether the map contains at least "length" objects.
      */
-    hasMinLength : (qx.bom.client.Feature.ECMA_OBJECT_COUNT) ?
+    hasMinLength : (qx.core.Environment.get("ecmascript.objectcount")) ?
       function(map, minLength)
       {
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
           qx.core.Assert && qx.core.Assert.assertInteger(minLength, "Invalid argument 'minLength'");
@@ -96,7 +96,7 @@ qx.Class.define("qx.lang.Object",
       :
       function(map, minLength)
       {
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
           qx.core.Assert && qx.core.Assert.assertInteger(minLength, "Invalid argument 'minLength'");
@@ -151,39 +151,6 @@ qx.Class.define("qx.lang.Object",
 
 
     /**
-     * Checks two keys for their position in the map. This is useful
-     * for finding the key which has higher priority than the other.
-     * Might be useful for conflict resolution.
-     * 
-     * @param map {Map} Incoming data structure
-     * @param key1 {String} First key
-     * @param key2 {String} Second key
-     * @return {String|null} The winner key or <code>null</code> 
-     */
-    findWinnerKey : function(map, key1, key2)
-    {
-      if (!(key1 in map)) {
-        return key2 in map ? key2 : null;
-      }
-
-      if (!(key2 in map)) {
-        return key1 in map ? key1 : null;
-      }
-      
-      for (var key in map) 
-      {
-        if (key == key1) {
-          return key1;
-        } else if (key == key2) {
-          return key2;
-        }
-      }
-      
-      return null;      
-    },
-    
-
-    /**
      * Get the values of a map as array
      *
      * @param map {Object} the map
@@ -191,7 +158,7 @@ qx.Class.define("qx.lang.Object",
      */
     getValues : function(map)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
       }
 
@@ -207,6 +174,39 @@ qx.Class.define("qx.lang.Object",
 
 
     /**
+     * Inserts all keys of the source object into the
+     * target objects. Attention: The target map gets modified.
+     *
+     * @signature function(target, source, overwrite)
+     * @param target {Object} target object
+     * @param source {Object} object to be merged
+     * @param overwrite {Boolean ? true} If enabled existing keys will be overwritten
+     * @return {Object} Target with merged values from the source object
+     */
+    mergeWith : qx.Bootstrap.objectMergeWith,
+
+
+    /**
+     * Inserts all keys of the source object into the
+     * target objects but don't override existing keys
+     *
+     * @param target {Object} target object
+     * @param source {Object} object to be merged
+     * @return {Object} target with merged values from source
+     */
+    carefullyMergeWith : function(target, source)
+    {
+      if (qx.core.Environment.get("qx.debug"))
+      {
+        qx.core.Assert && qx.core.Assert.assertMap(target, "Invalid argument 'target'");
+        qx.core.Assert && qx.core.Assert.assertMap(source, "Invalid argument 'source'");
+      }
+
+      return qx.lang.Object.mergeWith(target, source, false);
+    },
+
+
+    /**
      * Merge a number of objects.
      *
      * @param target {Object} target object
@@ -215,19 +215,14 @@ qx.Class.define("qx.lang.Object",
      */
     merge : function(target, varargs)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(target, "Invalid argument 'target'");
       }
 
       var len = arguments.length;
-      var current, key;
 
-      for (var i=1; i<len; i++) 
-      {
-        current = arguments[i];
-        for (key in current) {
-          target[key] = current[key];
-        }
+      for (var i=1; i<len; i++) {
+        qx.lang.Object.mergeWith(target, arguments[i]);
       }
 
       return target;
@@ -242,7 +237,7 @@ qx.Class.define("qx.lang.Object",
      */
     clone : function(source)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(source, "Invalid argument 'source'");
       }
 
@@ -267,7 +262,7 @@ qx.Class.define("qx.lang.Object",
      */
     invert : function(map)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
       }
 
@@ -292,7 +287,7 @@ qx.Class.define("qx.lang.Object",
      */
     getKeyFromValue: function(map, value)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
       }
 
@@ -316,7 +311,7 @@ qx.Class.define("qx.lang.Object",
      */
     contains : function(map, value)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
       }
 
@@ -333,7 +328,7 @@ qx.Class.define("qx.lang.Object",
     */
     select: function(key, map)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertMap(map, "Invalid argument 'map'");
       }
       return map[key];
@@ -352,7 +347,7 @@ qx.Class.define("qx.lang.Object",
     */
     fromArray: function(array)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         qx.core.Assert && qx.core.Assert.assertArray(array, "Invalid argument 'array'");
       }
 
@@ -360,7 +355,7 @@ qx.Class.define("qx.lang.Object",
 
       for (var i=0, l=array.length; i<l; i++)
       {
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           switch(typeof array[i])
           {
@@ -375,6 +370,43 @@ qx.Class.define("qx.lang.Object",
       }
 
       return obj;
+    },
+
+    /**
+     * Serializes an object to URI parameters (also known as query string).
+     *
+     * Escapes characters that have a special meaning in URIs as well as
+     * umlauts. Uses the global function encodeURIComponent, see
+     * https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/encodeURIComponent
+     *
+     * Note: For URI parameters that are to be sent as
+     * application/x-www-form-urlencoded (POST), spaces should be encoded
+     * with "+".
+     *
+     * @param obj {Object}   Object to serialize.
+     * @param post {Boolean} Whether spaces should be encoded with "+".
+     * @return {String}      Serialized object. Safe to append to URIs or send as
+     *                       URL encoded string.
+     *
+     */
+    toUriParameter: function(obj, post)
+    {
+      var key,
+          parts = [],
+          encode = window.encodeURIComponent
+
+      for (key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          if (post) {
+            parts.push(encode(key).replace(/%20/g, "+") + "=" +
+              encode(obj[key]).replace(/%20/g, "+"));
+          } else {
+            parts.push(encode(key) + "=" + encode(obj[key]));
+          }
+        }
+      }
+
+      return parts.join("&");
     }
   }
 });

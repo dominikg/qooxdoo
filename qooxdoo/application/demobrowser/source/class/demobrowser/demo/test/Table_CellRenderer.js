@@ -32,6 +32,7 @@
 
 /**
  * @tag noPlayground
+ * @tag test
  */
 qx.Class.define("demobrowser.demo.test.Table_CellRenderer",
 {
@@ -70,13 +71,13 @@ qx.Class.define("demobrowser.demo.test.Table_CellRenderer",
 
 
       // setup aliases
-      var qxTheme = qx.core.Setting.get("qx.theme");
+      var qxTheme = qx.core.Environment.get("qx.theme");
       var themeName = /\.([a-z]+)$/i.exec(qxTheme)[1];
       qx.util.AliasManager.getInstance().add("decoration", "qx/decoration/" + themeName);
       if (themeName == "Classic") {
-        qx.util.AliasManager.getInstance().add("icon", "qx/icon/Oxygen");  
+        qx.util.AliasManager.getInstance().add("icon", "qx/icon/Oxygen");
       }
-      else 
+      else
       {
         qx.util.AliasManager.getInstance().add("icon", "qx/icon/Tango");
       }

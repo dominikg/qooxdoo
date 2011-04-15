@@ -40,6 +40,7 @@
 
 #asset(qx/icon/Tango/22/actions/help-contents.png)
 #asset(qx/icon/Tango/22/actions/help-about.png)
+#asset(qx/icon/Tango/22/actions/media-seek-forward.png)
 
 #asset(qx/icon/Tango/22/mimetypes/text-html.png)
 
@@ -64,6 +65,8 @@ qx.Class.define("demobrowser.DemoBrowser",
   construct : function()
   {
     this.base(arguments);
+    
+    this.__menuItemStore = {};
 
     // Configure layout
     var layout = new qx.ui.layout.VBox;
@@ -76,6 +79,7 @@ qx.Class.define("demobrowser.DemoBrowser",
     // Data
     this.widgets = {};
     this.tests = {};
+    this.__currentTheme = "qx.theme.Modern";
 
 
     // Commands & Menu Bar
@@ -100,7 +104,7 @@ qx.Class.define("demobrowser.DemoBrowser",
     leftComposite.setBackgroundColor("background-splitpane");
     mainsplit.add(leftComposite, 0);
 
-    if (qx.core.Variant.isSet("qx.contrib", "on")) {
+    if (qx.core.Environment.get("qx.contrib")) {
       this._makeVersionSelect();
     }
 
@@ -117,17 +121,17 @@ qx.Class.define("demobrowser.DemoBrowser",
     this._searchTextField.setLiveUpdate(true);
     this._searchTextField.setAppearance("widget");
     this._searchTextField.setPlaceholder("Filter...");
-    
+
     var filterTimer = new qx.event.Timer(500);
     filterTimer.addListener("interval", function(ev) {
       this.filter(this._searchTextField.getValue());
       filterTimer.stop();
     }, this);
-    
+
     this._searchTextField.addListener("changeValue", function(ev) {
       filterTimer.restart();
     }, this);
-    
+
     searchComposlite.add(this._searchTextField, {flex: 1});
 
     // create the status of the tree
@@ -145,46 +149,19 @@ qx.Class.define("demobrowser.DemoBrowser",
 
     this._demoView = this.__makeDemoView();
 
-    if (qx.core.Variant.isSet("qx.contrib", "off")) {
+    if (qx.core.Environment.get("qx.contrib") == false) {
       infosplit.add(this._demoView, 2);
     }
 
-    var htmlView = this.__makeHtmlCodeView();
-    var jsView = this.__makeJsCodeView();
-    var logView = this.__makeLogView();
+    var htmlView = this.__htmlView = this.__makeHtmlCodeView();
+    var jsView = this.__jsView = this.__makeJsCodeView();
+    var logView = this.__logView = this.__makeLogView();
 
-    var stack = new qx.ui.container.Stack;
+    var stack = this.__stack = new qx.ui.container.Stack;
     stack.setDecorator("main");
     stack.add(htmlView);
     stack.add(jsView);
     stack.add(logView);
-
-    this.viewGroup.addListener("changeSelection", function(e)
-    {
-      var selected = e.getData()[0];
-      var show = selected != null ? selected.getUserData("value") : "";
-      switch(show)
-      {
-        case "html":
-          this.setSelection([htmlView]);
-          stack.show();
-          break;
-
-        case "js":
-          this.setSelection([jsView]);
-          stack.show();
-          break;
-
-        case "log":
-          this.setSelection([logView]);
-          stack.show();
-          break;
-
-        default:
-          this.resetSelection();
-          stack.exclude();
-      }
-    }, stack);
 
     infosplit.add(stack, 1);
     stack.resetSelection();
@@ -205,17 +182,22 @@ qx.Class.define("demobrowser.DemoBrowser",
     this.__menuElements =
     [
       this.__sobutt,
-      this.__viewPart
+      this.__viewPart,
+      this.__disposeBtn
     ];
 
-    if (qx.core.Variant.isSet("qx.contrib", "off")) {
+    if (qx.core.Environment.get("qx.contrib") == false) {
       this.__menuElements.push(this.__playgroundButton);
+      this.__menuElements.push(this.__themePart);
+      this.__menuElements.push(this.__summaryBtn);
+    } else {
+      this.__menuElements.push(this.__debugButton);
     }
 
     this.__logSync = new qx.event.Timer(250);
     this.__logSync.addListener("interval", this.__onLogInterval, this);
     this.__logSync.start();
-    
+
     this.__infoWindow = new demobrowser.InfoWindow(this.tr("Info"));
     this.__infoWindow.setAutoCenter(true);
   },
@@ -248,6 +230,7 @@ qx.Class.define("demobrowser.DemoBrowser",
     // ------------------------------------------------------------------------
 
     _iframe : null,
+    __currentTheme : null,
     __logSync : null,
     __logDone : null,
     _tree : null,
@@ -257,19 +240,33 @@ qx.Class.define("demobrowser.DemoBrowser",
     __currentJSCode : null,
     __menuElements : null,
     _versionFilter : null,
+    _navPart : null,
     __sobutt : null,
     __viewPart : null,
+    __themePart : null,
+    __themeMenu : null,
+    __disposeBtn : null,
+    __debugButton : null,
+    __summaryBtn : null,
     __menuBar : null,
     _leftComposite : null,
     _infosplit : null,
     _demoView : null,
     __autorunTimer : null,
+    __overflowMenu : null,
+    __menuItemStore : null,
+    __menuViewRadioGroup: null,
     _urlWindow : null,
     __infoWindow : null,
+    __stack : null,
+    __htmlView: null,
+    __jsView: null,
+    __logView: null,
+    __viewGroup: null,
 
 
     defaultUrl : "demo/welcome.html",
-    playgroundUrl : "http://demo.qooxdoo.org/" + qx.core.Setting.get("qx.version") + "/playground/",
+    playgroundUrl : "http://demo.qooxdoo.org/" + qx.core.Environment.get("qx.version") + "/playground/",
 
     __makeCommands : function()
     {
@@ -290,12 +287,47 @@ qx.Class.define("demobrowser.DemoBrowser",
 
       this._cmdDisposeSample = new qx.ui.core.Command("Ctrl+D");
       this._cmdDisposeSample.addListener("execute", this.__disposeSample, this);
-
-      this._cmdNamespacePollution = new qx.ui.core.Command("Ctrl+P");
-      this._cmdNamespacePollution.addListener("execute", this.__showPollution, this);
     },
 
 
+
+    /**
+     * TODOC
+     *
+     */
+    __syncRightView :  function(e)
+    {
+      var theOtherGroup = e.getTarget()===this.__viewGroup ? this.__menuViewRadioGroup : this.__viewGroup;
+      var selected = e.getData()[0];
+      if(theOtherGroup && selected) {
+        theOtherGroup.setModelSelection([selected.getModel()]);
+      }
+      if(e.getTarget() === this.__viewGroup)
+      {
+        var show = selected != null ? selected.getUserData("value") : "";
+        switch(show)
+        {
+          case "html":
+            this.__stack.setSelection([this.__htmlView]);
+            this.__stack.show();
+            break;
+
+          case "js":
+            this.__stack.setSelection([this.__jsView]);
+            this.__stack.show();
+            break;
+
+          case "log":
+            this.__stack.setSelection([this.__logView]);
+            this.__stack.show();
+            break;
+
+          default:
+            this.__stack.resetSelection();
+            this.__stack.exclude();
+        }
+      }
+    },
 
     /**
      * TODOC
@@ -310,7 +342,7 @@ qx.Class.define("demobrowser.DemoBrowser",
       } else {
         msg = "Unable to access namespace. Maybe no demo loaded.";
       }
-      
+
       var area = new qx.ui.form.TextArea(msg);
       area.setDecorator(null);
       area.setAutoSize(true);
@@ -363,7 +395,7 @@ qx.Class.define("demobrowser.DemoBrowser",
     __onApiOpen : function() {
       window.open(
         "http://demo.qooxdoo.org/" +
-        qx.core.Setting.get("qx.version") +
+        qx.core.Environment.get("qx.version") +
         "/apiviewer/"
       );
     },
@@ -373,9 +405,29 @@ qx.Class.define("demobrowser.DemoBrowser",
      * Handler for opening the manual.
      */
     __onManualOpen : function() {
-      var vers = (qx.core.Setting.get("qx.version").split("-")[0]);
+      var vers = (qx.core.Environment.get("qx.version").split("-")[0]);
       window.open("http://manual.qooxdoo.org/" + vers);
     },
+
+
+    /**
+     * Handler for to hide/show all test demos.
+     * 
+     * @param event {qx.event.type.Data} The event.
+     */
+    _onHideShowTests : function(event)
+    {
+      var search = window.location.search;
+      var anchor = window.location.hash;
+      
+      var url = "index.html";
+      if (search == "") {
+        url += "?qxenv:demobrowser.withTests:true";
+      }
+      url += anchor;
+      location.replace(url);
+    },
+
     
     /**
      * TODOC
@@ -394,28 +446,7 @@ qx.Class.define("demobrowser.DemoBrowser",
       {
         msg = this.tr("Unable to access application.");
       }
-      
-      var label = new qx.ui.basic.Label(msg);
-      label.setRich(true);
-      label.setWrap(true);
-      this.__infoWindow.setContent(label);
-      this.__infoWindow.setWidth(350);
-      this.__infoWindow.show();
-    },
 
-    /**
-     * TODOC
-     * @param e {Event} TODOC
-     */
-    __showPollution : function(e)
-    {
-      var cw = this._iframe.getWindow();
-      var msg;
-      if (cw && cw.qx) {
-        msg = cw.qx.dev.Pollution.getInfo();
-      } else {
-        msg = this.tr("Unable to access application.");
-      }
       var label = new qx.ui.basic.Label(msg);
       label.setRich(true);
       label.setWrap(true);
@@ -454,18 +485,22 @@ qx.Class.define("demobrowser.DemoBrowser",
       this._runbutton.setMinWidth(60);
       this._stopbutton.setMinWidth(60);
 
+      var prevNextPart = new qx.ui.toolbar.Part();
+      bar.add(prevNextPart);
       // -- previous navigation
       var prevbutt = new qx.ui.toolbar.Button(this.tr("Previous"), "icon/22/actions/go-previous.png");
       prevbutt.addListener("execute", this.playPrev, this);
       prevbutt.setToolTipText("Run previous demo");
-      this._navPart.add(prevbutt);
+      prevNextPart.add(prevbutt);
+      this._prevButton = prevbutt;
 
       // -- next navigation
       var nextbutt = new qx.ui.toolbar.Button(this.tr("Next"), "icon/22/actions/go-next.png");
       nextbutt.addListener("execute", this.playNext, this);
       nextbutt.setToolTipText("Run next demo");
-      this._navPart.add(nextbutt);
-      
+      prevNextPart.add(nextbutt);
+      this._nextButton = nextbutt;
+
       var navButtonOptions =  {
         converter : function(data) {
           return data == "visible";
@@ -474,15 +509,17 @@ qx.Class.define("demobrowser.DemoBrowser",
       qx.data.SingleValueBinding.bind(this._runbutton, "visibility", prevbutt, "enabled", navButtonOptions);
       qx.data.SingleValueBinding.bind(this._runbutton, "visibility", nextbutt, "enabled", navButtonOptions);
 
+      var externLinksPart1 = this._navPart = new qx.ui.toolbar.Part();
+      bar.add(externLinksPart1);
       // -- spin-out sample
       var sobutt = new qx.ui.toolbar.Button(this.tr("Own Window"), "icon/22/actions/edit-redo.png");
       sobutt.addListener("execute", this.__openWindow, this);
       sobutt.setToolTipText("Open demo in new window");
       this.__sobutt = sobutt;
-      this._navPart.add(sobutt);
+      externLinksPart1.add(sobutt);
 
       // -- to playground
-      if (qx.core.Variant.isSet("qx.contrib", "off")) {
+      if (qx.core.Environment.get("qx.contrib") == false) {
         var playgroundButton = new qx.ui.toolbar.Button(this.tr("To Playground"), "icon/22/actions/application-exit.png");
         playgroundButton.addListener("execute", this.__toPlayground, this);
         playgroundButton.setToolTipText("Open demo in the playground");
@@ -490,18 +527,20 @@ qx.Class.define("demobrowser.DemoBrowser",
 
         // Loading demos into IE fails most of the time because IE truncates
         // long URLs
-        if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+        if (qx.core.Environment.get("browser.name") == "ie") {
           playgroundButton.exclude();
         }
 
         this.__playgroundButton = playgroundButton;
-        this._navPart.add(playgroundButton);
-        
+        externLinksPart1.add(playgroundButton);
+
+        var externLinksPart2 = new qx.ui.toolbar.Part();
+        bar.add(externLinksPart2);
         // api button
         var apiButton = new qx.ui.toolbar.Button(
           this.tr("API Viewer"), "icon/22/actions/help-contents.png"
         );
-        this._navPart.add(apiButton);
+        externLinksPart2.add(apiButton);
         apiButton.setToolTipText(this.tr("Open the qooxdoo API Viewer"));
         apiButton.addListener("execute", this.__onApiOpen, this);
 
@@ -509,10 +548,46 @@ qx.Class.define("demobrowser.DemoBrowser",
         var helpButton = new qx.ui.toolbar.Button(
           this.tr("Manual"), "icon/22/actions/help-about.png"
         );
-        this._navPart.add(helpButton);
+        externLinksPart2.add(helpButton);
         helpButton.setToolTipText(this.tr("Open the qooxdoo Manual"));
         helpButton.addListener("execute", this.__onManualOpen, this);
-        
+
+      }
+
+
+
+      // THEME MENU
+      // -----------------------------------------------------
+
+      var menuPart = new qx.ui.toolbar.Part;
+      bar.add(menuPart);
+
+      if (qx.core.Environment.get("qx.contrib") == false)
+      {
+        var themeMenu = new qx.ui.menu.Menu;
+
+        this.__themeMenu = themeMenu;
+
+        var t1 = new qx.ui.menu.RadioButton("Modern Theme");
+        var t2 = new qx.ui.menu.RadioButton("Classic Theme");
+        var t3 = new qx.ui.menu.RadioButton("Simple Theme");
+
+        t1.setUserData("value", "qx.theme.Modern");
+        t1.setValue(true);
+        t2.setUserData("value", "qx.theme.Classic");
+        t3.setUserData("value", "qx.theme.Simple");
+
+        var group = new qx.ui.form.RadioGroup(t1, t2, t3);
+        group.addListener("changeSelection", this.__onChangeTheme, this);
+
+        themeMenu.add(t1);
+        themeMenu.add(t2);
+        themeMenu.add(t3);
+
+        var themeButton = new qx.ui.toolbar.MenuButton(this.tr("Theme"), "icon/22/apps/utilities-color-chooser.png", themeMenu);
+        this.__themePart = themeButton;
+        themeButton.setToolTipText("Choose theme");
+        menuPart.add(themeButton);
       }
 
 
@@ -520,27 +595,33 @@ qx.Class.define("demobrowser.DemoBrowser",
       // DEBUG MENU
       // -----------------------------------------------------
 
-      var menuPart = new qx.ui.toolbar.Part();
-      bar.add(menuPart);
-
       var menu = new qx.ui.menu.Menu;
 
-      if (qx.core.Variant.isSet("qx.contrib", "off"))
+      if (qx.core.Environment.get("qx.contrib") == false)
       {
         var summaryBtn = new qx.ui.menu.Button(this.tr("Object Summary"));
+        this.__summaryBtn = summaryBtn;
         summaryBtn.setCommand(this._cmdObjectSummary);
         menu.add(summaryBtn);
-
-        var namespaceBtn = new qx.ui.menu.Button(this.tr("Global Namespace Pollution"));
-        namespaceBtn.setCommand(this._cmdNamespacePollution);
-        menu.add(namespaceBtn);
       }
 
       var disposeBtn = new qx.ui.menu.Button(this.tr("Dispose Demo"));
+      this.__disposeBtn = disposeBtn;
       disposeBtn.setCommand(this._cmdDisposeSample);
       menu.add(disposeBtn);
 
+      if (qx.core.Environment.get("qx.contrib") == false)
+      {
+        menu.addSeparator();
+
+        var hideTests = new qx.ui.menu.CheckBox(this.tr("Hide/Show Tests Demos"));
+        hideTests.setValue(!!qx.core.Environment.get("demobrowser.withTests"));
+        hideTests.addListener("changeValue", this._onHideShowTests, this);
+        menu.add(hideTests);
+      }
+
       var debugButton = new qx.ui.toolbar.MenuButton(this.tr("Debug"), "icon/22/apps/office-spreadsheet.png", menu);
+      this.__debugButton = debugButton;
       debugButton.setToolTipText("Debugging options");
       menuPart.add(debugButton);
 
@@ -552,12 +633,14 @@ qx.Class.define("demobrowser.DemoBrowser",
       bar.addSpacer();
       bar.add(viewPart);
 
-      if (qx.core.Variant.isSet("qx.contrib", "off"))
+      if (qx.core.Environment.get("qx.contrib") == false)
       {
         var htmlView = new qx.ui.toolbar.RadioButton("HTML Code", "icon/22/apps/internet-web-browser.png");
         htmlView.setToolTipText("Display HTML source");
+        htmlView.setModel('html');
         var jsView = new qx.ui.toolbar.RadioButton("JS Code", "icon/22/mimetypes/executable.png");
         jsView.setToolTipText("Display JavaScript source");
+        jsView.setModel('js');
 
         htmlView.setUserData("value", "html");
         jsView.setUserData("value", "js");
@@ -570,18 +653,45 @@ qx.Class.define("demobrowser.DemoBrowser",
       logView.setToolTipText("Display log file");
 
       logView.setUserData("value", "log");
+      logView.setModel('log');
 
       viewPart.add(logView);
 
-      var viewGroup = this.viewGroup = new qx.ui.form.RadioGroup;
+      var viewGroup = this.__viewGroup = new qx.ui.form.RadioGroup;
       viewGroup.setAllowEmptySelection(true);
       viewGroup.add(logView);
+      viewGroup.addListener('changeSelection',this.__syncRightView,this);
 
-      if (qx.core.Variant.isSet("qx.contrib", "off")) {
+      if (qx.core.Environment.get("qx.contrib") == false) {
         viewGroup.add(htmlView, jsView);
       }
+      
 
-
+      // enable overflow handling
+      bar.setOverflowHandling(true);
+    
+      // add a button for overflow handling
+      var chevron = new qx.ui.toolbar.MenuButton(null, "icon/22/actions/media-seek-forward.png");
+      chevron.setAppearance("toolbar-button");  // hide the down arrow icon
+      bar.add(chevron);
+      bar.setOverflowIndicator(chevron);
+    
+      // set priorities for overflow handling
+      bar.setRemovePriority(viewPart, 6);
+      bar.setRemovePriority(menuPart, 5);
+      bar.setRemovePriority(externLinksPart2, 4);
+      bar.setRemovePriority(externLinksPart1, 3);
+      bar.setRemovePriority(prevNextPart, 2);
+      bar.setRemovePriority(this._navPart, 1);
+      
+      // add the overflow menu
+      this.__overflowMenu = new qx.ui.menu.Menu();
+      chevron.setMenu(this.__overflowMenu);
+    
+      // add the listener
+      bar.addListener("hideItem", this._onHideItem, this);
+      bar.addListener("showItem", this._onShowItem, this);
+    
 
       // DONE
       // -----------------------------------------------------
@@ -589,7 +699,159 @@ qx.Class.define("demobrowser.DemoBrowser",
       return bar;
     },
 
+    /**
+     * Handler for the overflow handling which will be called on hide.
+     * @param e {qx.event.type.Data} The event.
+     */
+    _onHideItem : function(e) {
+      var partItem = e.getData();
+      var menuItems = this._getMenuItems(partItem);
+      for(var i=0, l=menuItems.length; i<l; i++){
+        menuItems[i].setVisibility("visible");
+        if(partItem === this.__themePart && !(menuItems[i] instanceof qx.ui.menu.Separator)) {
+          menuItems[i].getMenu().setPosition("right-top");
+        }
+      }
+    },
+    
+    
+    /**
+     * Handler for the overflow handling which will be called on show.
+     * @param e {qx.event.type.Data} The event.
+     */    
+    _onShowItem : function(e) {
+      var partItem = e.getData();
+      var menuItems = this._getMenuItems(partItem);
+      for(var i=0,l=menuItems.length;i<l;i++)
+      {
+        menuItems[i].setVisibility("excluded");
+      }
+      if(partItem === this.__themePart)
+      {
+        var menuButtons = partItem.getMenuButtons();
+        for(var i=0, l=menuButtons.length; i<l; i++) {
+          menuButtons[i].getMenu().setPosition("bottom-left");
+        }
+      }
+    },
+    
+        
+    /**
+     * Helper for the overflow handling. It is responsible for returning a 
+     * corresponding menu item for the given toolbar item.
+     * 
+     * @param toolbarItem {qx.ui.core.Widget} The toolbar item to look for.
+     * @return {qx.ui.core.Widget} The coresponding menu items.
+     */
+    _getMenuItems : function(partItem) {
+      var cachedItems = [];
+      if (partItem instanceof qx.ui.toolbar.Part)
+      {
+        var partButtons = partItem.getChildren();
+        var separator = null;
+        var firstGroup = false;
+        var menuItems = this.__overflowMenu.getChildren();
+        if(partItem != this.__viewPart)
+        {
+          separator = this.__menuItemStore[partItem.toHashCode()];
+          if (!separator)
+          {
+          separator = new qx.ui.menu.Separator();
+          this.__overflowMenu.addBefore(separator,menuItems[0]);
+          this.__menuItemStore[partItem.toHashCode()] = separator;
+          }
+          cachedItems.push(separator);
+        }
+        else
+        {
+          firstGroup = true;
+        }
+        for(var i=0, l=partButtons.length; i<l; i++)
+        {
+          if(partButtons[i].getVisibility() == 'excluded'){
+            continue;
+          }
+          var cachedItem = this.__menuItemStore[partButtons[i].toHashCode()];
+      
+          if (!cachedItem)
+          {
+            if(partButtons[i] instanceof qx.ui.toolbar.RadioButton)
+            {
+              cachedItem = new qx.ui.menu.RadioButton( partButtons[i].getLabel() );
+              cachedItem.setToolTipText(partButtons[i].getToolTipText());
+              cachedItem.setEnabled(partButtons[i].getEnabled());
+              cachedItem.setUserData('value',partButtons[i].getUserData('value'));
+              cachedItem.setModel(partButtons[i].getModel());
+              partButtons[i].bind("enabled", cachedItem, "enabled");
+              if(!this.__menuViewRadioGroup)
+              {
+                this.__menuViewRadioGroup = new qx.ui.form.RadioGroup();
+                this.__menuViewRadioGroup.setAllowEmptySelection(true);
+                this.__menuViewRadioGroup.addListener('changeSelection',this.__syncRightView,this);
+              }
+              this.__menuViewRadioGroup.add(cachedItem);
+            }
+            else if(partButtons[i] instanceof qx.ui.toolbar.MenuButton)
+            {
+              cachedItem = new qx.ui.menu.Button(
+                partButtons[i].getLabel().translate(),
+                partButtons[i].getIcon(),
+                partButtons[i].getCommand(),
+                partButtons[i].getMenu()
+                );
+              cachedItem.setToolTipText(partButtons[i].getToolTipText());
+              cachedItem.setEnabled(partButtons[i].getEnabled());
+              partButtons[i].bind("enabled", cachedItem, "enabled");
+            }
+            else if(partButtons[i] instanceof qx.ui.toolbar.Button)
+            {
+              cachedItem = new qx.ui.menu.Button(
+                partButtons[i].getLabel().translate(),
+                partButtons[i].getIcon()
+                );
+              cachedItem.getChildControl('label', false).setRich(true);
+              cachedItem.setTextColor(partButtons[i].getTextColor());
+              cachedItem.setToolTipText(partButtons[i].getToolTipText());
+              cachedItem.setEnabled(partButtons[i].getEnabled());
+              partButtons[i].bind("enabled", cachedItem, "enabled");
+              var listeners = qx.event.Registration.getManager(partButtons[i]).getListeners(partButtons[i],'execute');
+              if(listeners && listeners.length>0)
+              {
+                for(var j=0, k=listeners.length; j<k; j++) {
+                  cachedItem.addListener('execute', qx.lang.Function.bind(listeners[j].handler,listeners[j].context));
+                }
+              }
+            }
+            else if(partButtons[i] instanceof qx.ui.toolbar.CheckBox)
+            {
+              cachedItem = new qx.ui.menu.CheckBox(
+                partButtons[i].getLabel()
+                );
+              cachedItem.setToolTipText(partButtons[i].getToolTipText());
+              cachedItem.setEnabled(partButtons[i].getEnabled());
+              partButtons[i].bind("enabled", cachedItem, "enabled");
+            }
+            else
+            {
+              cachedItem = new qx.ui.menu.Separator();
+            }
+            if(firstGroup)
+            {
+              this.__overflowMenu.add(cachedItem);
+            }
+            else
+            {
+              this.__overflowMenu.addBefore(cachedItem,separator);
+            }
+            this.__menuItemStore[partButtons[i].toHashCode()] = cachedItem;
+          }
+          cachedItems.push(cachedItem);
+        }
+      }
 
+      return cachedItems;
+    },
+    
     __makeDemoView : function()
     {
       var iframe = new qx.ui.embed.Iframe().set({
@@ -696,8 +958,8 @@ qx.Class.define("demobrowser.DemoBrowser",
 
       return tree1;
     },
-    
-    
+
+
     __makeUrlMenu : function()
     {
       var urlWindow = new qx.ui.window.Window(this.tr("Demo Link"), "icon/22/mimetypes/text-html.png");
@@ -717,9 +979,9 @@ qx.Class.define("demobrowser.DemoBrowser",
       if (top < 0) {
         top = 0;
       }
-      urlWindow.moveTo(left, top);      
+      urlWindow.moveTo(left, top);
       this.getApplicationRoot().add(urlWindow);
-      
+
       var menu = new qx.ui.menu.Menu();
       var copyButton = new qx.ui.menu.Button(this.tr("Get Demo Link"), "icon/22/mimetypes/text-html.png");
       copyButton.addListener("execute", function(e) {
@@ -732,7 +994,7 @@ qx.Class.define("demobrowser.DemoBrowser",
         this._urlWindow.open();
       }, this);
       menu.add(copyButton);
-      this._tree.setContextMenu(menu);    
+      this._tree.setContextMenu(menu);
     },
 
 
@@ -764,7 +1026,7 @@ qx.Class.define("demobrowser.DemoBrowser",
       var _initialNode = null;
 
       var autorun;
-      if (qx.core.Variant.isSet("qx.contrib", "on")) {
+      if (qx.core.Environment.get("qx.contrib") == true) {
         autorun = false;
       }
       else {
@@ -790,7 +1052,7 @@ qx.Class.define("demobrowser.DemoBrowser",
         }
         else {
           // nothing preselected
-          _initialSection = "animation";
+          _initialSection = "Demos";
           if (autorun) {
             this.setPlayDemos("all");
           }
@@ -833,11 +1095,16 @@ qx.Class.define("demobrowser.DemoBrowser",
           }
           else
           {
+            // When the node has no type, it is a folder without childeren
+            if (!currNode.type) {
+              continue;
+            }
+            
             t = new qx.ui.tree.TreeFile(that.polish(currNode.label));
             var fullName = currNode.pwd().slice(1).join("/") + "/" + currNode.label;
             if (currNode.tags) {
               t.setUserData("tags", currNode.tags);
-              if (qx.core.Variant.isSet("qx.contrib", "on")) {
+              if (qx.core.Environment.get("qx.contrib") == true) {
                 that._getVersionTags(currNode.tags);
                 for (var j=0,m=currNode.tags.length; j<m; j++) {
                   var tag = currNode.tags[j];
@@ -868,7 +1135,7 @@ qx.Class.define("demobrowser.DemoBrowser",
       this.tree.getRoot().setOpen(true)
       buildSubTree(this.tree.getRoot(), ttree);
 
-      if (qx.core.Variant.isSet("qx.contrib", "on")) {
+      if (qx.core.Environment.get("qx.contrib") == true) {
         this._getVersionItems();
       }
 
@@ -922,6 +1189,8 @@ qx.Class.define("demobrowser.DemoBrowser",
     stopSample : function(e)
     {
       this.setPlayDemos("current");
+      this._nextButton.setEnabled(true);
+      this._prevButton.setEnabled(true);
       this._stopbutton.setVisibility("excluded");
       this._runbutton.setVisibility("visible");
     },
@@ -949,7 +1218,10 @@ qx.Class.define("demobrowser.DemoBrowser",
       {
         treeNode.getTree().setSelection([treeNode]);
         url = 'demo/' + value;
-        
+        if (qx.core.Environment.get("qx.contrib") == false) {
+          url += "?qx.theme=" + this.__currentTheme;
+        }
+
         var currentTags = treeNode.getUserData("tags");
         if (currentTags) {
           this.__playgroundButton.setEnabled(!qx.lang.Array.contains(currentTags, "noPlayground"));
@@ -1032,6 +1304,8 @@ qx.Class.define("demobrowser.DemoBrowser",
         } else {
           var self = this;
           this.__autorunTimer = qx.event.Timer.once(this.playNext, self, 5000);
+          this._nextButton.setEnabled(false);
+          this._prevButton.setEnabled(false);
         }
       } else {
         // Remove stop button, display run button
@@ -1194,7 +1468,7 @@ qx.Class.define("demobrowser.DemoBrowser",
         var content = evt.getContent();
         // if there is a content
         if (content) {
-          if (qx.core.Variant.isSet("qx.contrib", "off")) {
+          if (qx.core.Environment.get("qx.contrib") == false) {
             // extract the name of the js file
             var secondSrcTagPosition = content.indexOf("<script", content.indexOf("<script")+7);
             var srcAttributeStart = content.indexOf("src", secondSrcTagPosition);
@@ -1318,11 +1592,11 @@ qx.Class.define("demobrowser.DemoBrowser",
         if (!otherSamp || otherSamp == this.tree.getRoot()) {
           return;
         }
-        
+
         while (otherSamp.isVisible && !otherSamp.isVisible()) {
           otherSamp = this.tree.getPreviousNodeOf(otherSamp, false);
         }
-        
+
         if (otherSamp.getParent() == this.tree.getRoot()) {
           // otherSamp is the parent
           var candidate = this.tree.getPreviousNodeOf(otherSamp, false);
@@ -1342,7 +1616,7 @@ qx.Class.define("demobrowser.DemoBrowser",
             otherSamp = candidate;
           }
         }
-        
+
         if (!otherSamp || otherSamp === currSamp) {
           // Remove stop button, display run button
           this._stopbutton.setVisibility("excluded");
@@ -1366,6 +1640,8 @@ qx.Class.define("demobrowser.DemoBrowser",
      */
     playNext : function(e)
     {
+      this._nextButton.setEnabled(true);
+      this._prevButton.setEnabled(true);
       var currSamp = this.tree.getSelection()[0];  // widget
 
       if (currSamp)
@@ -1377,7 +1653,7 @@ qx.Class.define("demobrowser.DemoBrowser",
           this._runbutton.setVisibility("visible");
           return;
         }
-        
+
         if (otherSamp.getParent() == this.tree.getRoot()) {
           if (this.getPlayDemos() == "category") {
             if (otherSamp != currSamp && otherSamp != currSamp.getParent()) {
@@ -1390,13 +1666,13 @@ qx.Class.define("demobrowser.DemoBrowser",
           otherSamp.setOpen(true);
           otherSamp = this.tree.getNextNodeOf(otherSamp);
         }
-        
+
         if (!otherSamp) {
           this._stopbutton.setVisibility("excluded");
           this._runbutton.setVisibility("visible");
           return;
         }
-        
+
         while (!otherSamp.isVisible()) {
           var candidate = this.tree.getNextNodeOf(otherSamp);
           if (!candidate) {
@@ -1575,6 +1851,13 @@ qx.Class.define("demobrowser.DemoBrowser",
       }
     },
 
+    __onChangeTheme : function(e)
+    {
+      this.__currentTheme = e.getData()[0].getUserData("value");
+      this.runSample();
+    },
+
+
     /**
      * Creates the application header.
      */
@@ -1585,7 +1868,7 @@ qx.Class.define("demobrowser.DemoBrowser",
       header.setAppearance("app-header");
 
       var title = new qx.ui.basic.Label("Demo Browser");
-      var version = new qx.ui.basic.Label("qooxdoo " + qx.core.Setting.get("qx.version"));
+      var version = new qx.ui.basic.Label("qooxdoo " + qx.core.Environment.get("qx.version"));
 
       header.add(title);
       header.add(new qx.ui.core.Spacer, {flex : 1});
@@ -1611,10 +1894,10 @@ qx.Class.define("demobrowser.DemoBrowser",
     this._disposeObjects("mainsplit", "tree1", "left", "runbutton", "toolbar",
       "f1", "f2", "_history", "logappender", '_cmdObjectSummary',
       '_cmdRunSample', '_cmdPrevSample', '_cmdNextSample',
-      '_cmdSampleInOwnWindow', '_cmdDisposeSample', '_cmdNamespacePollution',
-      "_navPart", "_runbutton", "_stopbutton", "__sobutt",
-      "__viewPart", "viewGroup", "__menuBar", "_infosplit", "_searchTextField",
-      "_status", "_tree", "_iframe", "_demoView", "__menuElements",
-      "__logSync", "_leftComposite", "_urlWindow");
+      '_cmdSampleInOwnWindow', '_cmdDisposeSample', "__disposeBtn", "__debugButton",
+      "_navPart", "_runbutton", "_stopbutton", "__sobutt", "__themePart",
+      "__viewPart", "__viewGroup", "__menuBar", "_infosplit", "_searchTextField",
+      "_status", "_tree", "_iframe", "_demoView", "__menuElements", "__summaryBtn",
+      "__logSync", "_leftComposite", "_urlWindow", "_nextButton", "_prevButton","__menuItemStore");
   }
 });

@@ -76,7 +76,7 @@
  *
  * *External Documentation*
  *
- * See <a href='http://manual.qooxdoo.org/1.3/pages/layout/box.html'>extended documentation</a>
+ * See <a href='http://manual.qooxdoo.org/1.4/pages/layout/box.html'>extended documentation</a>
  * and links to demos for this layout.
  *
  */
@@ -279,9 +279,9 @@ qx.Class.define("qx.ui.layout.VBox",
     */
 
     // overridden
-    verifyLayoutProperty : qx.core.Variant.select("qx.debug",
+    verifyLayoutProperty : qx.core.Environment.select("qx.debug",
     {
-      "on" : function(item, name, value)
+      "true" : function(item, name, value)
       {
         this.assert(name === "flex" || name === "height", "The property '"+name+"' is not supported by the VBox layout!");
 
@@ -297,7 +297,7 @@ qx.Class.define("qx.ui.layout.VBox",
         }
       },
 
-      "off" : null
+      "false" : null
     }),
 
 

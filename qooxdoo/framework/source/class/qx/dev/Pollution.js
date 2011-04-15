@@ -21,6 +21,9 @@
 
 /**
  * Retrieve information about global namespace pollution
+ *
+ * @deprecated since 1.5
+ *
  */
 qx.Class.define("qx.dev.Pollution",
 {
@@ -34,6 +37,9 @@ qx.Class.define("qx.dev.Pollution",
   {
     /**
      * Classes to check for pollution
+     *
+     * @deprecated since 1.5
+     *
      */
     names :
     {
@@ -47,8 +53,19 @@ qx.Class.define("qx.dev.Pollution",
      * Known properties of the classes to check. These properties will not be
      * reported as pollution.
      *
+     * Note: This class has been deprecated in 1.5 without any alternatives.
+     *
+     * Instead you can check for globals using modern JavaScript developer tools such as
+     * Firebug by inspecting the window object (in case of a browser environment).
+     *
+     * To avoid introducing globals in the first place, it is recommended to use code
+     * quality tools (for instance, the lint checker included in qooxdoo's tool chain).
+     *
      * http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects
      * http://developer.mozilla.org/en/docs/Gecko_DOM_Reference
+     *
+     * @deprecated since 1.5
+     *
      */
     ignore :
     {
@@ -77,7 +94,7 @@ qx.Class.define("qx.dev.Pollution",
         "statusbar", "directories", "closed", "crypto", "pkcs11", "opener", "status",
         "defaultStatus", "innerWidth", "innerHeight", "outerWidth", "outerHeight",
         "screenX", "screenY", "pageXOffset", "pageYOffset", "scrollMaxX", "scrollMaxY",
-        "fullScreen", "frameElement", "XMLHttpRequest"
+        "fullScreen", "frameElement", "XMLHttpRequest", "applicationCache", "localStorage"
       ],
 
       "document" :
@@ -111,9 +128,13 @@ qx.Class.define("qx.dev.Pollution",
      *       <li>body</li>
      *     </ul>
      * @return {void}
+     *
+     * @deprecated since 1.5
      */
     getInfo : function(objectName)
     {
+      qx.log.Logger.deprecatedMethodWarning(arguments.callee);
+
       var msg = qx.dev.Pollution.getTextList(objectName || "window");
 
       if (msg) {
@@ -134,15 +155,20 @@ qx.Class.define("qx.dev.Pollution",
      *       <li>body</li>
      *     </ul>
      * @return {Map[]} Array of values, which are not supposed to be in the given object.
+     *
+     * @deprecated since 1.5
+     *
      */
     extract : function(objectName)
     {
+      qx.log.Logger.deprecatedMethodWarning(arguments.callee);
+
       var ext = [];
       var ign = qx.dev.Pollution.ignore[objectName];
 
       // IE offers a window[index] access to the frames of a window, i. e.
       // for three frame, the window object will have attributes "0", "1" and "2"
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         if (objectName == "window")
         {
@@ -161,8 +187,10 @@ qx.Class.define("qx.dev.Pollution",
         try
         {
           // MS IE 7 crashes when doing typeof(window.external), catch here
-          if (qx.core.Variant.isSet("qx.client", "mshtml|opera"))
-          {
+          if (
+            qx.core.Environment.get("engine.name") == "mshtml" ||
+            qx.core.Environment.get("engine.name") == "opera"
+          ) {
             if (objectName == "window" && key == "external") {
               continue;
             }
@@ -217,9 +245,14 @@ qx.Class.define("qx.dev.Pollution",
      *       <li>body</li>
      *     </ul>
      * @return {String} HTML fragment
+     *
+     * @deprecated since 1.5
+     *
      */
     getHtmlTable : function(objectName)
     {
+      qx.log.Logger.deprecatedMethodWarning(arguments.callee);
+
       var all = [];
 
       var rowStart = "<tr style='vertical-align:top'><td>";
@@ -250,9 +283,14 @@ qx.Class.define("qx.dev.Pollution",
      *       <li>body</li>
      *     </ul>
      * @return {String} global pollution list
+     *
+     * @deprecated since 1.5
+     *
      */
     getTextList : function(objectName)
     {
+      qx.log.Logger.deprecatedMethodWarning(arguments.callee);
+
       var all = [];
 
       var cellSplit = ": ";

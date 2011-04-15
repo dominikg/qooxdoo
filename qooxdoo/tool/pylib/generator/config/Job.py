@@ -74,7 +74,10 @@ class Job(object):
            assumes no JobMergeValue be passed, all macros expanded'''
 
         if isinstance(target, types.ListType):
-            return self.listMerge(source, target)
+            if not isinstance(source, (types.ListType,)):
+                return self.listMerge([source], target)
+            else:
+                return self.listMerge(source, target)
         elif isinstance(target, types.DictType):
             return self.deepJsonMerge(source, target)
         else:  # scalar value
@@ -145,13 +148,12 @@ class Job(object):
                 if isinstance(entry, types.StringTypes):
                     if Key.hasMacro(entry):
                         entry = letObj.expandMacros(entry)
-                # cyclic check: have we seen this already?
-                if entry in entryTrace:
-                    raise RuntimeError, "Extend entry already seen: %s" % str(entryTrace+[self.name,entry])
                 
                 entryJob = self._getJob(entry, config)
                 if not entryJob:
                     raise RuntimeError, "No such job: \"%s\" (trace: %s)" % (entry, entryTrace+[self.name])
+                if entryJob.name in entryTrace: # cycle check
+                    raise RuntimeError, "Extend entry already seen: %s" % str(entryTrace+[self.name, entryJob.name])
 
                 self._console.debug('Including "%s" into "%s"' % (entryJob.name, self.name))
                 # make sure this entry job is fully resolved in its context
@@ -240,7 +242,8 @@ class Job(object):
         if self.hasFeature(Key.LET_KEY):
             # exand macros in the let
             letMap = self.getFeature(Key.LET_KEY)
-            letMap = self._expandMacrosInLet(letMap)
+            letObj = Let(letMap)
+            letMap = letObj.expandMacrosInLet()
             self.setFeature(Key.LET_KEY, letMap)
             
             # separate strings from other values
@@ -259,7 +262,6 @@ class Job(object):
 
 
     def includeGlobalLet(self, additionalLet=None):
-        #import pydb; pydb.debugger()
         newlet = self.mapMerge(self.getFeature(Key.LET_KEY,{}),{}) # init with local let
         if additionalLet:
             newlet = self.mapMerge(additionalLet, newlet)
@@ -312,7 +314,11 @@ class Job(object):
                 sub = replval   # array references are ok for now
         else:
             templ = string.Template(s)
-            sub = templ.safe_substitute(mapstr)
+            #sub = templ.safe_substitute(mapstr)
+            try:
+                sub = templ.substitute(mapstr)
+            except KeyError, e:
+                raise ValueError("Macro left undefined in job (%s): '%s'\n(might be from an included config)" % (self.name, e.args[0]))
         return sub
 
 
@@ -323,8 +329,6 @@ class Job(object):
     # structure that holds the expanded version (so the input data is unchanged)
 
     def _expandMacrosInValues(self, data, maps):
-        #result = data  # intialize result
-        #print "IN: %r" % data
         
         # arrays
         if isinstance(data, types.ListType):
@@ -343,7 +347,6 @@ class Job(object):
                 # expand in values
                 enew = self._expandMacrosInValues(data[e], maps)
                 if enew != data[e]:
-                    #console.debug("expanding: %s ==> %s" % (str(data[e]), str(enew)))
                     console.debug("expanding: %r ==> %r" % (data[e], enew))
                     #data[e] = enew
                 result[e] = enew
@@ -381,33 +384,7 @@ class Job(object):
         else:
             result = data
 
-        #print "OUT: %r" % result
         return result
-
-
-    def _expandMacrosInLet(self, letDict):
-        """ do macro expansion within the "let" dict """
-
-        keys = letDict.keys()
-        for k in keys:
-            kval = letDict[k]
-            
-            # construct a temp. dict of translation maps, for later calls to _expand* funcs
-            # wpbasti: Crazy stuff: Could be find some better variable names here. Seems to be optimized for size already ;)
-            if isinstance(kval, types.StringTypes):
-                kdicts = {'str': {k:kval}, 'bin': {}}
-            else:
-                kdicts = {'str': {}, 'bin': {k:kval}}
-                
-            # cycle through other keys of this dict
-            for k1 in keys:
-                if k != k1: # no expansion with itself!
-                    enew = self._expandMacrosInValues(letDict[k1], kdicts)
-                    if enew != letDict[k1]:
-                        #console.debug("expanding: %s ==> %s" % (k1.encode('utf-8'), (enew.encode('utf-8'))))
-                        console.debug("expanding: %s ==> %s" % (k1, repr(enew)))
-                        letDict[k1] = enew
-        return letDict
 
 
     def getData(self):
@@ -486,6 +463,7 @@ class Job(object):
             target[listKey].append(element)
             return target[listKey]
 
+        # -- deepJsonMerge -------------------------------------------------------
 
         if not isinstance(source, types.DictType):
             raise TypeError, "Wrong argument to deepJsonMerge (must be Dict)"
@@ -497,19 +475,21 @@ class Job(object):
             assert isinstance(override_keys, types.ListType)
 
         for key in source:
+            # pass here - these are treated when their corresponding key is treated
             if key == Key.OVERRIDE_KEY:
-                pass  # pass here - these are treated when their corresponding key is treated
+                pass
 
-            elif key in target:  # we have to merge values
+            # merge values
+            elif key in target:
                 # skip protected keys
                 if key in override_keys:
                     continue
 
                 # treat spanning macros (which can represent data structures), and JobMergeValues
-                elif ((isString(source[key]) and isSpanningMacro(source[key])) or
-                      (isString(target[key]) and isSpanningMacro(target[key])) or
-                      isinstance(source[key], JobMergeValue)                   or
-                      isinstance(target[key], JobMergeValue)
+                elif ((isString(source[key]) and isSpanningMacro(source[key]))
+                      or (isString(target[key]) and isSpanningMacro(target[key]))
+                      or isinstance(source[key], JobMergeValue)
+                      or isinstance(target[key], JobMergeValue)
                      ):
                     # insert an intermediate object, which is resolved when macros are resolved
                     target[key] = JobMergeValue(source[key], target[key])
@@ -520,24 +500,29 @@ class Job(object):
                     target[key] = self.mapMerge(source[key], target[key])
 
                 # merge arrays rather than shadowing
-                elif isinstance(source[key], types.ListType):
+                elif isinstance(target[key], types.ListType):
                     # equality problem: in two arbitrary lists, i have no way of telling 
                     # whether any pair of elements is somehow related (e.g. specifies the
                     # same library), and i can't do recursive search here, with some 
                     # similarity reasoning, can i. therefore: non-equal elements are just
                     # considered unrelated.
-                    target[key] = self.listMerge(source[key],target[key])
+                    if not isinstance(source[key], types.ListType):
+                        target[key] = self.listMerge([source[key]],target[key])
+                    else:
+                        target[key] = self.listMerge(source[key],target[key])
                 
                 # merge dicts rather than shadowing
-                elif isinstance(source[key], types.DictType):
-                    # assuming schema-conformance of target[key] as well
+                elif isinstance(target[key], types.DictType):
+                    # assuming schema-conformance of source[key] as well
                     # recurse on the sub-dicts
                     self.deepJsonMerge(source[key], target[key])
                     #target[key] = self.mapMerge(source[key],target[key])
 
                 else:
                     pass  # leave target key alone
-            else:  # it's a new key, just add it
+
+            # add new key
+            else:
                 target[key] = source[key]
                 # carry over override protection:
                 # only add protection for new keys - don't add protection for keys that

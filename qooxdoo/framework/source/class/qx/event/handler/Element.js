@@ -70,7 +70,6 @@ qx.Class.define("qx.event.handler.Element",
       load : true, // Image elements
       scroll : true,
       select : true,
-      selectstart: true,
       reset : true,    // Form Elements
       submit : true   // Form Elements
     },
@@ -110,7 +109,7 @@ qx.Class.define("qx.event.handler.Element",
     canHandleEvent : function(target, type)
     {
       // Don't handle "load" event of Iframe. Unfortunately, both Element and
-      // Iframe handler support "load" event. Should be handled by 
+      // Iframe handler support "load" event. Should be handled by
       // qx.event.handler.Iframe only. Fixes [#BUG 4587].
       if (type === "load") {
         return target.tagName.toLowerCase() !== "iframe";

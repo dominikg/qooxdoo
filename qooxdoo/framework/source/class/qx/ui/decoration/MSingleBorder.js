@@ -18,10 +18,11 @@
 ************************************************************************ */
 /**
  * A basic decorator featuring simple borders based on CSS styles.
+ * This mixin is usually used by {@link qx.ui.decoration.DynamicDecorator}.
  */
-qx.Mixin.define("qx.ui.decoration.MSingleBorder", 
+qx.Mixin.define("qx.ui.decoration.MSingleBorder",
 {
-  properties : 
+  properties :
   {
     /*
     ---------------------------------------------------------------------------
@@ -180,21 +181,21 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
     width :
     {
       group : [ "widthTop", "widthRight", "widthBottom", "widthLeft" ],
-      shorthand : true
+      mode : "shorthand"
     },
 
     /** Property group to set the border style of all sides */
     style :
     {
       group : [ "styleTop", "styleRight", "styleBottom", "styleLeft" ],
-      shorthand : true
+      mode : "shorthand"
     },
 
     /** Property group to set the border color of all sides */
     color :
     {
       group : [ "colorTop", "colorRight", "colorBottom", "colorLeft" ],
-      shorthand : true
+      mode : "shorthand"
     }
   },
 
@@ -202,9 +203,10 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
   members :
   {
     /**
-     * Takes a styles map and adds the border styles styles in place 
-     * to the given map.
-     * 
+     * Takes a styles map and adds the border styles styles in place
+     * to the given map. This is the needed behavior for
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param styles {Map} A map to add the styles.
      */
     _styleBorder : function(styles) {
@@ -232,7 +234,7 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
       }
 
       // Check if valid
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (styles.length === 0) {
           throw new Error("Invalid Single decorator (zero border width). Use qx.ui.decorator.Background instead!");
@@ -247,18 +249,30 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
 
 
     /**
-     * Resize function for the decorator.
-     * 
+     * Resize function for the decorator. This is suitable for the
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param element {Element} The element which could be resized.
      * @param width {Number} The new width.
      * @param height {Number} The new height.
      * @return {Map} A map containing the desired position and dimension.
      *   (width, height, top, left).
-     */    
+     */
     _resizeBorder : function(element, width, height) {
       var insets = this.getInsets();
       width -= insets.left + insets.right;
       height -= insets.top + insets.bottom;
+
+      // Fix to keep applied size above zero
+      // Makes issues in IE7 when applying value like '-4px'
+      if (width < 0) {
+        width = 0;
+      }
+
+      if (height < 0) {
+        height = 0;
+      }
+
       return {
         left : insets.left - this.getWidthLeft(),
         top : insets.top - this.getWidthTop(),
@@ -266,13 +280,13 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
         height : height
       };
     },
-    
-    
-    
+
+
+
     /**
      * Implementation of the interface for the single border.
-     * 
-     * @return {Map} A map containing the default insets. 
+     *
+     * @return {Map} A map containing the default insets.
      *   (top, right, bottom, left)
      */
     _getDefaultInsetsForBorder : function()
@@ -284,8 +298,8 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
         left : this.getWidthLeft()
       };
     },
-    
-    
+
+
     /*
     ---------------------------------------------------------------------------
       PROPERTY APPLY ROUTINES
@@ -304,7 +318,7 @@ qx.Mixin.define("qx.ui.decoration.MSingleBorder",
     // property apply
     _applyStyle : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this._markup) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");

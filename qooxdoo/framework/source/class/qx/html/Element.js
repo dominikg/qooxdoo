@@ -145,7 +145,7 @@ qx.Class.define("qx.html.Element",
     {
       var obj;
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this.DEBUG) {
           qx.log.Logger.debug(this, "Flushing elements...");
@@ -192,7 +192,7 @@ qx.Class.define("qx.html.Element",
           // Flush invisible elements first
           else
           {
-            if (qx.core.Variant.isSet("qx.debug", "on"))
+            if (qx.core.Environment.get("qx.debug"))
             {
               if (this.DEBUG) {
                 obj.debug("Flush invisible element");
@@ -211,7 +211,7 @@ qx.Class.define("qx.html.Element",
       {
         obj = later[i];
 
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           if (this.DEBUG) {
             obj.debug("Flush rendered element");
@@ -237,7 +237,7 @@ qx.Class.define("qx.html.Element",
           continue;
         }
 
-        if (qx.core.Variant.isSet("qx.debug", "on"))
+        if (qx.core.Environment.get("qx.debug"))
         {
           if (this.DEBUG) {
             qx.log.Logger.debug(this, "Switching visibility to: " + obj.__visible);
@@ -249,7 +249,7 @@ qx.Class.define("qx.html.Element",
         if (!obj.$$disposed) {
           element.style.display = obj.__visible ? "" : "none";
           // also hide the element (fixed some rendering problem in IE<8 & IE8 quirks)
-          if (qx.core.Variant.isSet("qx.client", "mshtml"))
+          if ((qx.core.Environment.get("engine.name") == "mshtml"))
           {
             if (!(document.documentMode >= 8)) {
               element.style.visibility = obj.__visible ? "visible" : "hidden";
@@ -521,7 +521,7 @@ qx.Class.define("qx.html.Element",
      */
     __flush : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this.DEBUG) {
           this.debug("Flush: " + this.getAttribute("id"));
@@ -639,7 +639,7 @@ qx.Class.define("qx.html.Element",
       var domPos = 0;
       var domEl;
 
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         var domOperations = 0;
       }
 
@@ -653,7 +653,7 @@ qx.Class.define("qx.html.Element",
         {
           domParent.removeChild(domEl);
 
-          if (qx.core.Variant.isSet("qx.debug", "on")) {
+          if (qx.core.Environment.get("qx.debug")) {
             domOperations++;
           }
         }
@@ -686,7 +686,7 @@ qx.Class.define("qx.html.Element",
               domParent.appendChild(dataEl);
             }
 
-            if (qx.core.Variant.isSet("qx.debug", "on")) {
+            if (qx.core.Environment.get("qx.debug")) {
               domOperations++
             }
           }
@@ -697,7 +697,7 @@ qx.Class.define("qx.html.Element",
       }
 
       // User feedback
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (qx.html.Element.DEBUG) {
           this.debug("Synced DOM with " + domOperations + " operations");
@@ -1407,7 +1407,7 @@ qx.Class.define("qx.html.Element",
       // when we try to use the same DOM node again. I am not sure
       // why this happens. Would be a good performance improvement,
       // but does not seem to work.
-      if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+      if ((qx.core.Environment.get("engine.name") == "mshtml")) {
         var helper = document.createElement("div");
       } else {
         var helper = qx.bom.Element.getHelperElement();
@@ -1471,20 +1471,13 @@ qx.Class.define("qx.html.Element",
      * @signature function(value)
      * @param value {Boolean} True, if the element should be selectable.
      */
-    setSelectable : qx.core.Variant.select("qx.client",
+    setSelectable : qx.core.Environment.select("engine.name",
     {
       "webkit" : function(value)
       {
         // Apply qooxdoo attribute
         this.setAttribute("qxSelectable", value ? "on" : "off");
-
-        // In Chrome, the text of elements with the CSS property
-        // -webkit-user-select set to "none" is not searchable.
-        // Refer to qx.html.Root#__forcePreventSelection for
-        // more details and a work-around.
-        if (qx.bom.client.Browser.NAME !== "chrome") {
-          this.setStyle("userSelect", value ? "text" : "none");
-        }
+        this.setStyle("userSelect", value ? "text" : "none");
       },
 
       "gecko" : function(value)
@@ -2505,7 +2498,7 @@ qx.Class.define("qx.html.Element",
         return null;
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var msg = "Failed to add event listener for type '" + type + "'" +
           " to the target '" + this + "': ";
@@ -2565,7 +2558,7 @@ qx.Class.define("qx.html.Element",
         return null;
       }
 
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         var msg = "Failed to remove event listener for type '" + type + "'" +
           " from the target '" + this + "': ";

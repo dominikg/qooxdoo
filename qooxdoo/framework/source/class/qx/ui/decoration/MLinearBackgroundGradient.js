@@ -18,16 +18,18 @@
 ************************************************************************ */
 /**
  * Mixin for the linear background gradient CSS property.
- * 
+ * This mixin is usually used by {@link qx.ui.decoration.DynamicDecorator}.
+ *
  * Keep in mind that this is not supported by all browsers:
  *
  * * Safari 4.0+
  * * Chrome 4.0+
  * * Firefox 3.6+
+ * * Opera 11.1+
  */
-qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient", 
+qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
 {
-  properties : 
+  properties :
   {
     /** Start start color of the background */
     startColor :
@@ -36,7 +38,7 @@ qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
       nullable : true,
       apply : "_applyLinearBackgroundGradient"
     },
-    
+
     /** End end color of the background */
     endColor :
     {
@@ -44,52 +46,52 @@ qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
       nullable : true,
       apply : "_applyLinearBackgroundGradient"
     },
-    
+
     /** The orientation of the gradient. */
-    orientation : 
+    orientation :
     {
       check : ["horizontal", "vertical"],
       init : "vertical",
       apply : "_applyLinearBackgroundGradient"
     },
-    
+
     /** Position in percent where to start the color. */
-    startColorPosition : 
+    startColorPosition :
     {
-      check : "Number", 
+      check : "Number",
       init : 0,
       apply : "_applyLinearBackgroundGradient"
     },
-    
+
     /** Position in percent where to start the color. */
-    endColorPosition : 
+    endColorPosition :
     {
-      check : "Number", 
+      check : "Number",
       init : 100,
       apply : "_applyLinearBackgroundGradient"
     },
-    
+
     /** Defines if the given positions are in % or px.*/
-    colorPositionUnit : 
+    colorPositionUnit :
     {
       check : ["px", "%"],
       init : "%",
       apply : "_applyLinearBackgroundGradient"
     },
-    
-    
+
+
     /** Property group to set the start color inluding its start position. */
     gradientStart :
     {
       group : ["startColor", "startColorPosition"],
-      shorthand : true
+      mode : "shorthand"
     },
-    
+
     /** Property group to set the end color inluding its end position. */
     gradientEnd :
     {
       group : ["endColor", "endColorPosition"],
-      shorthand : true
+      mode : "shorthand"
     }
   },
 
@@ -97,19 +99,20 @@ qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
   members :
   {
     /**
-     * Takes a styles map and adds the linear background styles in place to the 
-     * given map.
-     * 
+     * Takes a styles map and adds the linear background styles in place to the
+     * given map. This is the needed behavior for
+     * {@link qx.ui.decoration.DynamicDecorator}.
+     *
      * @param styles {Map} A map to add the styles.
      */
     _styleLinearBackgroundGradient : function(styles) {
       var Color = qx.theme.manager.Color.getInstance();
       var unit = this.getColorPositionUnit();
 
-      if (qx.bom.client.Engine.WEBKIT) {
+      if (qx.core.Environment.get("engine.name") == "webkit") {
         // webkit uses px values if non are given
         unit = unit === "px" ? "" : unit;
-        
+
         if (this.getOrientation() == "horizontal") {
           var startPos = this.getStartColorPosition() + unit +" 0" + unit;
           var endPos = this.getEndColorPosition() + unit + " 0" + unit;
@@ -118,8 +121,8 @@ qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
           var endPos = "0" + unit +" " + this.getEndColorPosition() + unit;
         }
 
-        var color = 
-          "from(" + Color.resolve(this.getStartColor()) + 
+        var color =
+          "from(" + Color.resolve(this.getStartColor()) +
           "),to(" + Color.resolve(this.getEndColor()) + ")";
 
         var value = "-webkit-gradient(linear," + startPos + "," + endPos + "," + color + ")";
@@ -130,21 +133,26 @@ qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
         var start = Color.resolve(this.getStartColor()) + " " + this.getStartColorPosition() + unit;
         var end = Color.resolve(this.getEndColor()) + " " + this.getEndColorPosition() + unit;
 
-        var prefix = qx.bom.client.Engine.GECKO ? "-moz-" : "";
-        styles["background"] = 
+        var prefix = "";
+        if (qx.core.Environment.get("engine.name") == "gecko") {
+          prefix = "-moz-";
+        } else if (qx.core.Environment.get("engine.name") == "opera") {
+          prefix = "-o-";
+        }
+        styles["background"] =
           prefix + "linear-gradient(" + deg + "deg, " + start + "," + end + ")";
       }
     },
-    
-    
+
+
     /**
      * Resize function for the background color. This is suitable for the
      * {@link qx.ui.decoration.DynamicDecorator}.
-     * 
+     *
      * @param element {Element} The element which could be resized.
      * @param width {Number} The new width.
      * @param height {Number} The new height.
-     * @return {Map} A map containing the desired position and dimension 
+     * @return {Map} A map containing the desired position and dimension
      *   (width, height, top, left).
      */
     _resizeLinearBackgroundGradient : function(element, width, height) {
@@ -163,7 +171,7 @@ qx.Mixin.define("qx.ui.decoration.MLinearBackgroundGradient",
     // property apply
     _applyLinearBackgroundGradient : function()
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
         if (this._isInitialized()) {
           throw new Error("This decorator is already in-use. Modification is not possible anymore!");

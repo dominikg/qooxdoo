@@ -89,7 +89,7 @@ qx.Class.define("qx.bom.element.Opacity",
      * @param opacity {Float} A float number between 0 and 1
      * @return {String} CSS compatible string
      */
-    compile : qx.core.Variant.select("qx.client",
+    compile : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(opacity)
       {
@@ -143,7 +143,7 @@ qx.Class.define("qx.bom.element.Opacity",
      * @signature function(element, opacity)
      * @break {qx.bom.element.Style}
      */
-    set : qx.core.Variant.select("qx.client",
+    set : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, opacity)
       {
@@ -212,7 +212,7 @@ qx.Class.define("qx.bom.element.Opacity",
      * @return {void}
      * @signature function(element)
      */
-    reset : qx.core.Variant.select("qx.client",
+    reset : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element)
       {
@@ -256,7 +256,7 @@ qx.Class.define("qx.bom.element.Opacity",
      * @return {Float} A float number between 0 and 1
      * @signature function(element, mode)
      */
-    get : qx.core.Variant.select("qx.client",
+    get : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, mode)
       {

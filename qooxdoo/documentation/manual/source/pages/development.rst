@@ -30,11 +30,13 @@ Testing
 =======
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    development/unit_testing
    development/frame_apps_testrunner
    development/framework_unit_testing
+   development/simulator
+   development/simulator_locators
 
 
 .. _index#parts:
@@ -72,7 +74,6 @@ Miscellaneous
 .. toctree::
    :maxdepth: 2
 
-   development/variants
    development/image_clipping_and_combining
 
    development/write_api_documentation

@@ -12,6 +12,10 @@
      EPL: http://www.eclipse.org/org/documents/epl-v10.php
      See the LICENSE file in the project's top-level directory for details.
 
+   Authors:
+     * Daniel Wagner (d_wagner)
+     * Christian Hagendorn (chris_schmidt)
+
 ************************************************************************ */
 
 /**
@@ -27,14 +31,19 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
 
   implement : [qx.ui.form.IStringForm],
 
-  
+
   construct : function(model)
   {
     this.base(arguments, model);
 
     this._createChildControl("textfield");
     this._createChildControl("button");
-    this.getChildControl("dropdown").getChildControl("list").setSelectionMode("single");
+
+    var dropdown = this.getChildControl("dropdown");
+    dropdown.getChildControl("list").setSelectionMode("single");
+
+    this.__selection = dropdown.getSelection();
+    this.__selection.addListener("change", this.__onSelectionChange, this);
   },
 
   properties :
@@ -53,9 +62,9 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       init: 120
     },
 
-    
+
     /**
-     * The currently selected or entered value. 
+     * The currently selected or entered value.
      */
     value :
     {
@@ -63,14 +72,14 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       event: "changeValue",
       apply: "_applyValue"
     },
-    
-    
+
+
     /**
      * Formatting function that will be applied to the value of a selected model
-     * item's label before it is written to the text field. Also used to find 
+     * item's label before it is written to the text field. Also used to find
      * and preselect the first list entry that begins with the current content
-     * of the text field when the dropdown list is opened. Can be used e.g. to 
-     * strip HTML tags from rich-formatted item labels. The function will be 
+     * of the text field when the drop-down list is opened. Can be used e.g. to
+     * strip HTML tags from rich-formatted item labels. The function will be
      * called with the item's label (String) as the only parameter.
      */
     defaultFormat :
@@ -83,19 +92,23 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
 
   members :
   {
-    /** {var} The current binding id form the selection. */
-    __selectionBindingId : null,
+    /** {qx.data.Array} the drop-down selection. */
+    __selection : null,
 
-    
+
+    /** {Boolean} Indicator to ignore selection changes from the list. */
+    __ignoreChangeSelection : null,
+
+
     /*
     ---------------------------------------------------------------------------
       PUBLIC API
     ---------------------------------------------------------------------------
     */
 
-    
+
     /**
-     * Returns the current selection. This method only works if the widget is 
+     * Returns the current selection. This method only works if the widget is
      * already created and added to the document.
      *
      * @return {String|null} The current text selection.
@@ -104,9 +117,9 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       return this.getChildControl("textfield").getTextSelection();
     },
 
-    
+
     /**
-     * Returns the current selection length. This method only works if the 
+     * Returns the current selection length. This method only works if the
      * widget is already created and added to the document.
      *
      * @return {Integer|null} The current text selection length.
@@ -115,10 +128,10 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       return this.getChildControl("textfield").getTextSelectionLength();
     },
 
-    
+
     /**
-     * Set the selection to the given start and end (zero-based). If no end 
-     * value is given the selection will extend to the end of the textfield's 
+     * Set the selection to the given start and end (zero-based). If no end
+     * value is given the selection will extend to the end of the textfield's
      * content. This method only works if the widget is already created and
      * added to the document.
      *
@@ -129,16 +142,16 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       this.getChildControl("textfield").setTextSelection(start,  end);
     },
 
-    
+
     /**
-     * Clears the current selection. This method only works if the widget is 
+     * Clears the current selection. This method only works if the widget is
      * already created and added to the document.
      */
     clearTextSelection : function() {
       this.getChildControl("textfield").clearTextSelection();
     },
 
-    
+
     /**
      * Selects the whole content.
      */
@@ -146,7 +159,7 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       this.getChildControl("textfield").selectAllText();
     },
 
-    
+
     /**
      * Clear any text selection, then select all text.
      */
@@ -155,8 +168,8 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       this.clearTextSelection();
       this.selectAllText();
     },
-    
-    
+
+
     // overridden
     tabFocus : function()
     {
@@ -166,22 +179,22 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       field.selectAllText();
     },
 
-    
+
     // overridden
     focus : function()
     {
       this.base(arguments);
       this.getChildControl("textfield").getFocusElement().focus();
     },
-    
-    
+
+
     /*
     ---------------------------------------------------------------------------
       INTERNAL API
     ---------------------------------------------------------------------------
     */
-    
-    
+
+
     // overridden
     _createChildControlImpl : function(id, hash)
     {
@@ -191,9 +204,6 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       {
         case "textfield" :
           control = new qx.ui.form.TextField();
-          control.addListener("changeValue", function(ev) {
-            this.fireDataEvent("changeValue", ev.getData(), ev.getOldData());
-          }, this);
           control.setFocusable(false);
           control.addState("inner");
           this._add(control, {flex : 1});
@@ -217,146 +227,104 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
       this.__selectFirstMatch();
     },
 
-    
+
     // overridden
     _handleKeyboard : function(event)
     {
       var action = this._getAction(event);
-      
+
       switch(action)
       {
         case "select":
           this.setValue(this.getChildControl("textfield").getValue());
           break;
-          
+
         default:
           this.base(arguments, event);
           break;
       }
     },
-    
-    
+
+
     // overridden
     _getAction : function(event)
     {
       var keyIdentifier = event.getKeyIdentifier();
       var isOpen = this.getChildControl("dropdown").isVisible();
+      var isModifierPressed = this._isModifierPressed(event);
 
-      if (!isOpen && keyIdentifier === "Enter") {
+      if (!isOpen && !isModifierPressed && keyIdentifier === "Enter") {
         return "select";
       } else {
         return this.base(arguments, event);
       }
     },
-      
-    
-    // overridden
-    _addBindings : function()
-    {
-      var selection = this.getChildControl("dropdown").getSelection();
 
-      var labelSourcePath = this._getBindPath("", this.getLabelPath());
-      this.__selectionBindingId = selection.bind(labelSourcePath, 
-        this, "value", this.__getLabelFilterOptions());
-    },
-    
-    
-    // overridden
-    _removeBindings : function()
-    {
-      var selection = this.getChildControl("dropdown").getSelection();
-      
-      if (this.__selectionBindingId != null)
-      {
-        selection.removeBinding(this.__selectionBindingId);
-        this.__selectionBindingId = null;
-      }
-    },
-    
-    
+
     /*
     ---------------------------------------------------------------------------
       EVENT LISTENERS
     ---------------------------------------------------------------------------
     */
-    
-    
+
+
     // overridden
     _handleMouse : function(event)
     {
       this.base(arguments, event);
 
       var type = event.getType();
+      if (type !== "click") {
+        return;
+      }
+
       var target = event.getTarget();
-      if (type === "click" && target == this.getChildControl("button")) {
+      if (target == this.getChildControl("button")) {
         this.toggle();
+      } else {
+        this.close();
       }
     },
 
-    
+
+    /**
+     * Handler to synchronize selection changes with the value property.
+     *
+     * @param event {qx.event.type.Data} The change event from the qx.data.Array.
+     */
+    __onSelectionChange : function(event) {
+      if (this.__ignoreChangeSelection == true) {
+        return;
+      }
+
+      var selected = this.__selection.getItem(0);
+      selected = this.__convertValue(selected);
+
+      this.setValue(selected);
+      this.getChildControl("textfield").setValue(selected);
+    },
+
+
     /*
     ---------------------------------------------------------------------------
       APPLY ROUTINES
     ---------------------------------------------------------------------------
     */
-    
-    
+
+
     // property apply
     _applyValue : function(value, old)
     {
-      if (value && value !== old)
-      {
-        var textfield = this.getChildControl("textfield");
-        textfield.setValue(value);
-      }
+      var textfield = this.getChildControl("textfield");
+      textfield.setValue(value);
     },
-    
-    
+
+
     /*
     ---------------------------------------------------------------------------
       HELPER METHODS
     ---------------------------------------------------------------------------
     */
-    
-    
-    /**
-     * Returns an options map used for binding the selected item's label to
-     * the {@link #value} property. If {@link #stripTags} is set, a converter 
-     * that strips HTML tags from the label string is added.
-     * 
-     * @return {Map} Options map.
-     */
-    __getLabelFilterOptions : function()
-    {
-      var labelOptions = this.getLabelOptions();
-      var options = null;
-      var formatter = this.getDefaultFormat();
-      
-      if (labelOptions != null)
-      {
-        options = qx.lang.Object.clone(labelOptions);
-        
-        if (formatter)
-        {
-          options.converter = function(data, model)
-          {
-            data = labelOptions.converter(data, model);
-            return formatter(data);
-          }
-        }
-      } 
-      else
-      {
-        if (formatter)
-        {
-          options = {
-            converter : formatter
-          }
-        }
-      }
-      
-      return options;
-    },
 
 
     /**
@@ -365,41 +333,73 @@ qx.Class.define("qx.ui.form.VirtualComboBox",
     __selectFirstMatch : function()
     {
       var value = this.getChildControl("textfield").getValue();
-      var labelPath = this.getLabelPath();
-      var selection = this.getChildControl("dropdown").getSelection();
-      
-      if (selection.getItem(0) !== value)
+      var dropdown = this.getChildControl("dropdown");
+      var selection = dropdown.getSelection();
+
+      if (this.__convertValue(selection.getItem(0)) !== value)
       {
+        // reset the old selection
+        this.__ignoreChangeSelection = true;
+        selection.removeAll();
+        this.__ignoreChangeSelection = false;
+
+        // No calculation is needed when the value is empty
+        if (value == null || value == "") {
+          return;
+        }
+
         var model = this.getModel();
-        var lookupTable = this.getChildControl("dropdown").getChildControl("list")._getLookupTable();
-        
+        var lookupTable = dropdown.getChildControl("list")._getLookupTable();
         for (var i = 0, l = lookupTable.length; i < l; i++)
         {
           var modelItem = model.getItem(lookupTable[i]);
-          var itemLabel = null;
-          
-          if (labelPath) {
-            itemLabel = qx.data.SingleValueBinding.getValueFromObject(modelItem, labelPath);
-          }
-          else if (typeof(modelItem) == "string") {
-            itemLabel = modelItem;
-          }
-          
-          if (itemLabel && this.getDefaultFormat()) {
-            itemLabel = this.getDefaultFormat()(qx.lang.String.stripTags(itemLabel));
-          }
-          
+          var itemLabel = this.__convertValue(modelItem);
+
           if (itemLabel && itemLabel.indexOf(value) == 0) {
-            this.getChildControl("dropdown").setPreselected(modelItem);
+            dropdown.setPreselected(modelItem);
             break;
           }
         }
       }
+    },
+
+
+    /**
+     * Helper method to convert the model item to a String.
+     *
+     * @param modelItem {var} The model item to convert.
+     * @return {String} The converted value.
+     */
+    __convertValue : function(modelItem)
+    {
+      var labelOptions = this.getLabelOptions();
+      var formatter = this.getDefaultFormat();
+      var labelPath = this.getLabelPath();
+      var result = null;
+
+      if (labelPath != null) {
+        result = qx.data.SingleValueBinding.getValueFromObject(modelItem, labelPath);
+      } else if (qx.lang.Type.isString(modelItem)) {
+        result = modelItem;
+      }
+
+      var converter = qx.util.Delegate.getMethod(labelOptions, "converter");
+      if (converter != null) {
+        result = converter(result);
+      }
+
+      if (result != null && formatter != null) {
+        result = formatter(qx.lang.String.stripTags(result));
+      }
+
+      return result;
     }
   },
-  
-  
-  destruct : function() {
+
+
+  destruct : function()
+  {
+    this.__selection.removeListener("change", this.__onSelectionChange, this);
     this.__selection = null;
   }
 });

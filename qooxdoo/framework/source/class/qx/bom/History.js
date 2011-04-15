@@ -147,8 +147,10 @@ qx.Class.define("qx.bom.History",
      * {Boolean} Whether the browser supports the 'hashchange' event natively.
      */
     SUPPORTS_HASH_CHANGE_EVENT :
-      (qx.bom.client.Engine.MSHTML && document.documentMode >= 8) ||
-      (!qx.bom.client.Engine.MSHTML && document.documentMode && "onhashchange" in window),
+      (qx.core.Environment.get("engine.name") == "mshtml" &&
+       document.documentMode >= 8) ||
+      (!(qx.core.Environment.get("engine.name") == "mshtml") &&
+       document.documentMode && "onhashchange" in window),
 
 
     /**
@@ -162,7 +164,7 @@ qx.Class.define("qx.bom.History",
       {
         if (this.SUPPORTS_HASH_CHANGE_EVENT) {
           this.$$instance = new qx.bom.NativeHistory();
-        } else if (qx.core.Variant.isSet("qx.client", "mshtml")) {
+        } else if ((qx.core.Environment.get("engine.name") == "mshtml")) {
           this.$$instance = new qx.bom.IframeHistory();
         } else {
           this.$$instance = new qx.bom.NativeHistory();

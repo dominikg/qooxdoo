@@ -31,6 +31,7 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
   {
     this.__oneventWrapped = qx.Bootstrap.bind(this.__onevent, this);
     this.__elem = document.createElement("script");
+    this.__timeout = 10;
   },
 
 
@@ -48,6 +49,9 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
     /** {Object} Context to execute the callback in */
     __context : null,
 
+    /** {Number} Timeout limit in seconds. Default is 10 seconds. 0 means no timeout. */
+    __timeout: 0,
+
     /** {Function} This function is a wrapper for the DOM listener */
     __oneventWrapped : null,
 
@@ -61,6 +65,9 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
      *
      * The callback is executed when the process is done with any
      * of these status messages: success, fail or abort.
+     *
+     * Note that browsers not supporting the native "error" event detect
+     * network errors as soon as the timeout limit is reached.
      *
      * @param url {String} URL of the script
      * @param callback {Function} Callback to execute
@@ -93,6 +100,15 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
 
       // Attach handlers for all browsers
       script.onerror = script.onload = script.onreadystatechange = this.__oneventWrapped;
+
+      var self = this;
+      if (this.getTimeout() > 0) {
+        // No need to clear timeout since on success the callback is called
+        // and the loader disposed, meaning the callback is called only once
+        setTimeout(function() {
+          self.dispose("fail");
+        }, this.getTimeout() * 1000);
+      }
 
       // Setup URL
       script.src = url;
@@ -152,8 +168,10 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
       // Execute user callback
       if (this.__callback)
       {
-        if (qx.core.Variant.isSet("qx.client", "mshtml|webkit"))
-        {
+        if (
+          qx.core.Environment.get("engine.name") == "mshtml" ||
+          qx.core.Environment.get("engine.name") == "webkit"
+        ) {
           // Safari fails with an "maximum recursion depth exceeded" error if
           // many files are loaded
 
@@ -175,6 +193,23 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
       }
     },
 
+    /**
+     * Set timeout in seconds.
+     *
+     * @param timeout {Number?10} Timeout limit in seconds
+     */
+    setTimeout: function(timeout) {
+      this.__timeout = timeout;
+    },
+
+    /**
+     * Get timeout in seconds.
+     *
+     * @return {Number} Timeout limit in seconds
+     */
+    getTimeout: function() {
+      return this.__timeout;
+    },
 
     /**
      * Internal event listener for load and error events.
@@ -182,7 +217,7 @@ qx.Bootstrap.define("qx.io.ScriptLoader",
      * @signature function(e)
      * @param e {Event} Native event object
      */
-    __onevent : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onevent : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(e)
       {

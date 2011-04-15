@@ -120,7 +120,7 @@ qx.Class.define("qx.event.handler.Focus",
     /**
      * {Map} See: http://msdn.microsoft.com/en-us/library/ms534654(VS.85).aspx
      */
-    FOCUSABLE_ELEMENTS : qx.core.Variant.select("qx.client",
+    FOCUSABLE_ELEMENTS : qx.core.Environment.select("engine.name",
     {
       "mshtml|gecko" :
       {
@@ -198,7 +198,7 @@ qx.Class.define("qx.event.handler.Focus",
     focus : function(element)
     {
       // Fixed timing issue with IE, see [BUG #3267]
-      if (qx.core.Variant.isSet("qx.client", "mshtml"))
+      if ((qx.core.Environment.get("engine.name") == "mshtml"))
       {
         window.setTimeout(function()
         {
@@ -355,7 +355,7 @@ qx.Class.define("qx.event.handler.Focus",
      *
      * @signature function()
      */
-    _initObserver : qx.core.Variant.select("qx.client",
+    _initObserver : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -458,7 +458,7 @@ qx.Class.define("qx.event.handler.Focus",
      *
      * @signature function()
      */
-    _stopObserver : qx.core.Variant.select("qx.client",
+    _stopObserver : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -517,7 +517,7 @@ qx.Class.define("qx.event.handler.Focus",
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeDragGesture : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeDragGesture : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "gecko" : function(domEvent)
       {
@@ -537,7 +537,7 @@ qx.Class.define("qx.event.handler.Focus",
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeFocusIn : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeFocusIn : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(domEvent)
       {
@@ -601,14 +601,14 @@ qx.Class.define("qx.event.handler.Focus",
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeFocusOut : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeFocusOut : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(domEvent)
       {
-        //TODO check this implementation for IE9
+        var relatedTarget = qx.bom.Event.getRelatedTarget(domEvent);
 
         // If the focus goes to nowhere (the document is blurred)
-        if (!domEvent.toElement)
+        if (relatedTarget == null)
         {
           // Update internal representation
           this.__doWindowBlur();
@@ -669,7 +669,7 @@ qx.Class.define("qx.event.handler.Focus",
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeBlur : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeBlur : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "gecko" : function(domEvent)
       {
@@ -710,7 +710,7 @@ qx.Class.define("qx.event.handler.Focus",
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeFocus : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeFocus : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "gecko" : function(domEvent)
       {
@@ -763,7 +763,7 @@ qx.Class.define("qx.event.handler.Focus",
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeMouseDown : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeMouseDown : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "gecko" : function(domEvent)
       {
@@ -808,9 +808,7 @@ qx.Class.define("qx.event.handler.Focus",
             // The unselectable attribute stops focussing as well.
             // Do this manually.
             try {
-              var scrollTop = qx.bom.Viewport.getScrollTop();
               focusTarget.focus();
-              window.document.documentElement.scrollTop = scrollTop;
             } catch (ex) {
               // ignore "Can't move focus of this control" error
             }
@@ -829,50 +827,47 @@ qx.Class.define("qx.event.handler.Focus",
       },
 
       "webkit" : function(domEvent) {
-        this.__onNativeMouseDownWebkitOpera(domEvent);
+        var target = qx.bom.Event.getTarget(domEvent);
+        var focusTarget = this.__findFocusableElement(target);
+
+        if (focusTarget) {
+          this.setFocus(focusTarget);
+        } else {
+          qx.bom.Event.preventDefault(domEvent);
+        }
       },
 
       "opera" : function(domEvent)
       {
+        var target = qx.bom.Event.getTarget(domEvent);
+        var focusTarget = this.__findFocusableElement(target);
 
-        // Recent Operas
-        if (qx.bom.client.Browser.VERSION >= 11) {
-          this.__onNativeMouseDownWebkitOpera(domEvent);
+        if (!this.__isSelectable(target)) {
+          // Prevent the default action for all non-selectable
+          // targets. This prevents text selection and context menu.
+          qx.bom.Event.preventDefault(domEvent);
 
-        // Legacy Operas
-        } else {
-          var target = qx.bom.Event.getTarget(domEvent);
-          var focusTarget = this.__findFocusableElement(target);
-
-          if (!this.__isSelectable(target)) {
-            // In legacy Operas, prevent the default action
-            // for all non-selectable targets. This prevents
-            // text selection.
-            qx.bom.Event.preventDefault(domEvent);
-
-            // The stopped event keeps the selection
-            // of the previously focused element.
-            // We need to clear the old selection.
-            if (focusTarget)
+          // The stopped event keeps the selection
+          // of the previously focused element.
+          // We need to clear the old selection.
+          if (focusTarget)
+          {
+            var current = this.getFocus();
+            if (current && current.selectionEnd)
             {
-              var current = this.getFocus();
-              if (current && current.selectionEnd)
-              {
-                current.selectionStart = 0;
-                current.selectionEnd = 0;
-                current.blur();
-              }
-
-              // The prevented event also stop the focus, do
-              // it manually if needed.
-              if (focusTarget) {
-                this.setFocus(focusTarget);
-              }
+              current.selectionStart = 0;
+              current.selectionEnd = 0;
+              current.blur();
             }
-          } else if (focusTarget) {
-            this.setFocus(focusTarget);
-          }
 
+            // The prevented event also stop the focus, do
+            // it manually if needed.
+            if (focusTarget) {
+              this.setFocus(focusTarget);
+            }
+          }
+        } else if (focusTarget) {
+          this.setFocus(focusTarget);
         }
       },
 
@@ -880,37 +875,12 @@ qx.Class.define("qx.event.handler.Focus",
     })),
 
     /**
-     * Native event listener for <code>mousedown</code> in WebKit and Opera.
-     *
-     * @signature function(domEvent)
-     * @param domEvent {Event} Native event
-     *
-     */
-    __onNativeMouseDownWebkitOpera : function(domEvent) {
-      var target = qx.bom.Event.getTarget(domEvent);
-      var focusTarget = this.__findFocusableElement(target);
-
-      // In recent Operas, only prevent the default action
-      // if no focusable element was found.
-      //
-      // Preventing the default in other cases (such as for all non-selectable
-      // targets) caused [BUG #4518], which is related to the browser bug
-      // described in [BUG #4543]. This means that text selection is possible
-      // in recent Operas.
-      if (focusTarget) {
-        this.setFocus(focusTarget);
-      } else {
-        qx.bom.Event.preventDefault(domEvent);
-      }
-    },
-
-    /**
      * Native event listener for <code>mouseup</code>.
      *
      * @signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeMouseUp : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeMouseUp : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(domEvent)
       {
@@ -954,7 +924,7 @@ qx.Class.define("qx.event.handler.Focus",
      * @param target {Element} target element from mouse up event
      * @return {Element} Element to activate;
      */
-    __fixFocus : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __fixFocus : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml|webkit" : function(target)
       {
@@ -979,7 +949,7 @@ qx.Class.define("qx.event.handler.Focus",
      *@signature function(domEvent)
      * @param domEvent {Event} Native event
      */
-    __onNativeSelectStart : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onNativeSelectStart : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml|webkit" : function(domEvent)
       {
@@ -1022,7 +992,7 @@ qx.Class.define("qx.event.handler.Focus",
 
 
     /**
-     * Returns the next focusable parent element of a activated DOM element.
+     * Returns the next focusable parent element of an activated DOM element.
      *
      * @param el {Element} Element to start lookup with.
      * @return {Element|null} The next focusable element.

@@ -59,7 +59,7 @@ qx.Class.define("qx.event.handler.Keyboard",
     this.__window = manager.getWindow();
 
     // Gecko ignores key events when not explicitly clicked in the document.
-    if (qx.core.Variant.isSet("qx.client", "gecko")) {
+    if ((qx.core.Environment.get("engine.name") == "gecko")) {
       this.__root = this.__window;
     } else {
       this.__root = this.__window.document.documentElement;
@@ -255,7 +255,10 @@ qx.Class.define("qx.event.handler.Keyboard",
 
       // IE and Safari suppress a "keypress" event if the "keydown" event's
       // default action was prevented. In this case we emulate the "keypress"
-      if (qx.core.Variant.isSet("qx.client", "mshtml|webkit"))
+      if (
+        qx.core.Environment.get("engine.name") == "mshtml" ||
+        qx.core.Environment.get("engine.name") == "webkit"
+      )
       {
         if (type == "keydown" && event.getDefaultPrevented())
         {
@@ -364,7 +367,7 @@ qx.Class.define("qx.event.handler.Keyboard",
      * @signature function(domEvent)
      * @param domEvent {Event} DOM event object
      */
-    __onKeyUpDown : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onKeyUpDown : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(domEvent)
       {
@@ -399,7 +402,7 @@ qx.Class.define("qx.event.handler.Keyboard",
         var type = domEvent.type;
 
         // FF repeats under windows keydown events like IE
-        if (qx.bom.client.Platform.WIN)
+        if (qx.core.Environment.get("os.name") == "win")
         {
           var keyIdentifier = keyCode ? this._keyCodeToIdentifier(keyCode) : this._charCodeToIdentifier(charCode);
 
@@ -426,9 +429,9 @@ qx.Class.define("qx.event.handler.Keyboard",
         var charCode = 0;
         var type = domEvent.type;
 
-        // starting with Safari 3.1 (verion 525.13) Apple switched the key
+        // starting with Safari 3.1 (version 525.13) Apple switched the key
         // handling to match the IE behaviour.
-        if (qx.bom.client.Engine.VERSION < 525.13)
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 525.13)
         {
           if (type == "keyup" || type == "keydown")
           {
@@ -486,7 +489,7 @@ qx.Class.define("qx.event.handler.Keyboard",
      * @param type {String} The event type
      * @param keyCode {Integer} the key code
      */
-    __firefoxInputFix : qx.core.Variant.select("qx.client",
+    __firefoxInputFix : qx.core.Environment.select("engine.name",
     {
       "gecko" : function(target, type, keyCode)
       {
@@ -529,7 +532,7 @@ qx.Class.define("qx.event.handler.Keyboard",
      * @signature function(domEvent)
      * @param domEvent {Event} DOM event object
      */
-    __onKeyPress : qx.event.GlobalError.observeMethod(qx.core.Variant.select("qx.client",
+    __onKeyPress : qx.event.GlobalError.observeMethod(qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(domEvent)
       {
@@ -553,9 +556,9 @@ qx.Class.define("qx.event.handler.Keyboard",
 
       "webkit" : function(domEvent)
       {
-        // starting with Safari 3.1 (verion 525.13) Apple switched the key
+        // starting with Safari 3.1 (version 525.13) Apple switched the key
         // handling to match the IE behaviour.
-        if (qx.bom.client.Engine.VERSION < 525.13)
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 525.13)
         {
           var keyCode = 0;
           var charCode = 0;
@@ -688,7 +691,7 @@ qx.Class.define("qx.event.handler.Keyboard",
      *
      * @lint ignoreReferenceField(_emulateKeyPress)
      */
-    _emulateKeyPress : qx.core.Variant.select("qx.client",
+    _emulateKeyPress : qx.core.Environment.select("engine.name",
     {
       "mshtml" : {
         8: true,
@@ -749,9 +752,11 @@ qx.Class.define("qx.event.handler.Keyboard",
        44 : "PrintScreen",  // The Print Screen (PrintScrn, SnapShot) key.
       145 : "Scroll",       // The scroll lock key
        19 : "Pause",        // The pause/break key
-       91 : qx.bom.client.Platform.MAC ? "cmd" : "Win", // The left Windows Logo key or left cmd key
+       // The left Windows Logo key or left cmd key
+       91 : qx.core.Environment.get("os.name") == "osx" ? "cmd" : "Win",
        92 : "Win",          // The right Windows Logo key or left cmd key
-       93 : qx.bom.client.Platform.MAC ? "cmd" : "Apps" // The Application key (Windows Context Menu) or right cmd key
+       // The Application key (Windows Context Menu) or right cmd key
+       93 : qx.core.Environment.get("os.name") == "osx" ? "cmd" : "Apps"
     },
 
 
@@ -936,7 +941,7 @@ qx.Class.define("qx.event.handler.Keyboard",
       }
     }
 
-    if (qx.core.Variant.isSet("qx.client", "mshtml"))
+    if ((qx.core.Environment.get("engine.name") == "mshtml"))
     {
       members._charCode2KeyCode =
       {
@@ -944,17 +949,17 @@ qx.Class.define("qx.event.handler.Keyboard",
         27 : 27
       };
     }
-    else if (qx.core.Variant.isSet("qx.client", "gecko"))
+    else if ((qx.core.Environment.get("engine.name") == "gecko"))
     {
       members._keyCodeFix = {
         12 : members._identifierToKeyCode("NumLock")
       };
     }
-    else if (qx.core.Variant.isSet("qx.client", "webkit"))
+    else if ((qx.core.Environment.get("engine.name") == "webkit"))
     {
-      // starting with Safari 3.1 (verion 525.13) Apple switched the key
+      // starting with Safari 3.1 (version 525.13) Apple switched the key
       // handling to match the IE behaviour.
-      if (qx.bom.client.Engine.VERSION < 525.13 )
+      if (parseFloat(qx.core.Environment.get("engine.version")) < 525.13 )
       {
         members._charCode2KeyCode =
         {

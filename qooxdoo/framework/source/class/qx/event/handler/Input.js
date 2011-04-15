@@ -75,7 +75,7 @@ qx.Class.define("qx.event.handler.Input",
     this._onPropertyWrapper = qx.lang.Function.listener(this._onProperty, this);
 
     // special event handler for opera
-    if (qx.core.Variant.isSet("qx.client", "opera")) {
+    if ((qx.core.Environment.get("engine.name") == "opera")) {
       this._onKeyDownWrapper = qx.lang.Function.listener(this._onKeyDown, this);
       this._onKeyUpWrapper = qx.lang.Function.listener(this._onKeyUp, this);
       this._onBlurWrapper = qx.lang.Function.listener(this._onBlur, this);
@@ -128,9 +128,11 @@ qx.Class.define("qx.event.handler.Input",
     __enter : false,
     __onInputTimeoutId : null,
 
-    // stores the former seet value for opera and IE
+    // stores the former set value for opera and IE
     __oldValue : null,
 
+    // stores the former set value for IE
+    __oldInputValue : null,
 
     /*
     ---------------------------------------------------------------------------
@@ -156,12 +158,13 @@ qx.Class.define("qx.event.handler.Input",
 
 
     // interface implementation
-    /**
-     * @signature function(target, type, capture)
-     */
-    registerEvent : qx.core.Variant.select("qx.client",
+    registerEvent : function(target, type, capture)
     {
-      "mshtml" : function(target, type, capture)
+      if (
+        qx.core.Environment.get("engine.name") == "mshtml" &&
+        (qx.core.Environment.get("engine.version") < 9 ||
+        (qx.core.Environment.get("engine.version") >= 9 && qx.core.Environment.get("browser.documentmode") < 9))
+      )
       {
         if (!target.__inputHandlerAttached)
         {
@@ -183,9 +186,8 @@ qx.Class.define("qx.event.handler.Input",
 
           target.__inputHandlerAttached = true;
         }
-      },
-
-      "default" : function(target, type, capture)
+      }
+      else
       {
         if (type === "input")
         {
@@ -200,21 +202,35 @@ qx.Class.define("qx.event.handler.Input",
           }
 
           // special enter bugfix for opera
-          if (qx.core.Variant.isSet("qx.client", "opera")) {
+          if ((qx.core.Environment.get("engine.name") == "opera") || (qx.core.Environment.get("engine.name") == "mshtml")) {
             if (target.type === "text" || target.type === "password") {
               this._onKeyPressWrapped = qx.lang.Function.listener(this._onKeyPress, this, target);
               qx.bom.Event.addNativeListener(target, "keypress", this._onKeyPressWrapped);
             }
           }
-
         }
       }
-    }),
+    },
 
 
-    __registerInputListener : qx.core.Variant.select("qx.client",
+    __registerInputListener : qx.core.Environment.select("engine.name",
     {
-      "mshtml" : null,
+      "mshtml" : function(target)
+      {
+        if (
+          qx.core.Environment.get("engine.version") >= 9 &&
+          qx.core.Environment.get("browser.documentmode") >= 9
+        ) {
+          qx.bom.Event.addNativeListener(target, "input", this._onInputWrapper);
+
+          if (target.type === "text" || target.type === "password")
+          {
+            // Fixed input for delete and backspace key
+            this._inputFixWrapper = qx.lang.Function.listener(this._inputFix, this, target);
+            qx.bom.Event.addNativeListener(target, "keyup", this._inputFixWrapper);
+          }
+        }
+      },
 
       "webkit" : function(target)
       {
@@ -223,7 +239,7 @@ qx.Class.define("qx.event.handler.Input",
 
         // the change event is not fired while typing
         // this has been fixed in the latest nightlies
-        if (qx.bom.client.Engine.VERSION < 532 && tag == "textarea") {
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 532 && tag == "textarea") {
           qx.bom.Event.addNativeListener(target, "keypress", this._onInputWrapper);
         }
         qx.bom.Event.addNativeListener(target, "input", this._onInputWrapper);
@@ -246,12 +262,13 @@ qx.Class.define("qx.event.handler.Input",
 
 
     // interface implementation
-    /**
-     * @signature function(target, type)
-     */
-    unregisterEvent : qx.core.Variant.select("qx.client",
+    unregisterEvent : function(target, type)
     {
-      "mshtml" : function(target, type)
+      if (
+        qx.core.Environment.get("engine.name") == "mshtml" &&
+        qx.core.Environment.get("engine.version") < 9 &&
+        qx.core.Environment.get("browser.documentmode") < 9
+      )
       {
         if (target.__inputHandlerAttached)
         {
@@ -276,13 +293,12 @@ qx.Class.define("qx.event.handler.Input",
             target.__inputHandlerAttached = null;
           }
         }
-      },
-
-      "default" : function(target, type)
+      }
+      else
       {
         if (type === "input")
         {
-          this.__registerInputListener(target);
+          this.__unregisterInputListener(target);
         }
         else if (type === "change")
         {
@@ -296,18 +312,31 @@ qx.Class.define("qx.event.handler.Input",
           }
         }
 
-        if (qx.core.Variant.isSet("qx.client", "opera")) {
+        if ((qx.core.Environment.get("engine.name") == "opera") || (qx.core.Environment.get("engine.name") == "mshtml")) {
           if (target.type === "text" || target.type === "password") {
             qx.bom.Event.removeNativeListener(target, "keypress", this._onKeyPressWrapped);
           }
         }
       }
-    }),
+    },
 
 
-    __unregisterInputListener : qx.core.Variant.select("qx.client",
+    __unregisterInputListener : qx.core.Environment.select("engine.name",
     {
-      "mshtml" : null,
+      "mshtml" : function(target)
+      {
+        if (
+          qx.core.Environment.get("engine.version") >= 9 &&
+          qx.core.Environment.get("browser.documentmode") >= 9
+        ) {
+          qx.bom.Event.removeNativeListener(target, "input", this._onInputWrapper);
+
+          if (target.type === "text" || target.type === "password") {
+            // Fixed input for delete and backspace key
+            qx.bom.Event.removeNativeListener(target, "keyup", this._inputFixWrapper);
+          }
+        }
+      },
 
       "webkit" : function(target)
       {
@@ -316,7 +345,7 @@ qx.Class.define("qx.event.handler.Input",
 
         // the change event is not fired while typing
         // this has been fixed in the latest nightlies
-        if (qx.bom.client.Engine.VERSION < 532 && tag == "textarea") {
+        if (parseFloat(qx.core.Environment.get("engine.version")) < 532 && tag == "textarea") {
           qx.bom.Event.removeNativeListener(target, "keypress", this._onInputWrapper);
         }
         qx.bom.Event.removeNativeListener(target, "input", this._onInputWrapper);
@@ -354,7 +383,7 @@ qx.Class.define("qx.event.handler.Input",
      * @param e {Event} DOM event object
      * @param target {Element} The event target
      */
-    _onKeyPress : qx.core.Variant.select("qx.client",
+    _onKeyPress : qx.core.Environment.select("engine.name",
     {
       "mshtml|opera" : function(e, target)
       {
@@ -362,6 +391,41 @@ qx.Class.define("qx.event.handler.Input",
           if (target.value !== this.__oldValue) {
             this.__oldValue = target.value;
             qx.event.Registration.fireEvent(target, "change", qx.event.type.Data, [target.value]);
+          }
+        }
+      },
+
+      "default" : null
+    }),
+
+
+    /*
+    ---------------------------------------------------------------------------
+      FOR IE (KEYUP TO SIMULATE INPUT EVENT)
+    ---------------------------------------------------------------------------
+    */
+    /**
+     * Handler for fixing the different behavior when pressing the backspace or
+     * delete key.
+     *
+     * The other browsers fire a "input" event if the user presses the backspace
+     * or delete key.
+     * IE fire the event only for other keys.
+     *
+     * @signature function(e, target)
+     * @param e {Event} DOM event object
+     * @param target {Element} The event target
+     */
+    _inputFix : qx.core.Environment.select("engine.name",
+    {
+      "mshtml" : function(e, target)
+      {
+        if (e.keyCode === 46 || e.keyCode === 8)
+        {
+          if (target.value !== this.__oldInputValue)
+          {
+            this.__oldInputValue = target.value;
+            qx.event.Registration.fireEvent(target, "input", qx.event.type.Data, [target.value]);
           }
         }
       },
@@ -382,7 +446,7 @@ qx.Class.define("qx.event.handler.Input",
      * @signature function(e)
      * @param e {Event} DOM event object
      */
-    _onKeyDown : qx.core.Variant.select("qx.client",
+    _onKeyDown : qx.core.Environment.select("engine.name",
     {
       "opera" : function(e)
       {
@@ -403,7 +467,7 @@ qx.Class.define("qx.event.handler.Input",
      * @signature function(e)
      * @param e {Event} DOM event object
      */
-    _onKeyUp : qx.core.Variant.select("qx.client",
+    _onKeyUp : qx.core.Environment.select("engine.name",
     {
       "opera" : function(e)
       {
@@ -423,11 +487,11 @@ qx.Class.define("qx.event.handler.Input",
      * @signature function(e)
      * @param e {Event} DOM event object
      */
-    _onBlur : qx.core.Variant.select("qx.client",
+    _onBlur : qx.core.Environment.select("engine.name",
     {
       "opera" : function(e)
       {
-        if (this.__onInputTimeoutId && qx.bom.client.Browser.VERSION < 10.6) {
+        if (this.__onInputTimeoutId && qx.core.Environment.get("browser.version") < 10.6) {
           window.clearTimeout(this.__onInputTimeoutId);
         }
       },
@@ -456,8 +520,8 @@ qx.Class.define("qx.event.handler.Input",
       if (!this.__enter || tag !== "input") {
         // opera lower 10.6 needs a special treatment for input events because
         // they are also fired on blur
-        if (qx.core.Variant.isSet("qx.client", "opera") &&
-            qx.bom.client.Browser.VERSION < 10.6) {
+        if ((qx.core.Environment.get("engine.name") == "opera") &&
+            qx.core.Environment.get("browser.version") < 10.6) {
           this.__onInputTimeoutId = window.setTimeout(function() {
             qx.event.Registration.fireEvent(target, "input", qx.event.type.Data, [target.value]);
           }, 0);
@@ -523,7 +587,7 @@ qx.Class.define("qx.event.handler.Input",
      * @signature function(e)
      * @param e {Event} Native DOM event
      */
-    _onProperty : qx.core.Variant.select("qx.client",
+    _onProperty : qx.core.Environment.select("engine.name",
     {
       "mshtml" : qx.event.GlobalError.observeMethod(function(e)
       {

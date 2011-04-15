@@ -22,6 +22,9 @@
 
 /**
  * This class is used to send HTTP requests to the server.
+ *
+ * Note: This class will be deprecated in a future release. Instead,
+ * classes found in {@link qx.io.request} will offer request handling.
  */
 qx.Class.define("qx.io.remote.Request",
 {
@@ -695,9 +698,9 @@ qx.Class.define("qx.io.remote.Request",
     // property apply
     _applyState : function(value, old)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on"))
+      if (qx.core.Environment.get("qx.debug"))
       {
-        if (qx.core.Setting.get("qx.ioRemoteDebug")) {
+        if (qx.core.Environment.get("qx.ioRemoteDebug")) {
           this.debug("State: " + value);
         }
       }

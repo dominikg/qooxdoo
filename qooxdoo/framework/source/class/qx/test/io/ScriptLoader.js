@@ -26,7 +26,8 @@ Authors:
 qx.Class.define("qx.test.io.ScriptLoader",
 {
   extend : qx.dev.unit.TestCase,
-  include : qx.test.io.MRemoteTest,
+  include : [qx.test.io.MRemoteTest,
+             qx.dev.unit.MRequirements],
 
   members :
   {
@@ -60,16 +61,14 @@ qx.Class.define("qx.test.io.ScriptLoader",
         return;
       }
 
-      // Opera will fire an event at all
-      if (qx.bom.client.Engine.OPERA) {
-        this.warn("Test skipped in Opera, since it doesn't fire events here.");
-        return;
-      }
+      // Opera will not fire an event at all
+      this.require(["notOpera"]);
 
       var url = this.getUrl("qx/test/xmlhttp/404.php");
 
       this.loader.load(url, function(status) { this.resume(function() {
-        if (qx.bom.client.Engine.MSHTML || (qx.bom.client.Engine.WEBKIT && qx.bom.client.Engine.VERSION < 531)) {
+        if (qx.core.Environment.get("engine.name") == "mshtml" || (qx.core.Environment.get("engine.name") == "webkit" &&
+          parseFloat(qx.core.Environment.get("engine.version")) < 531)) {
           // Error state does not work in IE and Safari 3!
           this.assertEquals("success", status);
         } else {
@@ -83,11 +82,8 @@ qx.Class.define("qx.test.io.ScriptLoader",
 
     testLoadError : function()
     {
-      // Opera will fire an event at all
-      if (qx.bom.client.Engine.OPERA) {
-        this.warn("Test skipped in Opera, since it doesn't fire events here.");
-        return;
-      }
+      // Opera will not fire an event at all
+      this.require(["notOpera"]);
 
       var protocol = location.protocol;
       if (protocol.indexOf("file:") == 0) {
@@ -97,9 +93,10 @@ qx.Class.define("qx.test.io.ScriptLoader",
       {
         this.resume(function()
         {
-          var isSafari3 = qx.bom.client.Engine.WEBKIT && qx.bom.client.Engine.VERSION < 530;
+          var isSafari3 = qx.core.Environment.get("engine.name") == "webkit" &&
+            parseFloat(qx.core.Environment.get("engine.version")) < 530;
 
-          if (qx.bom.client.Engine.MSHTML || isSafari3) {
+          if (qx.core.Environment.get("engine.name") == "mshtml" || isSafari3) {
             // Error state does not work in IE!
             this.assertEquals("success", status);
           } else {
@@ -170,6 +167,27 @@ qx.Class.define("qx.test.io.ScriptLoader",
       }, this);
 
       this.wait();
+    },
+
+    testTimeoutReached: function() {
+      var loader = new qx.io.ScriptLoader(),
+          url = "http://fail.tld";
+
+      // Actually, in browsers that support the "error" event, the
+      // error is detected and handled (with status "fail") before
+      // the timeout is reached
+      loader.setTimeout(1);
+      loader.load(url, function(status) {
+        this.resume(function() {
+          this.assertEquals("fail", status);
+        }, this);
+      }, this);
+
+      this.wait();
+    },
+
+    hasNotOpera: function() {
+      return !this.hasOpera();
     }
   }
 });

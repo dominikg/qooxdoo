@@ -53,8 +53,8 @@
  *
  * *External Documentation*
  *
- * <a href='http://manual.qooxdoo.org/1.3/pages/widget/label.html' target='_blank'>
- * Documentation of this widget in the qooxdoo wiki.</a>
+ * <a href='http://manual.qooxdoo.org/1.4/pages/widget/label.html' target='_blank'>
+ * Documentation of this widget in the qooxdoo manual.</a>
  */
 qx.Class.define("qx.ui.basic.Label",
 {
@@ -80,7 +80,7 @@ qx.Class.define("qx.ui.basic.Label",
       this.setValue(value);
     }
 
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().addListener("changeLocale", this._onChangeLocale, this);
     }
   },
@@ -264,11 +264,12 @@ qx.Class.define("qx.ui.basic.Label",
       // This is needed for all browsers not having text-overflow:ellipsis
       // but supporting XUL (firefox < 4)
       // https://bugzilla.mozilla.org/show_bug.cgi?id=312156
-      if (!qx.bom.client.Feature.CSS_TEXT_OVERFLOW && qx.bom.client.Feature.XUL)
+      if (!qx.core.Environment.get("css.textoverflow") &&
+        qx.core.Environment.get("html.xul"))
       {
         if (value && !this.isRich())
         {
-          if (qx.core.Variant.isSet("qx.debug", "on")) {
+          if (qx.core.Environment.get("qx.debug")) {
             this.warn("Only rich labels are selectable in browsers with Gecko engine!");
           }
           return;
@@ -430,7 +431,7 @@ qx.Class.define("qx.ui.basic.Label",
     {
       if (value && !this.isRich())
       {
-        if (qx.core.Variant.isSet("qx.debug", "on")) {
+        if (qx.core.Environment.get("qx.debug")) {
           this.warn("Only rich labels support wrap.");
         }
       }
@@ -450,9 +451,9 @@ qx.Class.define("qx.ui.basic.Label",
      * @signature function(e)
      * @param e {Event} the change event
      */
-    _onChangeLocale : qx.core.Variant.select("qx.dynlocale",
+    _onChangeLocale : qx.core.Environment.select("qx.dynlocale",
     {
-      "on" : function(e)
+      "true" : function(e)
       {
         var content = this.getValue();
         if (content && content.translate) {
@@ -460,7 +461,7 @@ qx.Class.define("qx.ui.basic.Label",
         }
       },
 
-      "off" : null
+      "false" : null
     }),
 
 
@@ -490,7 +491,7 @@ qx.Class.define("qx.ui.basic.Label",
 
   destruct : function()
   {
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().removeListener("changeLocale", this._onChangeLocale, this);
     }
 

@@ -19,8 +19,8 @@
 
 /**
  * EXPERIMENTAL!
- * 
- * This interface needs to implemented from all {@link qx.ui.tree.VirtualTree} 
+ *
+ * This interface needs to implemented from all {@link qx.ui.tree.VirtualTree}
  * providers.
  *
  * @internal
@@ -38,26 +38,18 @@ qx.Interface.define("qx.ui.tree.provider.IVirtualTreeProvider",
 
 
     /**
-     * Creates a renderer for node rendering.
+     * Creates a renderer for rendering.
      *
      * @return {var} new node renderer.
      */
-    createNodeRenderer : function() {},
-
-
-    /**
-     * Creates a renderer for leaf rendering.
-     *
-     * @return {var} new leaf renderer.
-     */
-    createLeafRenderer : function() {},
+    createRenderer : function() {},
 
 
     /**
      * Sets the name of the property, where the children are stored in the model.
      * Instead of the {@link #labelPath} must the child property a direct
      * property form the model instance.
-     * 
+     *
      * @param value {String} The child property name.
      */
     setChildProperty : function(value)
@@ -70,7 +62,7 @@ qx.Interface.define("qx.ui.tree.provider.IVirtualTreeProvider",
     /**
      * Sets the name of the property, where the value for the tree folders label
      * is stored in the model classes.
-     * 
+     *
      * @param value {String} The label path.
      */
     setLabelPath : function(value)
@@ -78,8 +70,8 @@ qx.Interface.define("qx.ui.tree.provider.IVirtualTreeProvider",
       this.assertArgumentsCount(arguments, 1, 1);
       this.assertString(value);
     },
-    
-    
+
+
     /**
      * Styles a selected item.
      *

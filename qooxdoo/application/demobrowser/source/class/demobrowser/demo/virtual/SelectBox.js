@@ -102,6 +102,17 @@ qx.Class.define("demobrowser.demo.virtual.SelectBox",
       var selectBox = new qx.ui.form.VirtualSelectBox(model);
       container.add(selectBox);
 
+      // Bind selection with tooltip
+      selectBox.bind("selection[0]", selectBox, "toolTipText", null);
+      var delegate = {
+        bindItem : function(controller, item, id)
+        {
+          controller.bindDefaultProperties(item, id);
+          controller.bindProperty("", "toolTipText", null, item, id);
+        }
+      };
+      selectBox.setDelegate(delegate);
+
       return container;
     },
 
@@ -125,7 +136,7 @@ qx.Class.define("demobrowser.demo.virtual.SelectBox",
       for (var i = 0; i < iconNames.length; i++) {
         rawData.push({
           label: iconNames[i],
-          icon: iconPrefix + iconNames[i] + iconPostfix 
+          icon: iconPrefix + iconNames[i] + iconPostfix
         });
       }
 
@@ -225,7 +236,7 @@ qx.Class.define("demobrowser.demo.virtual.SelectBox",
     createBox7 : function()
     {
       var container = new qx.ui.container.Composite(new qx.ui.layout.VBox(2));
-      container.add(new qx.ui.basic.Label("Persons"));
+      container.add(new qx.ui.basic.Label("Grouped with Persons"));
 
       // Creates the select box
       var selectBox = new qx.ui.form.VirtualSelectBox();
@@ -251,6 +262,12 @@ qx.Class.define("demobrowser.demo.virtual.SelectBox",
           b = b.getFirstname();
 
           return a > b ? 1 : a < b ? -1 : 0;
+
+        },
+
+        // Assign the group name for each item (fist char form first name)
+        group : function(model) {
+          return model.getFirstname().charAt(0).toUpperCase();
         }
       };
       selectBox.setDelegate(delegate);

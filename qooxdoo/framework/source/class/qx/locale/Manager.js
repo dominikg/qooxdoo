@@ -21,7 +21,6 @@
 
 /*
 #require(qx.event.dispatch.Direct)
-#require(qx.bom.client.Locale)
 #require(qx.locale.LocalizedString)
 #cldr
 */
@@ -52,10 +51,8 @@ qx.Class.define("qx.locale.Manager",
     this.__translations = qx.$$translations || {};
     this.__locales      = qx.$$locales || {};
 
-    var clazz = qx.bom.client.Locale;
-
-    var locale = clazz.LOCALE;
-    var variant = clazz.VARIANT;
+    var locale = qx.core.Environment.get("locale");
+    var variant = qx.core.Environment.get("locale.variant");
     if (variant !== "") {
       locale += "_" + variant;
     }
@@ -245,6 +242,9 @@ qx.Class.define("qx.locale.Manager",
     __extractLanguage : function(locale)
     {
       var language;
+      if (locale == null) {
+        return null;
+      }
       var pos = locale.indexOf("_");
 
       if (pos == -1) {
@@ -260,7 +260,7 @@ qx.Class.define("qx.locale.Manager",
     // property apply
     _applyLocale : function(value, old)
     {
-      if (qx.core.Variant.isSet("qx.debug", "on")) {
+      if (qx.core.Environment.get("qx.debug")) {
         if (!(value in this.__locales || value == this.__clientLocale)) {
           qx.log.Logger.warn("Locale: " + value+" not available.");
         }
@@ -431,7 +431,7 @@ qx.Class.define("qx.locale.Manager",
         txt = qx.lang.String.format(txt, translatedArgs);
       }
 
-      if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+      if (qx.core.Environment.get("qx.dynlocale")) {
         txt = new qx.locale.LocalizedString(txt, messageId, args);
       }
 

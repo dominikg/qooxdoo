@@ -205,7 +205,7 @@ qx.Class.define("qx.ui.table.Table",
     this.__focusedRow = null;
 
     // add an event listener which updates the table content on locale change
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().addListener("changeLocale", this._onChangeLocale, this);
     }
 
@@ -729,6 +729,8 @@ qx.Class.define("qx.ui.table.Table",
     __hadVerticalScrollBar : null,
 
     __timer : null,
+
+    __resizeInProgress : false,
 
 
 
@@ -2153,9 +2155,26 @@ qx.Class.define("qx.ui.table.Table",
      */
     _onResize : function()
     {
-      this.fireEvent("tableWidthChanged");
-      this._updateScrollerWidths();
-      this._updateScrollBarVisibility();
+      // it is necessary to decouple the resizing operation of the table with
+      // a timer. Otherwise the resizing operations will trigger another resize
+      // which will then trigger again this routine ending up in a endless loop.
+      // This only happens if the table / treevirtual widget is added to a
+      // scroll container and the own scrolling ability of the table pane is *not*
+      // used (strange, but possible usage). See Bug #4934 for details.
+      if (!this.__resizeInProgress)
+      {
+        qx.event.Timer.once(function()
+        {
+          this.fireEvent("tableWidthChanged");
+
+          this._updateScrollerWidths();
+          this._updateScrollBarVisibility();
+
+          this.__resizeInProgress = false;
+        }, this, 0);
+
+        this.__resizeInProgress = true;
+      }
     },
 
 
@@ -2237,7 +2256,7 @@ qx.Class.define("qx.ui.table.Table",
   destruct : function()
   {
     // remove the event listener which handled the locale change
-    if (qx.core.Variant.isSet("qx.dynlocale", "on")) {
+    if (qx.core.Environment.get("qx.dynlocale")) {
       qx.locale.Manager.getInstance().removeListener("changeLocale", this._onChangeLocale, this);
     }
 

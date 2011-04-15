@@ -296,7 +296,7 @@ qx.Class.define("qx.ui.table.selection.Model",
 
 
     /**
-     * Returns whether a index is selected.
+     * Returns whether an index is selected.
      *
      * @param index {Integer} the index to check.
      * @return {Boolean} whether the index is selected.
@@ -342,7 +342,7 @@ qx.Class.define("qx.ui.table.selection.Model",
 
 
     /**
-     * Calls a iterator function for each selected index.
+     * Calls an iterator function for each selected index.
      *
      * Usage Example:
      * <pre class='javascript'>
@@ -414,7 +414,10 @@ qx.Class.define("qx.ui.table.selection.Model",
           {
             // IE doesn't execute the "finally" block if no "catch" block is present
             // this hack is used to fix [BUG #3688]
-            if(qx.bom.client.Browser.NAME == 'ie' && qx.bom.client.Browser.VERSION<=7) {
+            if (
+              qx.core.Environment.get("browser.name") == 'ie' &&
+              qx.core.Environment.get("browser.version") <= 7
+            ) {
               this.setBatchMode(false);
             }
             throw e;
@@ -463,7 +466,7 @@ qx.Class.define("qx.ui.table.selection.Model",
 
 
     /**
-     * Removes a interval from the current selection.
+     * Removes an interval from the current selection.
      *
      * @param fromIndex {Integer} the first index of the interval (including).
      * @param toIndex {Integer} the last index of the interval (including).

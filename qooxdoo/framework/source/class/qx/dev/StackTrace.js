@@ -20,7 +20,7 @@
 /**
  * Methods to get information about the JavaScript call stack.
  */
-qx.Class.define("qx.dev.StackTrace",
+qx.Bootstrap.define("qx.dev.StackTrace",
 {
   statics:
   {
@@ -41,7 +41,7 @@ qx.Class.define("qx.dev.StackTrace",
      *     represents one call in the stack trace.
      * @signature function()
      */
-    getStackTrace : qx.core.Variant.select("qx.client",
+    getStackTrace : qx.core.Environment.select("engine.name",
     {
       "gecko" : function()
       {
@@ -130,7 +130,7 @@ qx.Class.define("qx.dev.StackTrace",
      *     Each line in the array represents one call in the stack trace.
      * @signature function(args)
      */
-    getStackTraceFromCaller : qx.core.Variant.select("qx.client",
+    getStackTraceFromCaller : qx.core.Environment.select("engine.name",
     {
       "opera" : function(args)
       {
@@ -179,10 +179,10 @@ qx.Class.define("qx.dev.StackTrace",
      * This will get the JavaScript file names and the line numbers of each call.
      * The file names are converted into qooxdoo class names if possible.
      *
-     * This works reliably in Gecko-based browsers. Later Opera versions and 
-     * Chrome also provide a useful stack trace. For Safari, only the class or 
-     * file name and line number where the error occurred are returned. 
-     * IE 6/7/8 does not attach any stack information to error objects so an 
+     * This works reliably in Gecko-based browsers. Later Opera versions and
+     * Chrome also provide an useful stack trace. For Safari, only the class or
+     * file name and line number where the error occurred are returned.
+     * IE 6/7/8 does not attach any stack information to error objects so an
      * empty array is returned.
      *
      * @param error {Error} Error exception instance.
@@ -190,7 +190,7 @@ qx.Class.define("qx.dev.StackTrace",
      *     represents one call in the stack trace.
      * @signature function(error)
      */
-    getStackTraceFromError : qx.core.Variant.select("qx.client",
+    getStackTraceFromError : qx.core.Environment.select("engine.name",
     {
       "gecko" : function(error)
       {
@@ -233,7 +233,7 @@ qx.Class.define("qx.dev.StackTrace",
             if (!fileMatch) {
               fileMatch = fileRe.exec(hit[1]);
             }
-            
+
             if (fileMatch) {
               var className = this.__fileNameToClassName(fileMatch[1]);
               trace.push(className + fileMatch[2]);
@@ -241,9 +241,9 @@ qx.Class.define("qx.dev.StackTrace",
                 trace.push(hit[1]);
             }
           }
-          
+
           return trace;
-        } 
+        }
         else if (error.sourceURL && error.line) {
           return [this.__fileNameToClassName(error.sourceURL) + ":" + error.line];
         }
@@ -286,7 +286,7 @@ qx.Class.define("qx.dev.StackTrace",
             }
           }
           return trace;
-        } else if (error.message.indexOf("Backtrace:") >= 0) {
+        } else if (error.message && error.message.indexOf("Backtrace:") >= 0) {
           var trace = [];
           var traceString = qx.lang.String.trim(error.message.split("Backtrace:")[1]);
           var lines = traceString.split("\n");

@@ -83,7 +83,7 @@ qx.Class.define("qx.event.dispatch.MouseCapture",
     // overridden
     canDispatchEvent : function(target, event, type)
     {
-      return (
+      return !!(
         this.__captureElement &&
         this.__captureEvents[type]
       );
@@ -214,7 +214,7 @@ qx.Class.define("qx.event.dispatch.MouseCapture",
 
 
     /** Whether the browser has native mouse capture support */
-    hasNativeCapture : qx.bom.client.Engine.MSHTML,
+    hasNativeCapture : qx.core.Environment.get("engine.name") == "mshtml",
 
 
     /**
@@ -227,7 +227,7 @@ qx.Class.define("qx.event.dispatch.MouseCapture",
      *   are not captured.
      * @signature function(element, containerCapture)
      */
-    nativeSetCapture : qx.core.Variant.select("qx.client",
+    nativeSetCapture : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element, containerCapture) {
         element.setCapture(containerCapture !== false);
@@ -244,7 +244,7 @@ qx.Class.define("qx.event.dispatch.MouseCapture",
      * @param element {Element} The DOM element to release the capture for
      * @signature function(element)
      */
-    nativeReleaseCapture : qx.core.Variant.select("qx.client",
+    nativeReleaseCapture : qx.core.Environment.select("engine.name",
     {
       "mshtml" : function(element) {
         element.releaseCapture();

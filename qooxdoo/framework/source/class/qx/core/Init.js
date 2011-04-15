@@ -60,9 +60,19 @@ qx.Class.define("qx.core.Init",
         return;
       }
 
+      if (qx.core.Environment.get("engine.name") == "") {
+        qx.log.Logger.warn("Could not detect engine!");
+      }
+      if (qx.core.Environment.get("engine.version") == "") {
+        qx.log.Logger.warn("Could not detect the version of the engine!");
+      }
+      if (qx.core.Environment.get("os.name") == "") {
+        qx.log.Logger.warn("Could not detect operating system!");
+      }
+
       qx.log.Logger.debug(this, "Load runtime: " + (new Date - qx.Bootstrap.LOADSTART) + "ms");
 
-      var app = qx.core.Setting.get("qx.application");
+      var app = qx.core.Environment.get("qx.application");
       var clazz = qx.Class.getByName(app);
 
       if (clazz)

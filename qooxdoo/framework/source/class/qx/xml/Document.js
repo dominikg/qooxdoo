@@ -75,7 +75,7 @@ qx.Class.define("qx.xml.Document",
      * @param qualifiedName {String ? null} The qualified name of the document element to be created or null.
      * @return {Document} empty XML object
      */
-    create : qx.core.Variant.select("qx.client",
+    create : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(namespaceUri, qualifiedName)
       {
@@ -116,7 +116,7 @@ qx.Class.define("qx.xml.Document",
      * @return {Document} XML document with given content
      * @signature function(str)
      */
-    fromString : qx.core.Variant.select("qx.client",
+    fromString : qx.core.Environment.select("engine.name",
     {
       "mshtml": function(str)
       {
@@ -146,7 +146,7 @@ qx.Class.define("qx.xml.Document",
   defer : function(statics)
   {
     // Detecting available ActiveX implementations.
-    if (qx.core.Variant.isSet("qx.client", "mshtml"))
+    if ((qx.core.Environment.get("engine.name") == "mshtml"))
     {
       // According to information on the Microsoft XML Team's WebLog
       // it is recommended to check for availability of MSXML versions 6.0 and 3.0.

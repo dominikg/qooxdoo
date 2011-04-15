@@ -156,12 +156,30 @@ qx.Class.define("demobrowser.TreeDataHandler",
 
         for (var j=0; j<struct.tests.length; j++)
         {
-          node = new demobrowser.Tree(struct.tests[j].name);
-          node.tags = struct.tests[j].tags;
-          node.type = "test";  // tests are leaf nodes
-          node.desc = struct.tests[j].desc;
-          node.manifest = struct.tests[j].manifest;
-          tree.add(node);
+          var tags = struct.tests[j].tags;
+          var ignoreNode = false;
+          
+          if (!qx.core.Environment.get("demobrowser.withTests"))
+          {
+            for (var k=0; k < tags.length; k++)
+            {
+              if (tags[k] === "test")
+              {
+                ignoreNode = true;
+                break;
+              }
+            }
+          }
+
+          if (!ignoreNode)
+          {
+            node = new demobrowser.Tree(struct.tests[j].name);
+            node.tags = struct.tests[j].tags;
+            node.type = "test";  // tests are leaf nodes
+            node.desc = struct.tests[j].desc;
+            node.manifest = struct.tests[j].manifest;
+            tree.add(node);
+          }
         }
       }
 
@@ -170,7 +188,7 @@ qx.Class.define("demobrowser.TreeDataHandler",
       {
         for (var j=0; j<struct.children.length; j++) {
           var subTree = this.readTree(struct.children[j]);
-          if (qx.core.Variant.isSet("qx.contrib", "on")) {
+          if (qx.core.Environment.get("qx.contrib") == true) {
             if (struct.children[j].manifest) {
               subTree.manifest = struct.children[j].manifest;
             }
@@ -185,7 +203,7 @@ qx.Class.define("demobrowser.TreeDataHandler",
         }
       }
 
-      if (qx.core.Variant.isSet("qx.contrib", "on")) {
+      if (qx.core.Environment.get("qx.contrib") == true) {
         if (struct.readme) {
           tree.readme = struct.readme;
         }
@@ -485,7 +503,9 @@ qx.Class.define("demobrowser.TreeDataHandler",
     }
   },
 
-
+  environment : {
+    "demobrowser.withTests" : false
+  },
 
 
   /*

@@ -20,25 +20,30 @@
 qx.Class.define("simulator.Application", {
 
   extend : qx.application.Native,
-  
+
   members :
   {
-  
+
     main : function()
     {
-      if (window.arguments) {
-        this._argumentsToSettings(window.arguments);
-      }
-      
       qx.log.Logger.register(qx.log.appender.RhinoConsole);
-      
+
+      if (window.arguments) {
+        try {
+          this._argumentsToSettings(window.arguments);
+        } catch(ex) {
+          this.error(ex.toString());
+          return;
+        }
+      }
+
       this.runner = new simulator.TestRunner();
       this.runner.runTests();
     },
-    
+
     /**
      * Converts the value of the "settings" command line option to qx settings.
-     * 
+     *
      * @param args {String[]} Rhino arguments object
      */
     _argumentsToSettings : function(args)
@@ -55,10 +60,21 @@ qx.Class.define("simulator.Application", {
         }
       }
       if (opts) {
-        opts = qx.lang.Json.parse(opts);
+        opts = opts.replace(/\\\{/g, "{").replace(/\\\}/g, "}");
+        try {
+          opts = qx.lang.Json.parse(opts);
+        } catch(ex) {
+          var msg = ex.toString() + "\nMake sure none of the settings configured"
+          + " in simulation-run/environment contain paths with spaces!";
+          throw new Error(msg);
+        }
         for (var prop in opts) {
+          var value = opts[prop];
+          if (typeof value == "string") {
+            value = value.replace(/\$/g, " ");
+          }
           try {
-            qx.core.Setting.define(prop, opts[prop]);
+            qx.core.Environment.add(prop, value);
           } catch(ex) {
             this.error("Unable to define command-line setting " + prop + ": " + ex);
           }
@@ -66,5 +82,5 @@ qx.Class.define("simulator.Application", {
       }
     }
   }
-  
+
 });

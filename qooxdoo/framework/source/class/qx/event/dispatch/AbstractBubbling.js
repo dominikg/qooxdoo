@@ -165,6 +165,16 @@ qx.Class.define("qx.event.dispatch.AbstractBubbling",
           listener = localList[j];
           context = listener.context || currentTarget;
 
+          if (qx.core.Environment.get("qx.debug")) {
+            // warn if the context is disposed
+            if (context && context.isDisposed && context.isDisposed()) {
+              this.warn(
+                "The context object '" + context + "' for the event '" +
+                type + "' of '" + currentTarget + "'is already disposed."
+              );
+            }
+          }
+
           listener.handler.call(context, event);
         }
 
@@ -184,6 +194,16 @@ qx.Class.define("qx.event.dispatch.AbstractBubbling",
         {
           listener = localList[j];
           context = listener.context || target;
+
+          if (qx.core.Environment.get("qx.debug")) {
+            // warn if the context is disposed
+            if (context && context.isDisposed && context.isDisposed()) {
+              this.warn(
+                "The context object '" + context + "' for the event '" +
+                type + "' of '" + target + "'is already disposed."
+              );
+            }
+          }
 
           listener.handler.call(context, event);
         }
@@ -207,6 +227,16 @@ qx.Class.define("qx.event.dispatch.AbstractBubbling",
         {
           listener = localList[j];
           context = listener.context || currentTarget;
+
+          if (qx.core.Environment.get("qx.debug")) {
+            // warn if the context is disposed
+            if (context && context.isDisposed && context.isDisposed()) {
+              this.warn(
+                "The context object '" + context + "' for the event '" +
+                type + "' of '" + currentTarget + "'is already disposed."
+              );
+            }
+          }
 
           listener.handler.call(context, event);
         }
