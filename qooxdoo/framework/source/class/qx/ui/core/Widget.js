@@ -3000,10 +3000,6 @@ qx.Class.define("qx.ui.core.Widget",
             }
             
             delete newStyles[prop];
-              else
-              {
-                // Single value given without array => expand to 4 values
-                newStyles[prop] = [shorthandValue, shorthandValue, shorthandValue, shorthandValue];
           }
         }
       }
