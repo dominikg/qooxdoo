@@ -64,7 +64,7 @@
 qx.Class.define("qx.ui.core.Widget",
 {
   extend : qx.ui.core.LayoutItem,
-  include : [qx.locale.MTranslation, qx.data.MBinding],
+  include : [qx.locale.MTranslation],
 
 
   /*
@@ -115,6 +115,7 @@ qx.Class.define("qx.ui.core.Widget",
      * newly created child widget.
      */
     createChildControl : "qx.event.type.Data",
+
 
     /**
      * Fired on resize (after layout) of the widget.
@@ -1948,7 +1949,7 @@ qx.Class.define("qx.ui.core.Widget",
       for (var i=0, l=children.length; i<l; i++)
       {
         child = children[i];
-        queue.push(child);
+        queue[child.$$hash] = child;
 
         child.addChildrenToQueue(queue);
       }
@@ -2126,7 +2127,7 @@ qx.Class.define("qx.ui.core.Widget",
 
     /**
      * Remove all children.
-     *
+     * 
      * @return {Array} An array containing the removed children.
      */
     _removeAll : function()
@@ -2145,7 +2146,7 @@ qx.Class.define("qx.ui.core.Widget",
       }
 
       qx.ui.core.queue.Layout.add(this);
-
+      
       return children;
     },
 
@@ -2511,7 +2512,6 @@ qx.Class.define("qx.ui.core.Widget",
     // property apply
     _applyTransition : function(value, old) 
     {
-<<<<<<< HEAD
       this.__syncTransitionHelperEvents();
       
       if (value) {
@@ -2534,9 +2534,6 @@ qx.Class.define("qx.ui.core.Widget",
     __syncTransitionHelperEvents : function()
     {
       if (this.getTransparentVisibility() != "visible")
-=======
-      if (qx.core.Environment.get("qx.dynlocale"))
->>>>>>> remotes/master/master
       {
         var transition = this.getTransition();
         if (transition) 
@@ -2640,12 +2637,7 @@ qx.Class.define("qx.ui.core.Widget",
       // Update visibility cache
       qx.ui.core.queue.Visibility.add(this);
     },
-    
-    
-        
-    
-    
-    
+
     /*
     ---------------------------------------------------------------------------
       OTHER PROPERTIES
@@ -2655,15 +2647,7 @@ qx.Class.define("qx.ui.core.Widget",
     // property apply
     _applyToolTipText : function(value, old)
     {
-<<<<<<< HEAD
       if (qx.core.Variant.isSet("qx.dynlocale", "on"))
-=======
-      this.getContainerElement().setStyle("opacity", value == 1 ? null : value);
-
-      // Fix for AlphaImageLoader - see Bug #1894 for details
-      if ((qx.core.Environment.get("engine.name") == "mshtml") &&
-          qx.bom.element.Decoration.isAlphaImageLoaderEnabled())
->>>>>>> remotes/master/master
       {
         if (this.__toolTipTextListenerId) {
           return;
@@ -2683,7 +2667,7 @@ qx.Class.define("qx.ui.core.Widget",
     _applyTextColor : function(value, old) {
       // empty template
     },
-    
+
 
 
     // property apply
@@ -2941,33 +2925,17 @@ qx.Class.define("qx.ui.core.Widget",
       {
         if (this.$$subparent)
         {
-          var obj = this;
-          var id = [];
-
-          do {
-            id.push(obj.$$subcontrol||obj.getAppearance());
-          } while (obj = obj.$$subparent);
-
-          // Combine parent control IDs, add top level appearance, filter result
-          // to not include positioning information anymore (e.g. #3)
-          structureSelector = id.reverse().join("/").replace(/#[0-9]+/g, "");
-        }
-        else
-        {
-          structureSelector = this.getAppearance();
-        }
-      }
-
-      // Query current selector
-      var stateSelector = "";
-      if (states) 
-      {
         var stateKeys = qx.Bootstrap.getKeys(states);
         var stateLength = stateKeys.length;
         if (stateLength == 1) {
           stateSelector = "." + stateKeys[0];
         } else if (stateLength > 1) {
           stateSelector = "." + stateKeys.sort().join(".");
+        }
+      }
+        else
+        {
+          structureSelector = this.getAppearance();
         }
       }
       
@@ -2994,17 +2962,12 @@ qx.Class.define("qx.ui.core.Widget",
             }
           }
 
-<<<<<<< HEAD
           // Expand groups
           // This is duplicated somehow to the property group implementation, 
           // but is required to solve priority issues which arise otherwise
           if (config.group)
-=======
-        // Check property availability of new data
-        if (qx.core.Environment.get("qx.debug"))
         {
-          for (var prop in newData)
->>>>>>> remotes/master/master
+            if (config.shorthand) 
           {
             if (config.shorthand) 
             {
@@ -3040,12 +3003,13 @@ qx.Class.define("qx.ui.core.Widget",
           }
         }
       }
+      }
       
       // Read old styles
       var oldSelector = this.__appearanceSelector;
       if (oldSelector) {
         var oldStyles = styleCache[oldSelector];
-      }      
+      }
       
       // Store new selector
       this.__appearanceSelector = newSelector;
