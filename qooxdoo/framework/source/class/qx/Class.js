@@ -901,7 +901,7 @@ qx.Bootstrap.define("qx.Class",
     {
       var clazz;
 
-      if (!extend && qx.core.Environment.get("qx.aspects") == false)
+      if (!extend)
       {
         // Create empty/non-empty class
         clazz = statics || {};
@@ -944,19 +944,7 @@ qx.Bootstrap.define("qx.Class",
             key = a[i];
             var staticValue = statics[key];
 
-            if (qx.core.Environment.get("qx.aspects"))
-            {
-
-              if (staticValue instanceof Function) {
-                staticValue = qx.core.Aspect.wrap(name + "." + key, staticValue, "static");
-              }
-
-              clazz[key] = staticValue;
-            }
-            else
-            {
-              clazz[key] = staticValue;
-            }
+            clazz[key] = staticValue;
           }
         }
       }
@@ -986,10 +974,6 @@ qx.Bootstrap.define("qx.Class",
         // Store destruct onto class
         if (destruct)
         {
-          if (qx.core.Environment.get("qx.aspects")) {
-            destruct = qx.core.Aspect.wrap(name, destruct, "destructor");
-          }
-
           clazz.$$destructor = destruct;
           qx.Bootstrap.setDisplayName(destruct, name, "destruct");
         }
