@@ -2917,6 +2917,7 @@ qx.Class.define("qx.ui.core.Widget",
     {
       var manager = qx.theme.manager.Appearance.getInstance();
 
+      var stateSelector;
       var states = this.__states;
       var structureSelector = this.__structureSelector;
       
