@@ -66,3 +66,4 @@ qooxdoo/frontend/framework/.cache
 qooxdoo/framework/api
 
 .idea
+.settings.xml
